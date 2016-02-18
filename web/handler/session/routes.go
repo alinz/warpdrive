@@ -8,8 +8,8 @@ import (
 func Routes() chi.Router {
 	r := chi.NewRouter()
 
-	r.Post("/start", middleware.BodyParser(loginRequestBuilder, 512), start)
-	r.Get("/end", end)
+	r.Post("/start", middleware.BodyParser(loginRequestBuilder, 512), startSessionHandler)
+	r.Get("/end", endSessionHandler)
 
 	return r
 }

@@ -12,7 +12,7 @@ import (
 	"golang.org/x/net/context"
 )
 
-func start(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+func startSessionHandler(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	login := ctx.Value(constant.CtxKeyParsedBody).(*loginRequest)
 	usersService := service.New()
 
@@ -35,7 +35,7 @@ func start(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	}{jwt})
 }
 
-func end(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+func endSessionHandler(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	security.RemoveJwtCookie(w)
 	util.Respond(w, 200, nil)
 }

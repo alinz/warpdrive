@@ -67,3 +67,18 @@ func (u userService) GenerateJWT() (string, error) {
 	tokenStr, err := security.JwtEncode(claims)
 	return tokenStr, err
 }
+
+func (u *userService) CreateUser(name, email, password string) error {
+	user := data.User{
+		Name:     name,
+		Email:    email,
+		Password: password,
+	}
+
+	err := user.Append(nil)
+	if err == nil {
+		u.user = &user
+	}
+
+	return err
+}
