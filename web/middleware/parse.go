@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/pressly/chi"
+	"github.com/pressly/warpdrive/web/constant"
 	"github.com/pressly/warpdrive/web/util"
 	"golang.org/x/net/context"
 )

@@ -48,7 +48,7 @@ db-reset:
 	@(cd ./script && bash ./db-reset.sh)
 
 dev: kill clean
-	@(export CONFIG=$$PWD/etc/warpdrive-dev.conf && \
+	@(export CONFIG=$$PWD/etc/warpdrive.conf && \
 		cd ./cmd/warpdrive && \
 		fresh -c ../../etc/fresh-runner.conf -w=../..)
 
