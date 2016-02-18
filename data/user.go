@@ -59,3 +59,14 @@ func (u *User) Update(session db.Database) error {
 		Find(db.Cond{"id": u.ID}).
 		Update(u)
 }
+
+func (u User) Remove(session db.Database) error {
+	if session == nil {
+		session = warpdrive.DB
+	}
+
+	return session.
+		C("users").
+		Find(db.Cond{"id": u.ID}).
+		Remove()
+}

@@ -11,6 +11,7 @@ func Routes() chi.Router {
 	r.Use(middleware.JwtHandler())
 
 	r.Post("/", middleware.BodyParser(createUserRequestBuilder, 512), createUserHandler)
+	r.Delete("/:userId", deleteUserHandler)
 
 	return r
 }

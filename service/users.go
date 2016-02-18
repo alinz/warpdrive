@@ -82,3 +82,8 @@ func (u *userService) CreateUser(name, email, password string) error {
 
 	return err
 }
+
+func (u userService) DeleteUserByID(id int64) error {
+	user := data.User{ID: id}
+	return user.Remove(nil)
+}

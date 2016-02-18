@@ -23,3 +23,21 @@ func createUserHandler(ctx context.Context, w http.ResponseWriter, r *http.Reque
 
 	util.Respond(w, 200, nil)
 }
+
+func deleteUserHandler(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	userID, err := util.ParamValueAsID(ctx, "userId")
+	if err != nil {
+		util.RespondError(w, err)
+		return
+	}
+
+	userService := service.New()
+	err = userService.DeleteUserByID(userID)
+
+	if err != nil {
+		util.RespondError(w, err)
+		return
+	}
+
+	util.Respond(w, 200, nil)
+}
