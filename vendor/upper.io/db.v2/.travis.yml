@@ -1,0 +1,49 @@
+sudo: false
+
+language: go
+
+go:
+  - 1.3
+  - 1.3.1
+  - 1.3.2
+  - 1.3.3
+  - 1.4
+  - 1.4.1
+  - 1.4.2
+  - 1.5
+  - 1.5.1
+  - 1.5.2
+
+addons:
+  postgresql: "9.4"
+
+services:
+  - mongodb
+
+env: GOARCH=amd64 TEST_HOST=127.0.0.1
+
+install:
+  - mkdir -p $GOPATH/src/upper.io
+  - mv $PWD $GOPATH/src/upper.io/db.v2
+  - cd $GOPATH/src/upper.io/db.v2
+  - ls -la
+  - go get -v github.com/cznic/ql/ql
+  - go get -v -t -d ./...
+  - export TRAVIS_BUILD_DIR=$GOPATH/src/upper.io/db.v2
+
+before_script:
+  - mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql -u root mysql
+  - (cd mysql/_dumps && make)
+  - (cd postgresql/_dumps && make)
+  - (cd sqlite/_dumps && make)
+  - (cd ql/_dumps && make)
+  - (cd mongo/_dumps && make)
+
+script:
+  - go test -v upper.io/db.v2
+  - BENCHTIME=2s make bench -C $GOPATH/src/upper.io/db.v2/mysql
+  - BENCHTIME=2s make bench -C $GOPATH/src/upper.io/db.v2/postgresql
+# - BENCHTIME=2s make bench -C $GOPATH/src/upper.io/db.v2/ql # Temporarily skipping benchmark, see https://github.com/cznic/ql/issues/107
+  - BENCHTIME=2s make test -C $GOPATH/src/upper.io/db.v2/ql
+  - BENCHTIME=2s make bench -C $GOPATH/src/upper.io/db.v2/sqlite
+  - BENCHTIME=2s make bench -C $GOPATH/src/upper.io/db.v2/mongo
