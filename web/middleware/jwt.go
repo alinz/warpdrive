@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/pressly/warpdrive/web/constant"
 	"github.com/pressly/warpdrive/web/security"
+	"github.com/pressly/warpdrive/web/util"
 
 	"github.com/pressly/chi"
 	"golang.org/x/net/context"
@@ -24,8 +26,13 @@ func JwtHandler() func(chi.Handler) chi.Handler {
 				return
 			}
 
-			ctx = context.WithValue(ctx, "jwt", token.Raw)
-			ctx = context.WithValue(ctx, "jwt.token", token)
+			ctx = context.WithValue(ctx, constant.CtxRawJWT, token.Raw)
+			ctx = context.WithValue(ctx, constant.CtxJWT, token)
+
+			userID := util.LoggedInUserID(ctx)
+			if userID == 1 {
+				ctx = context.WithValue(ctx, constant.CtxIsRoot, true)
+			}
 
 			next.ServeHTTPC(ctx, w, r)
 		}

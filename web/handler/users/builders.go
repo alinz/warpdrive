@@ -9,3 +9,13 @@ type createUserRequest struct {
 func createUserRequestBuilder() interface{} {
 	return &createUserRequest{}
 }
+
+type updateUserRequest struct {
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+func updateUserRequestBuilder() interface{} {
+	return &updateUserRequest{}
+}

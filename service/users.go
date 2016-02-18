@@ -87,3 +87,16 @@ func (u userService) DeleteUserByID(id int64) error {
 	user := data.User{ID: id}
 	return user.Remove(nil)
 }
+
+func (u *userService) UpdateUser(name, email, password string) error {
+	u.user.Name = name
+	if u.user.Email == email {
+		u.user.Email = ""
+	} else {
+		u.user.Email = email
+	}
+
+	u.user.Password = password
+
+	return u.user.Update(nil)
+}

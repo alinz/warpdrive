@@ -13,5 +13,8 @@ func Routes() chi.Router {
 	r.Post("/", middleware.BodyParser(createUserRequestBuilder, 512), createUserHandler)
 	r.Delete("/:userId", deleteUserHandler)
 
+	r.Patch("/", middleware.BodyParser(updateUserRequestBuilder, 512), updateUserHandler)
+	r.Patch("/:userId", middleware.BodyParser(updateUserRequestBuilder, 512), updateUserHandler)
+
 	return r
 }

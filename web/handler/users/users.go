@@ -3,6 +3,7 @@ package users
 import (
 	"net/http"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/pressly/warpdrive/service"
 	"github.com/pressly/warpdrive/web/constant"
 	"github.com/pressly/warpdrive/web/util"
@@ -40,4 +41,35 @@ func deleteUserHandler(ctx context.Context, w http.ResponseWriter, r *http.Reque
 	}
 
 	util.Respond(w, 200, nil)
+}
+
+func updateUserHandler(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	updateUser := ctx.Value(constant.CtxKeyParsedBody).(*updateUserRequest)
+	userService := service.New()
+
+	userID, err := util.ParamValueAsID(ctx, "userId")
+	if err != nil {
+		jwt := ctx.Value(constant.CtxJWT).(*jwt.Token)
+		err = userService.FindUserByJWT(jwt)
+	} else {
+		//userId must be either logged in userId or root user
+		if userID != util.LoggedInUserID(ctx) && !util.UserIsRoot(ctx) {
+			err = constant.ErrorAuthorizeAccess
+		} else {
+			err = userService.FindUserByID(userID)
+		}
+	}
+
+	if err != nil {
+		util.RespondError(w, err)
+		return
+	}
+
+	err = userService.UpdateUser(updateUser.Name, updateUser.Email, updateUser.Password)
+
+	if err != nil {
+		util.RespondError(w, err)
+	} else {
+		util.Respond(w, 200, nil)
+	}
 }

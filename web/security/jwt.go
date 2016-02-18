@@ -106,7 +106,7 @@ func RemoveJwtCookie(w http.ResponseWriter) {
 }
 
 func UserIDFromJwt(ctx context.Context) (int64, error) {
-	token := ctx.Value("jwt.token").(*jwt.Token)
+	token := ctx.Value(constant.CtxJWT).(*jwt.Token)
 	content := token.Claims["user_id"].(string)
 	id, err := strconv.ParseInt(content, 10, 64)
 

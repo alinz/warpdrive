@@ -1,6 +1,7 @@
 package data
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/pressly/warpdrive"
@@ -9,9 +10,9 @@ import (
 
 type User struct {
 	ID        int64     `db:"id,omitempty,pk" json:"id"`
-	Name      string    `db:"name" json:"name"`
-	Email     string    `db:"email" json:"email"`
-	Password  string    `db:"password" json:"-"`
+	Name      string    `db:"name,omitempty" json:"name"`
+	Email     string    `db:"email,omitempty" json:"email"`
+	Password  string    `db:"password,omitempty" json:"-"`
 	UpdatedAt time.Time `db:"updated_at" json:"updated_at"`
 	CreatedAt time.Time `db:"created_at" json:"created_at"`
 }
@@ -53,6 +54,8 @@ func (u *User) Update(session db.Database) error {
 	}
 
 	u.UpdatedAt = time.Now().UTC().Truncate(time.Second)
+
+	fmt.Println(u)
 
 	return session.
 		C("users").
