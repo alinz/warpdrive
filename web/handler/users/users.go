@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/pressly/warpdrive/data"
 	"github.com/pressly/warpdrive/service"
 	"github.com/pressly/warpdrive/web/constant"
 	"github.com/pressly/warpdrive/web/util"
@@ -14,9 +15,7 @@ import (
 func createUserHandler(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	createUser := ctx.Value(constant.CtxKeyParsedBody).(*createUserRequest)
 
-	userService := service.New()
-
-	err := userService.CreateUser(*createUser.Name, *createUser.Email, *createUser.Password)
+	_, err := service.CreateUser(*createUser.Name, *createUser.Email, *createUser.Password)
 	if err != nil {
 		util.RespondError(w, err)
 		return
@@ -32,8 +31,7 @@ func deleteUserHandler(ctx context.Context, w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	userService := service.New()
-	err = userService.DeleteUserByID(userID)
+	err = service.DeleteUserByID(userID)
 
 	if err != nil {
 		util.RespondError(w, err)
@@ -45,18 +43,18 @@ func deleteUserHandler(ctx context.Context, w http.ResponseWriter, r *http.Reque
 
 func updateUserHandler(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	updateUser := ctx.Value(constant.CtxKeyParsedBody).(*updateUserRequest)
-	userService := service.New()
+	var user *data.User
 
 	userID, err := util.ParamValueAsID(ctx, "userId")
 	if err != nil {
 		jwt := ctx.Value(constant.CtxJWT).(*jwt.Token)
-		err = userService.FindUserByJWT(jwt)
+		user, err = service.FindUserByJWT(jwt)
 	} else {
 		//userId must be either logged in userId or root user
 		if userID != util.LoggedInUserID(ctx) && !util.UserIsRoot(ctx) {
 			err = constant.ErrorAuthorizeAccess
 		} else {
-			err = userService.FindUserByID(userID)
+			user, err = service.FindUserByID(userID)
 		}
 	}
 
@@ -65,7 +63,11 @@ func updateUserHandler(ctx context.Context, w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	err = userService.UpdateUser(updateUser.Name, updateUser.Email, updateUser.Password)
+	user.Name = updateUser.Name
+	user.Email = updateUser.Email
+	user.Password = updateUser.Password
+
+	err = service.UpdateUser(user)
 
 	if err != nil {
 		util.RespondError(w, err)

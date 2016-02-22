@@ -14,15 +14,14 @@ import (
 
 func startSessionHandler(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	login := ctx.Value(constant.CtxKeyParsedBody).(*loginRequest)
-	usersService := service.New()
 
-	err := usersService.FindUserByEmailPassword(*login.Email, *login.Password)
+	user, err := service.FindUserByEmailPassword(*login.Email, *login.Password)
 	if err != nil {
 		util.RespondError(w, err)
 		return
 	}
 
-	jwt, err := usersService.GenerateJWT()
+	jwt, err := service.GenerateJWT(user)
 	if err != nil {
 		util.RespondError(w, err)
 		return

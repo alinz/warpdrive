@@ -1,10 +1,8 @@
 package data
 
 import (
-	"fmt"
 	"time"
 
-	"github.com/pressly/warpdrive"
 	"upper.io/db.v2"
 )
 
@@ -17,59 +15,41 @@ type User struct {
 	CreatedAt time.Time `db:"created_at" json:"created_at"`
 }
 
-func (u *User) LoadByID(id int64) error {
-	session := warpdrive.DB
-	return session.C("users").Find(db.Cond{
-		"id": id,
-	}).One(u)
+func (u User) CollectionName() string {
+	return "users"
 }
 
-func (u *User) LoadByEmailAndPassword(email, password string) error {
-	session := warpdrive.DB
-	return session.C("users").Find(db.Cond{
-		"email":    email,
-		"password": password,
-	}).One(u)
+func (u User) Query(session db.Database, query db.Cond) db.Result {
+	return session.C(u.CollectionName()).Find(query)
 }
 
-func (u *User) Append(session db.Database) error {
-	if session == nil {
-		session = warpdrive.DB
-	}
+func (u *User) Find(session db.Database, query db.Cond) error {
+	return u.Query(session, query).One(u)
+}
 
-	u.UpdatedAt = time.Now().UTC().Truncate(time.Second)
-	u.CreatedAt = u.UpdatedAt
+func (u *User) Save(session db.Database) error {
+	collection := session.C(u.CollectionName())
+	var err error
 
-	id, err := session.C("users").Append(u)
-	if err == nil {
-		u.ID = id.(int64)
+	if u.ID == 0 {
+		var id interface{}
+		u.UpdatedAt = time.Now().UTC().Truncate(time.Second)
+		u.CreatedAt = u.UpdatedAt
+
+		id, err = collection.Append(u)
+		if err == nil {
+			u.ID = id.(int64)
+		}
+	} else {
+		u.UpdatedAt = time.Now().UTC().Truncate(time.Second)
+		err = collection.
+			Find(db.Cond{"id": u.ID}).
+			Update(u)
 	}
 
 	return err
 }
 
-func (u *User) Update(session db.Database) error {
-	if session == nil {
-		session = warpdrive.DB
-	}
-
-	u.UpdatedAt = time.Now().UTC().Truncate(time.Second)
-
-	fmt.Println(u)
-
-	return session.
-		C("users").
-		Find(db.Cond{"id": u.ID}).
-		Update(u)
-}
-
-func (u User) Remove(session db.Database) error {
-	if session == nil {
-		session = warpdrive.DB
-	}
-
-	return session.
-		C("users").
-		Find(db.Cond{"id": u.ID}).
-		Remove()
+func (u *User) Remove(session db.Database) error {
+	return u.Query(session, db.Cond{"id": u.ID}).Remove()
 }
