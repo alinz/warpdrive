@@ -12,7 +12,12 @@ func Routes() chi.Router {
 
 	r.Get("/", listAllAppsHandler)
 	r.Post("/", middleware.BodyParser(createAppRequestBuilder, 512), createAppHandler)
-	r.Patch("/:userId", middleware.BodyParser(createAppRequestBuilder, 512), updateAppHandler)
+
+	r.Route("/:appId", func(r chi.Router) {
+		r.Patch("/", middleware.BodyParser(createAppRequestBuilder, 512), updateAppHandler)
+
+		r.Post("/cycles", middleware.BodyParser(createCycleRequestBuilder, 512), createAppCycleHandler)
+	})
 
 	return r
 }

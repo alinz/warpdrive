@@ -26,6 +26,11 @@ type Config struct {
 		Password string   `toml:"password"`
 	} `toml:"db"`
 
+	Security struct {
+		KeySize int `toml:"key_size"`
+	} `toml:"security"`
+
+	//[static]
 	Static struct {
 		Path string `toml:"path"`
 	} `toml:"static"`
