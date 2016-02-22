@@ -5,13 +5,13 @@ import (
 	"upper.io/db.v2"
 )
 
-func CreateApp(name string, userID int64) error {
+func CreateApp(name string, userID int64) (*data.App, error) {
+	app := data.App{Name: name}
 	//crate a tansaction because we need to create an app and
 	//assign it to user
 	fn := func(session db.Database) error {
 		var err error
 		//create an app
-		app := data.App{Name: name}
 		err = app.Save(session)
 
 		if err != nil {
@@ -27,8 +27,29 @@ func CreateApp(name string, userID int64) error {
 
 		err = permission.Save(session)
 
+		if err != nil {
+			return err
+		}
+
+		//we also need to assign the permision to root
+		if userID == 1 {
+			permission = data.Permission{
+				UserID:     1,
+				AppID:      app.ID,
+				Permission: data.AGENT,
+			}
+
+			err = permission.Save(session)
+		}
+
 		return err
 	}
 
-	return data.Transaction(fn)
+	err := data.Transaction(fn)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &app, err
 }

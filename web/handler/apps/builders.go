@@ -1,9 +1,9 @@
 package apps
 
-type appRequest struct {
-	Name string `json:"name"`
+type createAppRequest struct {
+	Name *string `json:"name,required"`
 }
 
-func appRequestBuilder() interface{} {
-	return appRequest{}
+func createAppRequestBuilder() interface{} {
+	return &createAppRequest{}
 }

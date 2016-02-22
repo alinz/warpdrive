@@ -11,8 +11,8 @@ func Routes() chi.Router {
 	r.Use(middleware.JwtHandler())
 
 	r.Get("/", listAllAppsHandler)
-	r.Post("/", middleware.BodyParser(appRequestBuilder, 512), createAppHandler)
-	r.Patch("/:userId", middleware.BodyParser(appRequestBuilder, 512), updateAppHandler)
+	r.Post("/", middleware.BodyParser(createAppRequestBuilder, 512), createAppHandler)
+	r.Patch("/:userId", middleware.BodyParser(createAppRequestBuilder, 512), updateAppHandler)
 
 	return r
 }
