@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/pressly/warpdrive"
 	"github.com/pressly/warpdrive/data"
 	"upper.io/db.v2"
 )
@@ -32,7 +33,7 @@ func CreateApp(name string, userID int64) (*data.App, error) {
 		}
 
 		//we also need to assign the permision to root
-		if userID == 1 {
+		if userID != 1 {
 			permission = data.Permission{
 				UserID:     1,
 				AppID:      app.ID,
@@ -52,4 +53,23 @@ func CreateApp(name string, userID int64) (*data.App, error) {
 	}
 
 	return &app, err
+}
+
+func ListApps(userID int64) ([]*data.AppWithPermission, error) {
+	builder := warpdrive.DB.Builder()
+	q := builder.
+		Select("apps.id",
+			"apps.name",
+			"apps.updated_at",
+			"apps.created_at",
+			"permissions.permission").
+		From("apps").
+		Join("permissions").
+		On("apps.id=permissions.app_id").
+		Where("permissions.user_id=?", userID)
+
+	var appsWithPermission []*data.AppWithPermission
+	err := q.Iterator().All(&appsWithPermission)
+
+	return appsWithPermission, err
 }

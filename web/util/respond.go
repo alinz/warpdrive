@@ -32,3 +32,12 @@ func RespondError(w http.ResponseWriter, err error) {
 		WriteAsJSON(w, nil, status)
 	}
 }
+
+func AutoDetectResponse(w http.ResponseWriter, content interface{}, err error) {
+	if err != nil {
+		RespondError(w, err)
+		return
+	}
+
+	Respond(w, 200, content)
+}

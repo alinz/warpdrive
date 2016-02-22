@@ -82,7 +82,8 @@ func (p *Permission) Save(session db.Database) error {
 	var err error
 
 	if p.ID == 0 {
-		id, err := collection.Append(p)
+		var id interface{}
+		id, err = collection.Append(p)
 		if err == nil {
 			p.ID = id.(int64)
 		}

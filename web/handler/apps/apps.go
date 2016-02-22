@@ -15,14 +15,14 @@ func createAppHandler(ctx context.Context, w http.ResponseWriter, r *http.Reques
 	userID := util.LoggedInUserID(ctx)
 
 	app, err := service.CreateApp(*createApp.Name, userID)
-	if err != nil {
-		util.RespondError(w, err)
-	}
-
-	util.Respond(w, 200, app)
+	util.AutoDetectResponse(w, app, err)
 }
 
 func listAllAppsHandler(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	userID := util.LoggedInUserID(ctx)
+
+	apps, err := service.ListApps(userID)
+	util.AutoDetectResponse(w, apps, err)
 }
 
 func updateAppHandler(ctx context.Context, w http.ResponseWriter, r *http.Request) {

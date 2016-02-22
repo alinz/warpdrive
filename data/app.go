@@ -30,10 +30,11 @@ func (a *App) Save(session db.Database) error {
 	var err error
 
 	if a.ID == 0 {
+		var id interface{}
 		a.UpdatedAt = time.Now().UTC().Truncate(time.Second)
 		a.CreatedAt = a.UpdatedAt
 
-		id, err := collection.Append(a)
+		id, err = collection.Append(a)
 		if err == nil {
 			a.ID = id.(int64)
 		}
@@ -49,4 +50,9 @@ func (a *App) Save(session db.Database) error {
 
 func (a *App) Remove(session db.Database) error {
 	return a.Query(session, db.Cond{"id": a.ID}).Remove()
+}
+
+type AppWithPermission struct {
+	App        `db:",inline"`
+	Permission PermissionType `db:"permission" json:"permission"`
 }
