@@ -17,14 +17,14 @@ func createAppCycleHandler(
 
 	userID := util.LoggedInUserID(ctx)
 	appID, err := util.ParamValueAsID(ctx, "appId")
-	cycleRequest := ctx.Value(constant.CtxKeyParsedBody).(*createCycleRequest)
+	createCycle := ctx.Value(constant.CtxKeyParsedBody).(*createCycleRequest)
 
 	if err != nil {
 		util.RespondError(w, err)
 		return
 	}
 
-	cycle, err := service.CreateCycle(*cycleRequest.Name, appID, userID)
+	cycle, err := service.CreateCycle(*createCycle.Name, appID, userID)
 	util.AutoDetectResponse(w, cycle, err)
 }
 
@@ -33,6 +33,11 @@ func allAppCyclesHandler(
 	w http.ResponseWriter,
 	r *http.Request) {
 
+	userID := util.LoggedInUserID(ctx)
+	appID, err := util.ParamValueAsID(ctx, "appId")
+
+	cycles, err := service.AllAppCycles(appID, userID)
+	util.AutoDetectResponse(w, cycles, err)
 }
 
 func updateAppCycleHandler(
@@ -40,6 +45,13 @@ func updateAppCycleHandler(
 	w http.ResponseWriter,
 	r *http.Request) {
 
+	userID := util.LoggedInUserID(ctx)
+	appID, err := util.ParamValueAsID(ctx, "appId")
+	cycleID, err := util.ParamValueAsID(ctx, "cycleId")
+	updateCycle := ctx.Value(constant.CtxKeyParsedBody).(*updateCycleRequest)
+
+	err = service.UpdateAppCycle(*updateCycle.Name, appID, cycleID, userID)
+	util.AutoDetectResponse(w, nil, err)
 }
 
 func downloadAppCycleConfigHandler(
@@ -47,6 +59,26 @@ func downloadAppCycleConfigHandler(
 	w http.ResponseWriter,
 	r *http.Request) {
 
+	userID := util.LoggedInUserID(ctx)
+	appID, err := util.ParamValueAsID(ctx, "appId")
+	cycleID, err := util.ParamValueAsID(ctx, "cycleId")
+
+	cycle, err := service.FindAppCycle(appID, cycleID, userID)
+
+	if err != nil {
+		util.RespondError(w, err)
+		return
+	}
+
+	util.Respond(w, 200, struct {
+		AppID     int64  `json:"app_id"`
+		CycleID   int64  `json:"cycle_id"`
+		PublicKey string `json:"public_key"`
+	}{
+		AppID:     appID,
+		CycleID:   cycleID,
+		PublicKey: cycle.PublicKey,
+	})
 }
 
 func createAppCycleReleaseHandler(

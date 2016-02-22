@@ -15,3 +15,11 @@ type createCycleRequest struct {
 func createCycleRequestBuilder() interface{} {
 	return &createCycleRequest{}
 }
+
+type updateCycleRequest struct {
+	Name *string `json:"name,required"`
+}
+
+func updateCycleRequestBuilder() interface{} {
+	return &updateCycleRequest{}
+}
