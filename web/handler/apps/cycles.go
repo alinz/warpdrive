@@ -170,6 +170,13 @@ func lockAppCycleReleaseHandler(
 	w http.ResponseWriter,
 	r *http.Request) {
 
+	userID := util.LoggedInUserID(ctx)
+	appID, _ := util.ParamValueAsID(ctx, "appId")
+	cycleID, _ := util.ParamValueAsID(ctx, "cycleId")
+	releaseID, _ := util.ParamValueAsID(ctx, "releaseId")
+
+	err := service.LockRelease(appID, cycleID, userID, releaseID)
+	util.AutoDetectResponse(w, nil, err)
 }
 
 func checkVersionAppCycleReleaseHandler(

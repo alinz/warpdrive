@@ -12,7 +12,7 @@ type Release struct {
 	Platform  Platform  `db:"platform,omitempty" json:"platform"`
 	Version   Version   `db:"version,omitempty" json:"version"`
 	Note      string    `db:"note,omitempty" json:"note"`
-	Lock      bool      `db:"lock,omitempty" json:"lock"`
+	Locked    bool      `db:"locked" json:"locked"`
 	UpdatedAt time.Time `db:"updated_at" json:"updated_at"`
 	CreatedAt time.Time `db:"created_at" json:"created_at"`
 }

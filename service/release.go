@@ -42,6 +42,8 @@ func CreateRelease(
 		return nil, err
 	}
 
+	release.Locked = false
+
 	//this variable is used to track all the bundles
 	//so in case of error, we can easily remove them
 	var bundlepaths []string
@@ -119,4 +121,33 @@ func AllCycleReleases(appID, cycleID, userID int64) ([]*data.Release, error) {
 	return data.FindAllReleases(warpdrive.DB, db.Cond{
 		"cycle_id": cycleID,
 	})
+}
+
+func LockRelease(appID, cycleID, userID, releaseID int64) error {
+	if !HashPermissionToAccessCycle(appID, cycleID, userID) {
+		return errors.New("No access to this app's cycle")
+	}
+
+	if HasReleaseLocked(releaseID) {
+		return errors.New("release is locked already")
+	}
+
+	fn := func(session db.Database) error {
+		var err error
+		release := data.Release{}
+		err = release.Find(session, db.Cond{"id": releaseID})
+
+		if err != nil {
+			return err
+		}
+
+		release.Locked = true
+
+		err = release.Save(session)
+		return err
+	}
+
+	err := data.Transaction(fn)
+
+	return err
 }

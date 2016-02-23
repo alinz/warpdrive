@@ -24,8 +24,12 @@ func Routes() chi.Router {
 			r.Route("/:cycleId", func(r chi.Router) {
 				r.Patch("/", m.BodyParser(updateCycleRequestBuilder, 512), updateAppCycleHandler)
 				r.Get("/config", downloadAppCycleConfigHandler)
-				r.Post("/releases", createAppCycleReleaseHandler)
-				r.Get("/releases", allAppCycleReleaseHandler)
+
+				r.Route("/releases", func(r chi.Router) {
+					r.Post("/", createAppCycleReleaseHandler)
+					r.Get("/", allAppCycleReleaseHandler)
+					r.Patch("/:releaseId/lock", lockAppCycleReleaseHandler)
+				})
 			})
 		})
 	})

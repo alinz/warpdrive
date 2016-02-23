@@ -16,7 +16,7 @@ CREATE TABLE releases (
     note text DEFAULT '',
     created_at timestamp DEFAULT now() NOT NULL,
     updated_at timestamp DEFAULT now() NOT NULL,
-    locked boolean DEFAULT TRUE NOT NULL
+    locked boolean DEFAULT FALSE NOT NULL
 );
 
 ALTER TABLE ONLY releases ADD CONSTRAINT releases_pkey PRIMARY KEY (id);
