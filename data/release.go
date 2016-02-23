@@ -55,3 +55,13 @@ func (r *Release) Save(session db.Database) error {
 func (r *Release) Remove(session db.Database) error {
 	return r.Query(session, db.Cond{"id": r.ID}).Remove()
 }
+
+func FindAllReleases(session db.Database, query db.Cond) ([]*Release, error) {
+	collection := session.C("releases")
+	var releases []*Release
+	err := collection.Find(query).All(&releases)
+	if err != nil {
+		return nil, err
+	}
+	return releases, nil
+}

@@ -110,11 +110,13 @@ func CreateRelease(
 	return &release, nil
 }
 
-func AllCycleReleases(appID, cycleID, userID int64) (*data.CycleWithReleases, error) {
+func AllCycleReleases(appID, cycleID, userID int64) ([]*data.Release, error) {
 	//check the permission
 	if !HashPermissionToAccessCycle(appID, cycleID, userID) {
 		return nil, errors.New("No access to this app's cycle")
 	}
 
-	return nil, nil
+	return data.FindAllReleases(warpdrive.DB, db.Cond{
+		"cycle_id": cycleID,
+	})
 }
