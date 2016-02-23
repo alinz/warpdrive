@@ -151,3 +151,8 @@ func LockRelease(appID, cycleID, userID, releaseID int64) error {
 
 	return err
 }
+
+func CheckDownloadableVersion(appID, cycleID int64, version string) (data.Version, error) {
+
+	return 0, nil
+}

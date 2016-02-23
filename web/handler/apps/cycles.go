@@ -184,6 +184,11 @@ func checkVersionAppCycleReleaseHandler(
 	ctx context.Context,
 	w http.ResponseWriter,
 	r *http.Request) {
+	appID, _ := util.ParamValueAsID(ctx, "appId")
+	cycleID, _ := util.ParamValueAsID(ctx, "cycleId")
+	version := util.ParamValue(ctx, "version")
+
+	service.CheckDownloadableVersion(appID, cycleID, version)
 	util.AutoDetectResponse(w, nil, errors.New("Not Implemented yet"))
 }
 
