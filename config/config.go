@@ -26,9 +26,21 @@ type Config struct {
 		Password string   `toml:"password"`
 	} `toml:"db"`
 
+	//[security]
 	Security struct {
 		KeySize int `toml:"key_size"`
 	} `toml:"security"`
+
+	//[file_upload]
+	FileUpload struct {
+		FileMaxSize int64  `toml:"file_max_size"`
+		TempFolder  string `toml:"temp_folder"`
+	} `toml:"file_upload"`
+
+	//[bundle]
+	Bundle struct {
+		BundlesFolder string `toml:"bundles_folder"`
+	} `toml:"bundle"`
 
 	//[static]
 	Static struct {

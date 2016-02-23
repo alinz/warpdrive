@@ -10,7 +10,7 @@ CREATE SEQUENCE release_id_seq
 
 CREATE TABLE releases (
     id bigint DEFAULT nextval('release_id_seq'::regclass) NOT NULL,
-    app_id bigint NOT NULL,
+    cycle_id bigint NOT NULL,
     platform int NOT NULL,
     version bigint NOT NULL,
     note text DEFAULT '',
@@ -20,7 +20,7 @@ CREATE TABLE releases (
 );
 
 ALTER TABLE ONLY releases ADD CONSTRAINT releases_pkey PRIMARY KEY (id);
-ALTER TABLE releases ADD FOREIGN KEY (app_id) REFERENCES apps(id) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE releases ADD FOREIGN KEY (cycle_id) REFERENCES cycles(id) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- # each platform can have their own versions.
-ALTER TABLE releases ADD UNIQUE (app_id, platform, version);
+ALTER TABLE releases ADD UNIQUE (cycle_id, platform, version);

@@ -54,3 +54,13 @@ func (c *Cycle) Save(session db.Database) error {
 func (c *Cycle) Remove(session db.Database) error {
 	return c.Query(session, db.Cond{"id": c.ID}).Remove()
 }
+
+type CycleWithReleases struct {
+	Cycle    `db:",inline"`
+	Releases []*Release `json:"releases"`
+}
+
+func (c *CycleWithReleases) Find(session db.Database, cycleID int64) error {
+
+	return nil
+}

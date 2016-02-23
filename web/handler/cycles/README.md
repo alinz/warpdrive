@@ -11,13 +11,13 @@ PATCH /apps/:appId/cycles/:cycleId
 GET   /apps/:appId/cycles/:cycleId/config
 
 ## Creates a new release
-POST  /apps/:appId/cycles/:cycleId/releases
+POST  /apps/:appId/cycles/:cycleId/releases?platform=&version=&notes=
 
 ## Changes of release fields
 PATCH /apps/:appId/cycles/:cycleId/releases/:releaseId
 
-## Upload either apk or ipa
-POST  /apps/:appId/cycles/:cycleId/releases/:releaseId
+## Get all releases
+GET  /apps/:appId/cycles/:cycleId/releases
 
 ## Locked the version so client can download
 PATCH /apps/:appId/cycles/:cycleId/releases/:releaseId/lock

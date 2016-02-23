@@ -1,8 +1,11 @@
 package apps
 
 import (
+	"errors"
+	"mime/multipart"
 	"net/http"
 
+	"github.com/pressly/warpdrive"
 	"github.com/pressly/warpdrive/service"
 	"github.com/pressly/warpdrive/web/constant"
 	"github.com/pressly/warpdrive/web/util"
@@ -86,20 +89,81 @@ func createAppCycleReleaseHandler(
 	w http.ResponseWriter,
 	r *http.Request) {
 
+	userID := util.LoggedInUserID(ctx)
+	appID, _ := util.ParamValueAsID(ctx, "appId")
+	cycleID, _ := util.ParamValueAsID(ctx, "cycleId")
+
+	qs := r.URL.Query()
+
+	version := qs.Get("version")
+	platform := qs.Get("platform")
+	note := qs.Get("note")
+
+	if err := r.ParseMultipartForm(warpdrive.Config.FileUpload.FileMaxSize); err != nil {
+		util.RespondError(w, errors.New("payload is too big"))
+		return
+	}
+
+	var filepaths []string
+	var filenames []string
+
+	for _, fileHeaders := range r.MultipartForm.File {
+		for _, fileHeader := range fileHeaders {
+			//we create a clouser here so we can use defer to close the file
+			//in case of any errors.
+			err := func(fileHeader *multipart.FileHeader) error {
+				file, _ := fileHeader.Open()
+				defer file.Close()
+				path := warpdrive.Config.FileUpload.TempFolder + util.UUID()
+				if err := util.CopyDataToFile(file, path); err != nil {
+					return errors.New("something went wrong")
+				}
+
+				filepaths = append(filepaths, path)
+				filenames = append(filenames, fileHeader.Filename)
+
+				return nil
+			}(fileHeader)
+
+			if err != nil {
+				util.RespondError(w, err)
+				return
+			}
+		}
+	}
+
+	release, err := service.CreateRelease(
+		appID,
+		cycleID,
+		userID,
+		platform,
+		version,
+		note,
+		filenames,
+		filepaths,
+	)
+
+	util.AutoDetectResponse(w, release, err)
 }
 
 func updateAppCycleReleaseHandler(
 	ctx context.Context,
 	w http.ResponseWriter,
 	r *http.Request) {
-
+	//will be implemented. not important right now
 }
 
-func uploadAppCycleReleaseHandler(
+func allAppCycleReleaseHandler(
 	ctx context.Context,
 	w http.ResponseWriter,
 	r *http.Request) {
 
+	userID := util.LoggedInUserID(ctx)
+	appID, _ := util.ParamValueAsID(ctx, "appId")
+	cycleID, _ := util.ParamValueAsID(ctx, "cycleId")
+
+	releases, err := service.AllCycleReleases(appID, cycleID, userID)
+	util.AutoDetectResponse(w, releases, err)
 }
 
 func lockAppCycleReleaseHandler(
