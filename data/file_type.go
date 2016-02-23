@@ -9,8 +9,9 @@ import (
 type FileType int
 
 const (
+	_ FileType = iota
 	//JS represents file type as javascript
-	JS FileType = iota
+	JS
 )
 
 var (

@@ -11,7 +11,8 @@ LDFLAGS+=-X github.com/pressly/warpdrive/warpdrive.Version="$(VERSION)"
 clean:
 	@rm -rf ./bin
 	@mkdir -p ./bin/data
-	@mkdir -p ./bin/tmp
+	@mkdir -p ./bin/temp
+	@mkdir -p ./bin/bundles
 
 
 #

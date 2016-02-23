@@ -10,8 +10,9 @@ import (
 type Platform int
 
 const (
+	_ Platform = iota
 	//IOS represents apple ios devices
-	IOS Platform = iota
+	IOS
 	//ANDROID represents google android devices
 	ANDROID
 )

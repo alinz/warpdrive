@@ -1,7 +1,6 @@
 package apps
 
 import (
-	"errors"
 	"mime/multipart"
 	"net/http"
 
@@ -100,7 +99,7 @@ func createAppCycleReleaseHandler(
 	note := qs.Get("note")
 
 	if err := r.ParseMultipartForm(warpdrive.Config.FileUpload.FileMaxSize); err != nil {
-		util.RespondError(w, errors.New("payload is too big"))
+		util.RespondError(w, err)
 		return
 	}
 
@@ -116,7 +115,7 @@ func createAppCycleReleaseHandler(
 				defer file.Close()
 				path := warpdrive.Config.FileUpload.TempFolder + util.UUID()
 				if err := util.CopyDataToFile(file, path); err != nil {
-					return errors.New("something went wrong")
+					return err
 				}
 
 				filepaths = append(filepaths, path)
