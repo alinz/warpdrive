@@ -9,28 +9,37 @@ import (
 func Routes() chi.Router {
 	r := chi.NewRouter()
 
-	r.Use(m.JwtHandler())
+	r.Group(func(r chi.Router) {
+		r.Use(m.JwtHandler())
 
-	r.Get("/", listAllAppsHandler)
-	r.Post("/", m.BodyParser(createAppRequestBuilder, 512), createAppHandler)
+		r.Get("/", listAllAppsHandler)
+		r.Post("/", m.BodyParser(createAppRequestBuilder, 512), createAppHandler)
 
-	r.Route("/:appId", func(r chi.Router) {
-		r.Patch("/", m.BodyParser(createAppRequestBuilder, 512), updateAppHandler)
+		r.Route("/:appId", func(r chi.Router) {
+			r.Patch("/", m.BodyParser(createAppRequestBuilder, 512), updateAppHandler)
 
-		r.Route("/cycles", func(r chi.Router) {
-			r.Post("/", m.BodyParser(createCycleRequestBuilder, 512), createAppCycleHandler)
-			r.Get("/", allAppCyclesHandler)
+			r.Route("/cycles", func(r chi.Router) {
+				r.Post("/", m.BodyParser(createCycleRequestBuilder, 512), createAppCycleHandler)
+				r.Get("/", allAppCyclesHandler)
 
-			r.Route("/:cycleId", func(r chi.Router) {
-				r.Patch("/", m.BodyParser(updateCycleRequestBuilder, 512), updateAppCycleHandler)
-				r.Get("/config", downloadAppCycleConfigHandler)
+				r.Route("/:cycleId", func(r chi.Router) {
+					r.Patch("/", m.BodyParser(updateCycleRequestBuilder, 512), updateAppCycleHandler)
+					r.Get("/config", downloadAppCycleConfigHandler)
 
-				r.Route("/releases", func(r chi.Router) {
-					r.Post("/", createAppCycleReleaseHandler)
-					r.Get("/", allAppCycleReleaseHandler)
-					r.Patch("/:releaseId/lock", lockAppCycleReleaseHandler)
+					r.Route("/releases", func(r chi.Router) {
+						r.Post("/", createAppCycleReleaseHandler)
+						r.Get("/", allAppCycleReleaseHandler)
+						r.Patch("/:releaseId/lock", lockAppCycleReleaseHandler)
+					})
 				})
 			})
+		})
+	})
+
+	r.Group(func(r chi.Router) {
+		r.Route("/:appId/cycles/:cycleId/releases/version/:version", func(r chi.Router) {
+			r.Get("/", checkVersionAppCycleReleaseHandler)
+			r.Post("/download", downloadAppCycleReleaseHandler)
 		})
 	})
 

@@ -1,6 +1,7 @@
 package apps
 
 import (
+	"errors"
 	"mime/multipart"
 	"net/http"
 
@@ -183,12 +184,12 @@ func checkVersionAppCycleReleaseHandler(
 	ctx context.Context,
 	w http.ResponseWriter,
 	r *http.Request) {
-
+	util.AutoDetectResponse(w, nil, errors.New("Not Implemented yet"))
 }
 
 func downloadAppCycleReleaseHandler(
 	ctx context.Context,
 	w http.ResponseWriter,
 	r *http.Request) {
-
+	util.AutoDetectResponse(w, nil, errors.New("Not Implemented yet"))
 }

@@ -17,13 +17,13 @@ POST  /apps/:appId/cycles/:cycleId/releases?platform=&version=&notes=
 PATCH /apps/:appId/cycles/:cycleId/releases/:releaseId
 
 ## Get all releases
-GET  /apps/:appId/cycles/:cycleId/releases
+GET  /apps/:appId/cycles/:cycleId/releases?currentVersion=1.2.0
 
 ## Locked the version so client can download
 PATCH /apps/:appId/cycles/:cycleId/releases/:releaseId/lock
 
 ## Check if any download is available
-GET   /apps/:appId/cycles/:cycleId/releases/:currentVersion
+GET   /apps/:appId/cycles/:cycleId/releases/version/:version
 
 {
   "latest_version": "1.2.3"
@@ -31,7 +31,7 @@ GET   /apps/:appId/cycles/:cycleId/releases/:currentVersion
 
 ## Download bundles
 
-POST /apps/:appId/cycles/:cycleId/releases/:version/download
+POST /apps/:appId/cycles/:cycleId/releases/version/:version/download
 
 ##
 
