@@ -113,3 +113,31 @@ func VersionAdd(version Version, major, minor, patch uint64) Version {
 
 	return Version(value)
 }
+
+func MaskVersion(version Version, major, minor, patch uint64) Version {
+	value := uint64(version)
+
+	v1 := (value & 0xffff000000000000) >> 48
+	v2 := (value & 0x0000ffff00000000) >> 32
+	v3 := value & 0x00000000ffffffff
+
+	if major == 0 {
+		v1 = 0
+	}
+
+	if minor == 0 {
+		v2 = 0
+	}
+
+	if patch == 0 {
+		v3 = 0
+	}
+
+	v1 = (v1 << 48) & 0xffff000000000000
+	v2 = (v2 << 32) & 0x0000ffff00000000
+	v3 = v3 & 0x00000000ffffffff
+
+	value = v1 | v2 | v3
+
+	return Version(value)
+}

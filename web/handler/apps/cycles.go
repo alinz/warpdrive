@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/pressly/warpdrive"
-	"github.com/pressly/warpdrive/data"
 	"github.com/pressly/warpdrive/service"
 	"github.com/pressly/warpdrive/web/constant"
 	"github.com/pressly/warpdrive/web/util"
@@ -188,15 +187,20 @@ func checkVersionAppCycleReleaseHandler(
 	r *http.Request) {
 	appID, _ := util.ParamValueAsID(ctx, "appId")
 	cycleID, _ := util.ParamValueAsID(ctx, "cycleId")
-	versionStr := util.ParamValue(ctx, "version")
 
-	platform := data.IOS
+	qs := r.URL.Query()
 
-	version, err := service.CheckDownloadableVersion(appID, cycleID, platform, versionStr)
+	currentVersion := qs.Get("version")
+	platform := qs.Get("platform")
 
-	util.AutoDetectResponse(w, struct {
-		Version data.Version `json:"version"`
-	}{Version: version}, err)
+	versions, err := service.CheckDownloadableVersion(
+		appID,
+		cycleID,
+		platform,
+		currentVersion,
+	)
+
+	util.AutoDetectResponse(w, versions, err)
 }
 
 func downloadAppCycleReleaseHandler(

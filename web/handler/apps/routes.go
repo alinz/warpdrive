@@ -37,10 +37,8 @@ func Routes() chi.Router {
 	})
 
 	r.Group(func(r chi.Router) {
-		r.Route("/:appId/cycles/:cycleId/releases/version/:version", func(r chi.Router) {
-			r.Get("/", checkVersionAppCycleReleaseHandler)
-			r.Post("/download", downloadAppCycleReleaseHandler)
-		})
+		r.Get("/:appId/cycles/:cycleId/releases/check", checkVersionAppCycleReleaseHandler)
+		r.Post("/:appId/cycles/:cycleId/releases/download", downloadAppCycleReleaseHandler)
 	})
 
 	return r

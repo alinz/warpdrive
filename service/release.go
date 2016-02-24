@@ -155,19 +155,28 @@ func LockRelease(appID, cycleID, userID, releaseID int64) error {
 func CheckDownloadableVersion(
 	appID,
 	cycleID int64,
-	platform data.Platform,
+	platformStr string,
 	versionStr string,
-) (data.Version, error) {
+) (map[string]data.Version, error) {
 	//convert version to int represantation
 	//then increment the major side and put it into the sql
 	currentVersion, err := data.ParseVersion(versionStr)
 
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
-	nextMajorVersion := data.VersionAdd(currentVersion, 1, 0, 0)
+	platform, err := data.ParsePlatform(platformStr)
 
+	if err != nil {
+		return nil, err
+	}
+
+	versions := make(map[string]data.Version)
+
+	//finding soft version
+
+	nextMajorVersion := data.VersionAdd(currentVersion, 1, 0, 0)
 	builder := warpdrive.DB.Builder()
 	q := builder.
 		Select(
@@ -189,9 +198,37 @@ func CheckDownloadableVersion(
 	release := data.Release{}
 
 	err = q.Iterator().One(&release)
-	if err != nil {
-		return 0, err
+	if err == nil {
+		versions["soft"] = release.Version
 	}
 
-	return release.Version, nil
+	//finding hard version
+
+	nextMajorVersion = data.MaskVersion(nextMajorVersion, 1, 0, 0)
+
+	q = builder.
+		Select(
+			"releases.id",
+			"releases.version",
+		).
+		From("releases").
+		Join("cycles").
+		On("cycles.id=releases.cycle_id").
+		Join("apps").
+		On("apps.id=cycles.app_id").
+		Where(`
+			releases.locked=TRUE AND
+			apps.id=? AND releases.cycle_id=? AND releases.platform=? AND
+			releases.version >= ?
+		`, appID, cycleID, platform, nextMajorVersion).
+		OrderBy("version")
+
+	release = data.Release{}
+
+	err = q.Iterator().One(&release)
+	if err == nil {
+		versions["hard"] = release.Version
+	}
+
+	return versions, nil
 }
