@@ -97,3 +97,19 @@ func (v *Version) UnmarshalJSON(data []byte) error {
 	*v = Version(value)
 	return nil
 }
+
+func VersionAdd(version Version, major, minor, patch uint64) Version {
+	value := uint64(version)
+
+	major = major + ((value & 0xffff000000000000) >> 48)
+	minor = minor + ((value & 0x0000ffff00000000) >> 32)
+	patch = patch + (value & 0x00000000ffffffff)
+
+	major = (major << 48) & 0xffff000000000000
+	minor = (minor << 32) & 0x0000ffff00000000
+	patch = patch & 0x00000000ffffffff
+
+	value = major | minor | patch
+
+	return Version(value)
+}

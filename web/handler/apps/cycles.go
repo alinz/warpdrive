@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/pressly/warpdrive"
+	"github.com/pressly/warpdrive/data"
 	"github.com/pressly/warpdrive/service"
 	"github.com/pressly/warpdrive/web/constant"
 	"github.com/pressly/warpdrive/web/util"
@@ -151,6 +152,7 @@ func updateAppCycleReleaseHandler(
 	w http.ResponseWriter,
 	r *http.Request) {
 	//will be implemented. not important right now
+	util.AutoDetectResponse(w, nil, errors.New("Not Implemented yet"))
 }
 
 func allAppCycleReleaseHandler(
@@ -186,10 +188,15 @@ func checkVersionAppCycleReleaseHandler(
 	r *http.Request) {
 	appID, _ := util.ParamValueAsID(ctx, "appId")
 	cycleID, _ := util.ParamValueAsID(ctx, "cycleId")
-	version := util.ParamValue(ctx, "version")
+	versionStr := util.ParamValue(ctx, "version")
 
-	service.CheckDownloadableVersion(appID, cycleID, version)
-	util.AutoDetectResponse(w, nil, errors.New("Not Implemented yet"))
+	platform := data.IOS
+
+	version, err := service.CheckDownloadableVersion(appID, cycleID, platform, versionStr)
+
+	util.AutoDetectResponse(w, struct {
+		Version data.Version `json:"version"`
+	}{Version: version}, err)
 }
 
 func downloadAppCycleReleaseHandler(
@@ -197,4 +204,5 @@ func downloadAppCycleReleaseHandler(
 	w http.ResponseWriter,
 	r *http.Request) {
 	util.AutoDetectResponse(w, nil, errors.New("Not Implemented yet"))
+
 }

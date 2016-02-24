@@ -152,7 +152,46 @@ func LockRelease(appID, cycleID, userID, releaseID int64) error {
 	return err
 }
 
-func CheckDownloadableVersion(appID, cycleID int64, version string) (data.Version, error) {
+func CheckDownloadableVersion(
+	appID,
+	cycleID int64,
+	platform data.Platform,
+	versionStr string,
+) (data.Version, error) {
+	//convert version to int represantation
+	//then increment the major side and put it into the sql
+	currentVersion, err := data.ParseVersion(versionStr)
 
-	return 0, nil
+	if err != nil {
+		return 0, err
+	}
+
+	nextMajorVersion := data.VersionAdd(currentVersion, 1, 0, 0)
+
+	builder := warpdrive.DB.Builder()
+	q := builder.
+		Select(
+			"releases.id",
+			"releases.version",
+		).
+		From("releases").
+		Join("cycles").
+		On("cycles.id=releases.cycle_id").
+		Join("apps").
+		On("apps.id=cycles.app_id").
+		Where(`
+			releases.locked=TRUE AND
+			apps.id=? AND releases.cycle_id=? AND releases.platform=? AND
+			releases.version > ? AND releases.version < ?
+		`, appID, cycleID, platform, currentVersion, nextMajorVersion).
+		OrderBy("version")
+
+	release := data.Release{}
+
+	err = q.Iterator().One(&release)
+	if err != nil {
+		return 0, err
+	}
+
+	return release.Version, nil
 }
