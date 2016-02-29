@@ -1,7 +1,10 @@
 package service
 
 import (
+	"archive/zip"
+	"bytes"
 	"errors"
+	"io"
 	"os"
 
 	"upper.io/db.v2"
@@ -231,4 +234,83 @@ func CheckDownloadableVersion(
 	}
 
 	return versions, nil
+}
+
+func DownloadRelease(
+	appID, cycleID int64,
+	versionStr, platformStr string, encryptedKey []byte,
+) (func() ([]byte, error), error) {
+
+	version, err := data.ParseVersion(versionStr)
+	if err != nil {
+		return nil, err
+	}
+
+	platform, err := data.ParsePlatform(platformStr)
+	if err != nil {
+		return nil, err
+	}
+
+	cycle := data.Cycle{}
+	err = cycle.Find(warpdrive.DB, db.Cond{"id": cycleID})
+	if err != nil {
+		return nil, err
+	}
+
+	key, err := crypto.DecryptByPrivateRSA([]byte(encryptedKey), cycle.PrivateKey, "sha256")
+	if err != nil {
+		return nil, err
+	}
+
+	builder := warpdrive.DB.Builder()
+	q := builder.
+		Select(
+			"releases.id",
+		).
+		From("releases").
+		Join("cycles").
+		On("cycles.id=releases.cycle_id").
+		Join("apps").
+		On("apps.id=cycles.app_id").
+		Where(`
+			releases.locked=TRUE AND
+			apps.id=? AND releases.cycle_id=? AND releases.platform=? AND
+			releases.version=?
+		`, appID, cycleID, platform, version)
+
+	release := data.Release{}
+	err = q.Iterator().One(&release)
+	if err != nil {
+		return nil, err
+	}
+
+	bundles, err := data.AllBundlesByReleaseID(warpdrive.DB, release.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	fn := func() ([]byte, error) {
+		var buffer bytes.Buffer
+
+		compress := zip.NewWriter(&buffer)
+		defer compress.Close()
+
+		for _, bundle := range bundles {
+			conatinFile, _ := compress.Create(bundle.Name)
+			targetFile, _ := os.Open(warpdrive.Config.Bundle.BundlesFolder + bundle.Hash)
+
+			io.Copy(conatinFile, targetFile)
+
+			targetFile.Close()
+		}
+
+		encrypted, err := crypto.AESCrypt(buffer.Bytes(), key)
+		if err != nil {
+			return nil, err
+		}
+
+		return encrypted, nil
+	}
+
+	return fn, nil
 }

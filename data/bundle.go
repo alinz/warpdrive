@@ -45,3 +45,20 @@ func (b *Bundle) Save(session db.Database) error {
 func (b *Bundle) Remove(session db.Database) error {
 	return b.Query(session, db.Cond{"id": b.ID}).Remove()
 }
+
+func AllBundlesByReleaseID(
+	session db.Database,
+	releaseID int64,
+) ([]*Bundle, error) {
+	var bundles []*Bundle
+
+	err := session.
+		C("bundles").
+		Find(db.Cond{"releaseId": releaseID}).
+		All(&bundles)
+	if err != nil {
+		return nil, err
+	}
+
+	return bundles, nil
+}

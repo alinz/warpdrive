@@ -1,6 +1,7 @@
 package apps
 
 import (
+	"encoding/base64"
 	"errors"
 	"mime/multipart"
 	"net/http"
@@ -207,6 +208,44 @@ func downloadAppCycleReleaseHandler(
 	ctx context.Context,
 	w http.ResponseWriter,
 	r *http.Request) {
-	util.AutoDetectResponse(w, nil, errors.New("Not Implemented yet"))
 
+	appID, _ := util.ParamValueAsID(ctx, "appId")
+	cycleID, _ := util.ParamValueAsID(ctx, "cycleId")
+
+	qs := r.URL.Query()
+
+	version := qs.Get("version")
+	platform := qs.Get("platform")
+
+	r.ParseForm()
+	base64EncrypedKey, ok := r.Form["encrypted_key"]
+	if !ok || len(base64EncrypedKey) != 1 {
+		util.RespondError(w, errors.New("enecrypted_key is not provided"))
+		return
+	}
+
+	encryptedKey, err := base64.StdEncoding.DecodeString(base64EncrypedKey[0])
+	if err != nil {
+		util.RespondError(w, err)
+	}
+
+	process, err := service.DownloadRelease(
+		appID,
+		cycleID,
+		version,
+		platform,
+		encryptedKey,
+	)
+	if err != nil {
+		util.RespondError(w, err)
+	}
+
+	encryptedData, err := process()
+	if err != nil {
+		util.RespondError(w, err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/zip")
+	w.Write(encryptedData)
 }
