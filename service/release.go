@@ -294,7 +294,6 @@ func DownloadRelease(
 		var buffer bytes.Buffer
 
 		compress := zip.NewWriter(&buffer)
-		defer compress.Close()
 
 		for _, bundle := range bundles {
 			conatinFile, _ := compress.Create(bundle.Name)
@@ -305,7 +304,9 @@ func DownloadRelease(
 			targetFile.Close()
 		}
 
-		encrypted, err := crypto.AESCrypt(buffer.Bytes(), key)
+		compress.Close()
+
+		encrypted, err := crypto.AESEncrypt(buffer.Bytes(), key)
 		if err != nil {
 			return nil, err
 		}
