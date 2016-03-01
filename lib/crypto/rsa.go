@@ -12,6 +12,7 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"errors"
+	"fmt"
 	"hash"
 	"io/ioutil"
 	"log"
@@ -92,6 +93,7 @@ func DecryptByPrivateRSA(message []byte, privateKey, algo string) ([]byte, error
 	h, _ := hashAlgorithm(algo)
 	plaintext, err := rsa.DecryptOAEP(h, rand.Reader, key, message, nil)
 	if err != nil {
+		fmt.Println(err)
 		return nil, err
 	}
 

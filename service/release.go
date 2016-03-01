@@ -257,7 +257,7 @@ func DownloadRelease(
 		return nil, err
 	}
 
-	key, err := crypto.DecryptByPrivateRSA([]byte(encryptedKey), cycle.PrivateKey, "sha256")
+	key, err := crypto.DecryptByPrivateRSA(encryptedKey, cycle.PrivateKey, "sha1")
 	if err != nil {
 		return nil, err
 	}

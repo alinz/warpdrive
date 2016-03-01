@@ -1,8 +1,9 @@
 package apps
 
 import (
-	"encoding/base64"
 	"errors"
+	"io"
+	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 
@@ -217,16 +218,10 @@ func downloadAppCycleReleaseHandler(
 	version := qs.Get("version")
 	platform := qs.Get("platform")
 
-	r.ParseForm()
-	base64EncrypedKey, ok := r.Form["encrypted_key"]
-	if !ok || len(base64EncrypedKey) != 1 {
-		util.RespondError(w, errors.New("enecrypted_key is not provided"))
-		return
-	}
-
-	encryptedKey, err := base64.StdEncoding.DecodeString(base64EncrypedKey[0])
+	encryptedKey, err := ioutil.ReadAll(io.LimitReader(r.Body, 4096))
 	if err != nil {
 		util.RespondError(w, err)
+		return
 	}
 
 	process, err := service.DownloadRelease(
@@ -236,8 +231,10 @@ func downloadAppCycleReleaseHandler(
 		platform,
 		encryptedKey,
 	)
+
 	if err != nil {
 		util.RespondError(w, err)
+		return
 	}
 
 	encryptedData, err := process()
