@@ -281,6 +281,7 @@ func DownloadRelease(
 	release := data.Release{}
 	err = q.Iterator().One(&release)
 	if err != nil {
+
 		return nil, err
 	}
 

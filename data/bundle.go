@@ -54,7 +54,7 @@ func AllBundlesByReleaseID(
 
 	err := session.
 		C("bundles").
-		Find(db.Cond{"releaseId": releaseID}).
+		Find(db.Cond{"release_id": releaseID}).
 		All(&bundles)
 	if err != nil {
 		return nil, err

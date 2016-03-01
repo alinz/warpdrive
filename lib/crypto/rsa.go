@@ -74,8 +74,11 @@ func EncryptByPublicRSA(message []byte, publicKey, algo string) ([]byte, error) 
 		return nil, err
 	}
 
-	h, _ := hashAlgorithm(algo)
-	encrypted, err := rsa.EncryptOAEP(h, rand.Reader, public, message, nil)
+	//func EncryptPKCS1v15(rand io.Reader, pub *PublicKey, msg []byte) (out []byte, err error)
+
+	//h, _ := hashAlgorithm(algo)
+	//encrypted, err := rsa.EncryptOAEP(h, rand.Reader, public, message, nil)
+	encrypted, err := rsa.EncryptPKCS1v15(rand.Reader, public, message)
 	if err != nil {
 		return nil, err
 	}
@@ -90,8 +93,11 @@ func DecryptByPrivateRSA(message []byte, privateKey, algo string) ([]byte, error
 		return nil, err
 	}
 
-	h, _ := hashAlgorithm(algo)
-	plaintext, err := rsa.DecryptOAEP(h, rand.Reader, key, message, nil)
+	//func DecryptPKCS1v15(rand io.Reader, priv *PrivateKey, ciphertext []byte) (out []byte, err error)
+
+	//h, _ := hashAlgorithm(algo)
+	//plaintext, err := rsa.DecryptOAEP(h, rand.Reader, key, message, nil)
+	plaintext, err := rsa.DecryptPKCS1v15(rand.Reader, key, message)
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
