@@ -1,7 +1,6 @@
 package crypto_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/pressly/warpdrive/lib/crypto"
@@ -38,8 +37,8 @@ func TestParsePrivateKey(t *testing.T) {
 func TestRSA(t *testing.T) {
 	private, public, err := crypto.RSAKeyPair(1024)
 
-	fmt.Println(private)
-	fmt.Println(public)
+	// fmt.Println(private)
+	// fmt.Println(public)
 
 	if err != nil {
 		t.Error(err)
