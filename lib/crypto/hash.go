@@ -4,7 +4,6 @@ import (
 	"crypto/sha1"
 	"fmt"
 	"io"
-	"math"
 	"os"
 )
 
@@ -19,20 +18,19 @@ func HashFile(filename string) (string, error) {
 
 	defer file.Close()
 
-	info, _ := file.Stat()
-	filesize := info.Size()
+	hash, err := Hash(file)
 
-	blocks := uint64(math.Ceil(float64(filesize) / float64(filechunk)))
+	return fmt.Sprintf("%x", hash), err
+}
+
+//Hash hashes any io.Reader into a 20 byte hash
+func Hash(src io.Reader) ([]byte, error) {
+	var result []byte
 
 	hash := sha1.New()
-
-	for i := uint64(0); i < blocks; i++ {
-		blocksize := int(math.Min(filechunk, float64(filesize-int64(i*filechunk))))
-		buf := make([]byte, blocksize)
-
-		file.Read(buf)
-		io.WriteString(hash, string(buf))
+	if _, err := io.Copy(hash, src); err != nil {
+		return result, err
 	}
 
-	return fmt.Sprintf("%x", hash.Sum(nil)), nil
+	return hash.Sum(result), nil
 }
