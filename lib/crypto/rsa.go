@@ -116,7 +116,7 @@ func RSAKeyPair(size int) (string, string, error) {
 	var privateBuffer bytes.Buffer
 
 	pemkey := &pem.Block{
-		Type:  "RSA PRIVATE KEY",
+		Type:  "PRIVATE KEY",
 		Bytes: x509.MarshalPKCS1PrivateKey(privateKey),
 	}
 
@@ -131,7 +131,7 @@ func RSAKeyPair(size int) (string, string, error) {
 	}
 
 	pemkey = &pem.Block{
-		Type:  "RSA PUBLIC KEY",
+		Type:  "PUBLIC KEY",
 		Bytes: bytes,
 	}
 
@@ -153,7 +153,7 @@ func SSHKeyPair(size int, pubKeyPath, privateKeyPath string) error {
 		return err
 	}
 	privateKeyPEM := &pem.Block{
-		Type:  "RSA PRIVATE KEY",
+		Type:  "PRIVATE KEY",
 		Bytes: x509.MarshalPKCS1PrivateKey(privateKey),
 	}
 	if err := pem.Encode(privateKeyFile, privateKeyPEM); err != nil {
