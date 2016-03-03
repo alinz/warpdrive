@@ -1,10 +1,8 @@
 package service
 
 import (
-	"archive/zip"
 	"bytes"
 	"errors"
-	"io"
 	"os"
 
 	"upper.io/db.v2"
@@ -12,6 +10,7 @@ import (
 	"github.com/pressly/warpdrive"
 	"github.com/pressly/warpdrive/data"
 	"github.com/pressly/warpdrive/lib/crypto"
+	"github.com/pressly/warpdrive/lib/warp"
 )
 
 func CreateRelease(
@@ -293,18 +292,12 @@ func DownloadRelease(
 	fn := func() ([]byte, error) {
 		var buffer bytes.Buffer
 
-		compress := zip.NewWriter(&buffer)
+		warpFile := warp.NewWriter(&buffer)
 
 		for _, bundle := range bundles {
-			conatinFile, _ := compress.Create(bundle.Name)
-			targetFile, _ := os.Open(warpdrive.Config.Bundle.BundlesFolder + bundle.Hash)
-
-			io.Copy(conatinFile, targetFile)
-
-			targetFile.Close()
+			path := warpdrive.Config.Bundle.BundlesFolder + bundle.Hash
+			warpFile.AddFile(bundle.Name, path)
 		}
-
-		compress.Close()
 
 		encrypted, err := crypto.AESEncrypt(buffer.Bytes(), key)
 		if err != nil {
