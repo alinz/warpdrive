@@ -3,6 +3,7 @@ package warp_test
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/pressly/warpdrive/lib/warp"
@@ -23,5 +24,9 @@ func TestWarpEncoding(t *testing.T) {
 		t.Error(err)
 	}
 
-	fmt.Println(buff.Bytes())
+	f, _ := os.Create("./output")
+	defer f.Close()
+	f.Write(buff.Bytes())
+
+	fmt.Println(buff.Len())
 }
