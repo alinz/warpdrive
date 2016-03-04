@@ -2,6 +2,7 @@ package apps
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -75,14 +76,27 @@ func downloadAppCycleConfigHandler(
 		return
 	}
 
+	protocol := "http"
+	if warpdrive.Config.JWT.Secure {
+		protocol += "s"
+	}
+
+	domain := fmt.Sprintf(
+		"%s://%s",
+		protocol,
+		warpdrive.Config.JWT.Domain,
+	)
+
 	util.Respond(w, 200, struct {
 		AppID     int64  `json:"app_id"`
 		CycleID   int64  `json:"cycle_id"`
 		PublicKey string `json:"public_key"`
+		Domain    string `json:"domain"`
 	}{
 		AppID:     appID,
 		CycleID:   cycleID,
 		PublicKey: cycle.PublicKey,
+		Domain:    domain,
 	})
 }
 
