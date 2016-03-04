@@ -48,7 +48,7 @@ kill: kill-fresh kill-by-port
 db-reset:
 	@(cd ./script && bash ./db-reset.sh)
 
-dev: kill clean
+dev: kill
 	@(export CONFIG=$$PWD/etc/warpdrive.conf && \
 		cd ./cmd/warpdrive && \
 		fresh -c ../../etc/fresh-runner.conf -w=../..)
