@@ -136,7 +136,16 @@ func createAppCycleReleaseHandler(
 				}
 
 				filepaths = append(filepaths, path)
-				filenames = append(filenames, fileHeader.Filename)
+
+				//we need to change the main.jsbundle to main-{version}.jsbundle.
+				//because this is how client safly separate versions in case of
+				//error
+				filename := fileHeader.Filename
+				if filename == "main.jsbundle" {
+					filename = fmt.Sprintf("main-%s.jsbundle", version)
+				}
+
+				filenames = append(filenames, filename)
 
 				return nil
 			}(fileHeader)
