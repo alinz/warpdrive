@@ -4,6 +4,9 @@
 VERSION=1.0.0
 LDFLAGS+=-X github.com/pressly/warpdrive/warpdrive.Version="$(VERSION)"
 
+OS=darwin linux windows
+ARCH=386 amd64
+BUILD_PATH=../../bin/build
 
 #
 # Cleaning
@@ -13,6 +16,7 @@ clean:
 	@mkdir -p ./bin/data
 	@mkdir -p ./bin/temp
 	@mkdir -p ./bin/bundles
+	@mkdir -p ./bin/build
 
 
 #
@@ -59,3 +63,16 @@ dev: kill
 
 build:
 	GOGC=off go build -i -ldflags "$(LDFLAGS)" -o ./bin/warpdrive ./cmd/warpdrive
+
+build-all:
+	@(cd cmd/warpdrive; 																												\
+	for GOOS in $(OS); do 																											\
+		for GOARCH in $(ARCH); do 																								\
+			echo "building $$GOOS $$GOARCH ..."; 																		\
+			export GOGC=off																													\
+			export GOOS=$$GOOS; 																										\
+			export GOARCH=$$GOARCH; 																								\
+			go build -ldflags "$(LDFLAGS)" 																					\
+			-o $(BUILD_PATH)/warpdrive-$$GOOS-$$GOARCH; 														\
+		done 																																			\
+	done)
