@@ -61,18 +61,22 @@ dev: kill
 #
 # Building
 
-build:
-	GOGC=off go build -i -ldflags "$(LDFLAGS)" -o ./bin/warpdrive ./cmd/warpdrive
-
-build-all:
+build-all: clean
 	@(cd cmd/warpdrive; 																												\
 	for GOOS in $(OS); do 																											\
 		for GOARCH in $(ARCH); do 																								\
 			echo "building $$GOOS $$GOARCH ..."; 																		\
-			export GOGC=off																													\
+			export GOGC=off;																												\
 			export GOOS=$$GOOS; 																										\
 			export GOARCH=$$GOARCH; 																								\
 			go build -ldflags "$(LDFLAGS)" 																					\
 			-o $(BUILD_PATH)/warpdrive-$$GOOS-$$GOARCH; 														\
 		done 																																			\
 	done)
+
+build-docker: clean
+	@(cd cmd/warpdrive;																													\
+	export export GOGC=off; export GOOS=linux; export GOARCH=amd64;	 						\
+	go build -ldflags "$(LDFLAGS)" -o $(BUILD_PATH)/warpdrive-linux-amd64;			\
+	cd ../..;																																		\
+	docker build -t warpdrive .)
