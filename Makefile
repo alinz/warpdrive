@@ -1,12 +1,10 @@
 #
 # Variables
 
-VERSION=1.0.0
-LDFLAGS+=-X github.com/pressly/warpdrive/warpdrive.Version="$(VERSION)"
-
 OS=darwin linux windows
 ARCH=386 amd64
-BUILD_PATH=../../bin/build
+
+LDFLAGS+=-X github.com/pressly/warpdrive/warpdrive.Version=$$(scripts/version.sh --long)
 
 #
 # Cleaning
@@ -60,7 +58,6 @@ dev: kill
 # Building
 
 build-all: clean
-	@(cd cmd/warpdrive; 																												\
 	for GOOS in $(OS); do 																											\
 		for GOARCH in $(ARCH); do 																								\
 			echo "building $$GOOS $$GOARCH ..."; 																		\
@@ -68,13 +65,10 @@ build-all: clean
 			export GOOS=$$GOOS; 																										\
 			export GOARCH=$$GOARCH; 																								\
 			go build -ldflags "$(LDFLAGS)" 																					\
-			-o $(BUILD_PATH)/warpdrive-$$GOOS-$$GOARCH; 														\
+			-o ./bin/build/warpdrive-$$GOOS-$$GOARCH ./cmd/warpdrive; 		          \
 		done 																																			\
 	done)
 
-build-docker: clean
-	@(cd cmd/warpdrive;																													\
-	export export GOGC=off; export GOOS=linux; export GOARCH=amd64;	 						\
-	go build -ldflags "$(LDFLAGS)" -o $(BUILD_PATH)/warpdrive-linux-amd64;			\
-	cd ../..;																																		\
-	docker build -t warpdrive .)
+build: clean
+	export GOGC=off;                                       	 		        				\
+	go build -ldflags "$(LDFLAGS)" -o ./bin/warpdrive ./cmd/warpdrive;
