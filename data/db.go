@@ -13,7 +13,7 @@ import (
 func InitDbWithConfig(conf *config.Config) (db.Database, error) {
 	var settings = postgresql.ConnectionURL{
 		Database: conf.DB.Database,
-		Address:  db.ParseAddress(strings.Join(conf.DB.Hosts, ",")),
+		Host:     strings.Join(conf.DB.Hosts, ","),
 		User:     conf.DB.Username,
 		Password: conf.DB.Password,
 	}

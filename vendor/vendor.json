@@ -1,0 +1,146 @@
+{
+	"comment": "",
+	"ignore": "test appengine",
+	"package": [
+		{
+			"path": "github.com/BurntSushi/toml",
+			"revision": "5c4df71dfe9ac89ef6287afc05e4c1b16ae65a1e",
+			"revisionTime": "2016-01-02T09:47:48-05:00"
+		},
+		{
+			"path": "github.com/dgrijalva/jwt-go",
+			"revision": "afef698c326bfd906b11659432544e5aae441d44",
+			"revisionTime": "2015-12-30T10:00:00-08:00"
+		},
+		{
+			"path": "github.com/jmoiron/sqlx/reflectx",
+			"revision": "398dd5876282499cdfd4cb8ea0f31a672abe9495",
+			"revisionTime": "2016-02-06T17:15:33-05:00"
+		},
+		{
+			"path": "github.com/lib/pq",
+			"revision": "69552e54d2a9d4c6a2438926a774930f7bc398ec",
+			"revisionTime": "2016-02-09T23:37:49+09:00"
+		},
+		{
+			"path": "github.com/lib/pq/oid",
+			"revision": "69552e54d2a9d4c6a2438926a774930f7bc398ec",
+			"revisionTime": "2016-02-09T23:37:49+09:00"
+		},
+		{
+			"path": "github.com/mitchellh/hashstructure",
+			"revision": "6b17d669fac5e2f71c16658d781ec3fdd3802b69",
+			"revisionTime": "2016-02-09T13:38:20-08:00"
+		},
+		{
+			"path": "github.com/pressly/chi",
+			"revision": "ee17e2cbb839165073fc63b3f4585f040dbe1b84",
+			"revisionTime": "2016-02-26T13:40:54-05:00"
+		},
+		{
+			"path": "github.com/pressly/chi/middleware",
+			"revision": "ee17e2cbb839165073fc63b3f4585f040dbe1b84",
+			"revisionTime": "2016-02-26T13:40:54-05:00"
+		},
+		{
+			"path": "github.com/tylerb/graceful",
+			"revision": "7116c7a8115899e80197cd9e0b97998c0f97ed8e",
+			"revisionTime": "2016-02-02T09:46:33-07:00"
+		},
+		{
+			"path": "golang.org/x/crypto/curve25519",
+			"revision": "5dc8cb4b8a8eb076cbb5a06bc3b8682c15bdbbd3",
+			"revisionTime": "2016-02-25T15:07:55+01:00"
+		},
+		{
+			"path": "golang.org/x/crypto/ssh",
+			"revision": "5dc8cb4b8a8eb076cbb5a06bc3b8682c15bdbbd3",
+			"revisionTime": "2016-02-25T15:07:55+01:00"
+		},
+		{
+			"path": "golang.org/x/net/context",
+			"revision": "a4bbce9fcae005b22ae5443f6af064d80a6f5a55",
+			"revisionTime": "2016-03-05T22:58:14Z"
+		},
+		{
+			"path": "golang.org/x/net/netutil",
+			"revision": "a4bbce9fcae005b22ae5443f6af064d80a6f5a55",
+			"revisionTime": "2016-03-05T22:58:14Z"
+		},
+		{
+			"path": "upper.io/db.v2",
+			"revision": "a3d9e4933c01895b950a59b304b698a650a274d5",
+			"revisionTime": "2016-03-07T06:44:55-06:00"
+		},
+		{
+			"path": "upper.io/db.v2/builder",
+			"revision": "a3d9e4933c01895b950a59b304b698a650a274d5",
+			"revisionTime": "2016-03-07T06:44:55-06:00"
+		},
+		{
+			"path": "upper.io/db.v2/builder/cache",
+			"revision": "a3d9e4933c01895b950a59b304b698a650a274d5",
+			"revisionTime": "2016-03-07T06:44:55-06:00"
+		},
+		{
+			"path": "upper.io/db.v2/builder/cache/hashstructure",
+			"revision": "a3d9e4933c01895b950a59b304b698a650a274d5",
+			"revisionTime": "2016-03-07T06:44:55-06:00"
+		},
+		{
+			"path": "upper.io/db.v2/builder/internal/util",
+			"revision": "a3d9e4933c01895b950a59b304b698a650a274d5",
+			"revisionTime": "2016-03-07T06:44:55-06:00"
+		},
+		{
+			"path": "upper.io/db.v2/builder/sqlbuilder",
+			"revision": "a3d9e4933c01895b950a59b304b698a650a274d5",
+			"revisionTime": "2016-03-07T06:44:55-06:00"
+		},
+		{
+			"path": "upper.io/db.v2/builder/sqlgen",
+			"revision": "a3d9e4933c01895b950a59b304b698a650a274d5",
+			"revisionTime": "2016-03-07T06:44:55-06:00"
+		},
+		{
+			"path": "upper.io/db.v2/builder/template/postgresql",
+			"revision": "a3d9e4933c01895b950a59b304b698a650a274d5",
+			"revisionTime": "2016-03-07T06:44:55-06:00"
+		},
+		{
+			"path": "upper.io/db.v2/internal/adapter",
+			"revision": "a3d9e4933c01895b950a59b304b698a650a274d5",
+			"revisionTime": "2016-03-07T06:44:55-06:00"
+		},
+		{
+			"path": "upper.io/db.v2/internal/debug",
+			"revision": "a3d9e4933c01895b950a59b304b698a650a274d5",
+			"revisionTime": "2016-03-07T06:44:55-06:00"
+		},
+		{
+			"path": "upper.io/db.v2/internal/schema",
+			"revision": "a3d9e4933c01895b950a59b304b698a650a274d5",
+			"revisionTime": "2016-03-07T06:44:55-06:00"
+		},
+		{
+			"path": "upper.io/db.v2/internal/sqladapter",
+			"revision": "a3d9e4933c01895b950a59b304b698a650a274d5",
+			"revisionTime": "2016-03-07T06:44:55-06:00"
+		},
+		{
+			"path": "upper.io/db.v2/internal/sqlutil/result",
+			"revision": "a3d9e4933c01895b950a59b304b698a650a274d5",
+			"revisionTime": "2016-03-07T06:44:55-06:00"
+		},
+		{
+			"path": "upper.io/db.v2/internal/sqlutil/tx",
+			"revision": "a3d9e4933c01895b950a59b304b698a650a274d5",
+			"revisionTime": "2016-03-07T06:44:55-06:00"
+		},
+		{
+			"path": "upper.io/db.v2/postgresql",
+			"revision": "a3d9e4933c01895b950a59b304b698a650a274d5",
+			"revisionTime": "2016-03-07T06:44:55-06:00"
+		}
+	]
+}

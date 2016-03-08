@@ -22,16 +22,14 @@ clean:
 #
 # Vendoring
 
-update-deps:
-	@echo "Updating Glockfile with package versions from GOPATH..."
-	@rm -rf ./vendor
-	@glock save github.com/pressly/warpdrive
-	@$(MAKE) vendor
+tools:
+	go get -u github.com/kardianos/govendor
 
-vendor:
-	@echo "Syncing dependencies into vendor directory..."
-	@rm -rf ./vendor
-	@gv < Glockfile
+vendor-list:
+	@govendor list
+
+vendor-update:
+	@govendor update +external
 
 
 #
