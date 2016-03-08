@@ -195,7 +195,7 @@ func CheckDownloadableVersion(
 			apps.id=? AND releases.cycle_id=? AND releases.platform=? AND
 			releases.version > ? AND releases.version < ?
 		`, appID, cycleID, platform, currentVersion, nextMajorVersion).
-		OrderBy("version")
+		OrderBy("-version")
 
 	release := data.Release{}
 
@@ -223,7 +223,7 @@ func CheckDownloadableVersion(
 			apps.id=? AND releases.cycle_id=? AND releases.platform=? AND
 			releases.version >= ?
 		`, appID, cycleID, platform, nextMajorVersion).
-		OrderBy("version")
+		OrderBy("-version")
 
 	release = data.Release{}
 
