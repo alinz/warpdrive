@@ -13,6 +13,11 @@
 			"revisionTime": "2015-12-30T10:00:00-08:00"
 		},
 		{
+			"path": "github.com/goware/heartbeat",
+			"revision": "602f8b16cd86f4f3f64efbcc3e11d6ac6db763e3",
+			"revisionTime": "2015-08-14T14:58:58-04:00"
+		},
+		{
 			"path": "github.com/jmoiron/sqlx/reflectx",
 			"revision": "398dd5876282499cdfd4cb8ea0f31a672abe9495",
 			"revisionTime": "2016-02-06T17:15:33-05:00"
