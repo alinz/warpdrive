@@ -72,12 +72,25 @@ func Load(configFile string, confEnv string) (*Config, error) {
 	}
 
 	config.Server.BundlesFolder = filepath.Join(config.Server.DataDir, "bundles")
-	if err := os.Mkdir(config.Server.BundlesFolder, 0755); err != nil {
-		return nil, err
+	dir, err := os.Stat(config.Server.BundlesFolder)
+	if err != nil && os.IsNotExist(err) {
+		if err := os.Mkdir(config.Server.BundlesFolder, 0755); err != nil {
+			return nil, err
+		}
 	}
+	if !dir.IsDir() {
+		return nil, errors.New(fmt.Sprintf("data_dir: %s is not a directory.", config.Server.BundlesFolder))
+	}
+
 	config.Server.TempFolder = filepath.Join(config.Server.DataDir, "tmp")
-	if err := os.Mkdir(config.Server.TempFolder, 0755); err != nil {
-		return nil, err
+	dir, err = os.Stat(config.Server.TempFolder)
+	if err != nil && os.IsNotExist(err) {
+		if err := os.Mkdir(config.Server.TempFolder, 0755); err != nil {
+			return nil, err
+		}
+	}
+	if !dir.IsDir() {
+		return nil, errors.New(fmt.Sprintf("data_dir: %s is not a directory.", config.Server.TempFolder))
 	}
 
 	return config, nil
