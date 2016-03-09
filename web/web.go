@@ -23,9 +23,14 @@ func New() http.Handler {
 
 	r.Use(heartbeat.Route("/ping"))
 
+	r.Get("/", index)
 	r.Mount("/session", session.Routes())
 	r.Mount("/users", users.Routes())
 	r.Mount("/apps", apps.Routes())
 
 	return r
+}
+
+func index(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte(`¯\_(ツ)_/¯`))
 }
