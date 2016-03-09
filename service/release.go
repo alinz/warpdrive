@@ -5,12 +5,11 @@ import (
 	"errors"
 	"os"
 
-	"upper.io/db.v2"
-
 	"github.com/pressly/warpdrive"
 	"github.com/pressly/warpdrive/data"
 	"github.com/pressly/warpdrive/lib/crypto"
 	"github.com/pressly/warpdrive/lib/warp"
+	"upper.io/db.v2"
 )
 
 func CreateRelease(
@@ -82,7 +81,7 @@ func CreateRelease(
 				return err
 			}
 
-			bundlepath := warpdrive.Config.Bundle.BundlesFolder + hash
+			bundlepath := warpdrive.Config.Server.BundlesFolder + hash
 
 			//move the bundle file from temp to bundle folder
 			err = os.Rename(filepath, bundlepath)
@@ -295,7 +294,7 @@ func DownloadRelease(
 		warpFile := warp.NewWriter(&buffer)
 
 		for _, bundle := range bundles {
-			path := warpdrive.Config.Bundle.BundlesFolder + bundle.Hash
+			path := warpdrive.Config.Server.BundlesFolder + bundle.Hash
 			warpFile.AddFile(bundle.Name, path)
 		}
 

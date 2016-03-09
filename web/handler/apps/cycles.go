@@ -130,7 +130,7 @@ func createAppCycleReleaseHandler(
 			err := func(fileHeader *multipart.FileHeader) error {
 				file, _ := fileHeader.Open()
 				defer file.Close()
-				path := warpdrive.Config.FileUpload.TempFolder + util.UUID()
+				path := warpdrive.Config.Server.TempFolder + util.UUID()
 				if err := util.CopyDataToFile(file, path); err != nil {
 					return err
 				}

@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	"github.com/pressly/warpdrive"
-
 	"github.com/pressly/warpdrive/config"
 	"upper.io/db.v2"
 	"upper.io/db.v2/postgresql"

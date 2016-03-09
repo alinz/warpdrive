@@ -1,12 +1,22 @@
 package config
 
-import "github.com/BurntSushi/toml"
+import (
+	"errors"
+	"fmt"
+	"os"
+	"path/filepath"
+
+	"github.com/BurntSushi/toml"
+)
 
 //Config configuration
 type Config struct {
 	//[server]
 	Server struct {
-		Bind string `toml:"bind"`
+		Bind          string `toml:"bind"`
+		DataDir       string `toml:"data_dir"`
+		BundlesFolder string
+		TempFolder    string
 	} `toml:"server"`
 
 	//[jwt]
@@ -33,19 +43,8 @@ type Config struct {
 
 	//[file_upload]
 	FileUpload struct {
-		FileMaxSize int64  `toml:"file_max_size"`
-		TempFolder  string `toml:"temp_folder"`
+		FileMaxSize int64 `toml:"file_max_size"`
 	} `toml:"file_upload"`
-
-	//[bundle]
-	Bundle struct {
-		BundlesFolder string `toml:"bundles_folder"`
-	} `toml:"bundle"`
-
-	//[static]
-	Static struct {
-		Path string `toml:"path"`
-	} `toml:"static"`
 }
 
 //Load New read a configuration file and returns a Config object
@@ -57,6 +56,27 @@ func Load(configFile string, confEnv string) (*Config, error) {
 	}
 
 	if _, err := toml.DecodeFile(configFile, &config); err != nil {
+		return nil, err
+	}
+
+	if config.Server.DataDir == "" {
+		return nil, errors.New("data_dir is not configured.")
+	}
+
+	dd, err := os.Stat(config.Server.DataDir)
+	if err != nil && os.IsNotExist(err) {
+		return nil, errors.New(fmt.Sprintf("data_dir: %s does not exist.", config.Server.DataDir))
+	}
+	if !dd.IsDir() {
+		return nil, errors.New(fmt.Sprintf("data_dir: %s is not a directory.", config.Server.DataDir))
+	}
+
+	config.Server.BundlesFolder = filepath.Join(config.Server.DataDir, "bundles")
+	if err := os.Mkdir(config.Server.BundlesFolder, 0755); err != nil {
+		return nil, err
+	}
+	config.Server.TempFolder = filepath.Join(config.Server.DataDir, "tmp")
+	if err := os.Mkdir(config.Server.TempFolder, 0755); err != nil {
 		return nil, err
 	}
 
