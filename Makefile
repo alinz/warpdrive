@@ -11,10 +11,6 @@ LDFLAGS+=-X github.com/pressly/warpdrive/warpdrive.Version=$$(scripts/version.sh
 
 clean:
 	@rm -rf ./bin
-	@mkdir -p ./bin/data
-	@mkdir -p ./bin/temp
-	@mkdir -p ./bin/bundles
-	@mkdir -p ./bin/build
 
 
 #
@@ -65,7 +61,7 @@ build-all: clean
 			export GOOS=$$GOOS; 																										\
 			export GOARCH=$$GOARCH; 																								\
 			go build -ldflags "$(LDFLAGS)" 																					\
-			-o ./bin/build/warpdrive-$$GOOS-$$GOARCH ./cmd/warpdrive; 		          \
+			-o ./bin/warpdrive-$$GOOS-$$GOARCH ./cmd/warpdrive;       		          \
 		done 																																			\
 	done)
 
