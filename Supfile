@@ -4,10 +4,11 @@ version: 0.3
 
 env:
   NAME: warpdrive
-  IMAGE: pressly/warpdrive
+  IMAGE: warpdrive
   REPO: git@github.com:pressly/warpdrive.git
-  BRANCH: supfile
+  BRANCH: master
   WORKDIR: /opt/warpdrive
+  DATADIR: /data/warpdrive
   CONFIG: /data/etc/warpdrive.conf
   HOST_PORT: 8221
   CONTAINER_PORT: 8221
@@ -17,17 +18,20 @@ networks:
   local:
     hosts:
       - localhost
+  production:
+    hosts:
+      - localhost
 
 commands:
-  config:
-    desc: Upload/test config file.
-    upload:
-      - src: etc/warpdrive.$SUP_NETWORK.conf
-        dst: /tmp/
-    run: >
-      test -f /tmp/etc/warpdrive.$SUP_NETWORK.conf || exit 1 && \
-        sudo mkdir -p $(dirname $CONFIG) && \
-        sudo mv /tmp/etc/warpdrive.$SUP_NETWORK.conf $CONFIG
+  #config:
+  #  desc: Upload/test config file.
+  #  upload:
+  #    - src: etc/warpdrive.$SUP_NETWORK.conf
+  #      dst: /tmp/
+  #  run: >
+  #    test -f /tmp/etc/warpdrive.$SUP_NETWORK.conf || exit 1 && \
+  #      sudo mkdir -p $(dirname $CONFIG) && \
+  #      sudo mv /tmp/etc/warpdrive.$SUP_NETWORK.conf $CONFIG
 
   ping:
     desc: Print uname and current date/time.
@@ -56,8 +60,8 @@ commands:
     run: >
       sudo docker run -d \
         -p $HOST_PORT:$CONTAINER_PORT \
+        -v $DATADIR:/data
         -v $CONFIG:/etc/warpdrive.conf \
-        -v /data/warpdrive/bundles:/data/bundles \
         --restart=always \
         --memory-swappiness=0 \
         --log-driver json-file \
@@ -100,6 +104,7 @@ commands:
         sudo docker rm $NAME || :; \
         sudo docker run -d \
           -p $HOST_PORT:$CONTAINER_PORT \
+          -v $DATADIR:/data \
           -v $CONFIG:/etc/warpdrive.conf \
           --restart=always \
           --memory-swappiness=0 \
@@ -123,7 +128,7 @@ targets:
   deploy:
     - build
     - pull
-    - config
+    #- config
     - stop-rm-run
     - ps
     - logs
