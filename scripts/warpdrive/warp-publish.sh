@@ -71,7 +71,7 @@ upload () {
        -X POST                                                                 \
        -H "Content-Type: multipart/form-data"                                  \
        -F "filename=$FILENAME"                                                 \
-       -F "file=@.release/$FILENAME"                                            \
+       -F "file=@.release/$FILENAME"                                           \
        "$DOMAIN/apps/$APP_ID/cycles/$CYCLE_ID/releases?platform=$PLATFORM"     \
        "&version=$VERSION&note=$NOTE&jwt=$TOKEN"
 }
