@@ -42,7 +42,7 @@ kill: kill-fresh kill-by-port
 # Development
 
 db-reset:
-	@(cd ./script && bash ./db-reset.sh)
+	@(cd ./scripts && bash ./db-reset.sh)
 
 dev: kill
 	@(export CONFIG=$$PWD/etc/warpdrive.conf && \
