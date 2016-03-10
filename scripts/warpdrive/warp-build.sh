@@ -3,7 +3,7 @@
 #
 # Created by Ali Najafizadeh on 2016-02-29.
 # Copyright © 2016 Pressly. All rights reserved.
-# 
+#
 
 usage ()
 {
@@ -19,7 +19,7 @@ usage ()
 
 PLATFORM=
 
-while getopts "hp" OPTION
+while getopts "hp:" OPTION
 do
   case $OPTION in
     h)

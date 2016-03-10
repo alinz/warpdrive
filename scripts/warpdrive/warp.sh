@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# 
+#
 # Created by Ali Najafizadeh on 2016-02-29.
 # Copyright © 2016 Pressly. All rights reserved.
 #
@@ -34,10 +34,10 @@ case $COMMAND in
     bash warp-login.sh
     ;;
   build)
-    bash warp-build.sh "$REST"
+    bash warp-build.sh $REST
     ;;
   publish)
-    bash warp-publish.sh "$REST"
+    bash warp-publish.sh $REST
     ;;
   ?)
     usage
