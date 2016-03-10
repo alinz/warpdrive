@@ -16,7 +16,7 @@ import (
 )
 
 var (
-	flags    = flag.NewFlagSet("pigeon", flag.ExitOnError)
+	flags    = flag.NewFlagSet("warpdrive", flag.ExitOnError)
 	confFile = flags.String("config", "", "path to config file")
 )
 
