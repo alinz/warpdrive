@@ -10,9 +10,9 @@ import (
 )
 
 type fileHeader struct {
-	FileSize int64
-	Hash     [20]byte
-	Name     [36]byte
+	FileSize int64     //8 bytes
+	Hash     [20]byte  //20 bytes
+	Name     [996]byte //996 bytes -> total is 1024bytes or 1kb
 }
 
 //Warp is a type to support new file encoding
@@ -44,7 +44,7 @@ func (w *Warp) AddFile(name, path string) error {
 	}
 
 	nameLength := len(name)
-	if nameLength > 36 {
+	if nameLength > 996 {
 		return errors.New("name of the file is too big")
 	}
 
