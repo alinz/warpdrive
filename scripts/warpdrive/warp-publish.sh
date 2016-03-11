@@ -66,7 +66,7 @@ DOMAIN=$(cat ./.warpdrive/.domain)
 # upload single file bundle
 
 ALLFILES=$(find .release -type f | sed "s/^\.release\///" | \
-           awk '{print "-F \"filename="$0"\""" -F \"file=@.release/"$0"\""}')
+           awk '{print "-F \"filename[]="$0"\""" -F \"file=@.release/"$0"\""}')
 ALLFILES=$(echo "$ALLFILES" | tr "\n" ' ')
 
 COMMAND="curl -i -X POST -H 'Content-Type: multipart/form-data' "$ALLFILES" '$DOMAIN/apps/$APP_ID/cycles/$CYCLE_ID/releases?platform=$PLATFORM&version=$VERSION&note=$NOTE&jwt=$TOKEN'"

@@ -123,8 +123,10 @@ func createAppCycleReleaseHandler(
 	var filepaths []string
 	var filenames []string
 
+	filePaths := r.Form["filename[]"]
+
 	for _, fileHeaders := range r.MultipartForm.File {
-		for _, fileHeader := range fileHeaders {
+		for index, fileHeader := range fileHeaders {
 			//we create a clouser here so we can use defer to close the file
 			//in case of any errors.
 			err := func(fileHeader *multipart.FileHeader) error {
@@ -137,10 +139,12 @@ func createAppCycleReleaseHandler(
 
 				filepaths = append(filepaths, path)
 
+				//fmt.Println(fileHeader.Filename)
+
 				//we need to change the main.jsbundle to main-{version}.jsbundle.
 				//because this is how client safly separate versions in case of
 				//error
-				filename := fileHeader.Filename
+				filename := filePaths[index]
 				if filename == "main.jsbundle" {
 					filename = fmt.Sprintf("main-%s.jsbundle", version)
 				}
