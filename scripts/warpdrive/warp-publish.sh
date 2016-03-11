@@ -65,48 +65,9 @@ DOMAIN=$(cat ./.warpdrive/.domain)
 #
 # upload single file bundle
 
-upload () {
-  local FILENAME=$1
-  local PATH=$2
-  echo "uploading $FILENAME from $PATH"
+ALLFILES=$(find .release -type f | sed "s/^\.release\///" | \
+           awk '{print "-F \"filename="$0"\""" -F \"file=@.release/"$0"\""}')
+ALLFILES=$(echo "$ALLFILES" | tr "\n" ' ')
 
-  SOURCE=$(pwd)
-
-  $("/usr/bin/curl -i -X POST -H \"Content-Type: multipart/form-data\" -F \"filename=$FILENAME\" -F \"file=@$SOURCE/$PATH\" \"$DOMAIN/apps/$APP_ID/cycles/$CYCLE_ID/releases?platform=$PLATFORM&version=$VERSION&note=$NOTE&jwt=$TOKEN\"")
-
-  # curl -i                                                                      \
-  #      -X POST                                                                 \
-  #      -H "Content-Type: multipart/form-data"                                  \
-  #      -F "filename=$FILENAME"                                                 \
-  #      -F "file=@$PATH"                                                        \
-  #      "$DOMAIN/apps/$APP_ID/cycles/$CYCLE_ID/releases?platform=$PLATFORM&version=$VERSION&note=$NOTE&jwt=$TOKEN"
-}
-
-
-# parse_folder_recursive () {
-#   for path in "$1"/*;do
-#     if [ -d "$path" ];then
-#       parse_folder_recursive "$path" "$2"
-#     elif [ -f "$path" ]; then
-#       local filename=$(echo "$path" | sed "s/^\.\/\.release\///")
-#       local p=$(echo "$path" | sed "s/^\.\///")
-#       ARRAY+=("-F \"filename[]=$filename\" -F \"file[]=@$p\"")
-#       echo $ARRAY
-#     fi
-#   done
-# }
-
-ALLFILES=$(find .release -type f | sed "s/^\.release\///" | awk '{print "-F \"filename[]="$0"\""" -F \"file[]=@.release/"$0"\""}')
-
-curl -i                                                                      \
-     -X POST                                                                 \
-     -H "Content-Type: multipart/form-data"                                  \
-     "$ALLFILES"                                                             \
-     "$DOMAIN/apps/$APP_ID/cycles/$CYCLE_ID/releases?platform=$PLATFORM&version=$VERSION&note=$NOTE&jwt=$TOKEN"
-
-
-# echo $ALLFILES
-
-# echo $ARRAY
-
-# parse_folder_recursive "./.release"
+COMMAND="curl -i -X POST -H 'Content-Type: multipart/form-data' "$ALLFILES" '$DOMAIN/apps/$APP_ID/cycles/$CYCLE_ID/releases?platform=$PLATFORM&version=$VERSION&note=$NOTE&jwt=$TOKEN'"
+eval $COMMAND
