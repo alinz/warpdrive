@@ -11,7 +11,7 @@ LDFLAGS+=-X github.com/pressly/warpdrive/warpdrive.Version=$$(scripts/version.sh
 
 clean:
 	@rm -rf ./bin
-
+	@mkdir -p ./bin/bundles
 
 #
 # Vendoring
