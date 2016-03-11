@@ -21,6 +21,7 @@ usage ()
   echo "    login                           login to specific warpdrive server"
   echo "    build   <OPTIONS>               build and prepare before publishing"
   echo "    publish <OPTIONS>               publish to logged in server"
+  echo "    config                          download config to current folder"
   echo ""
 }
 
@@ -38,6 +39,9 @@ case $COMMAND in
     ;;
   publish)
     bash warp-publish.sh $REST
+    ;;
+  config)
+    bash warp-config.sh $REST
     ;;
   ?)
     usage
