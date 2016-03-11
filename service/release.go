@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"os"
+	"path/filepath"
 
 	"github.com/pressly/warpdrive"
 	"github.com/pressly/warpdrive/data"
@@ -60,10 +61,10 @@ func CreateRelease(
 		}
 
 		//loop through all uploaded file and create bundle record.
-		for index, filepath := range filepaths {
+		for index, filePath := range filepaths {
 
 			//hash the temprary file
-			hash, err := crypto.HashFile(filepath)
+			hash, err := crypto.HashFile(filePath)
 			if err != nil {
 				return err
 			}
@@ -81,10 +82,10 @@ func CreateRelease(
 				return err
 			}
 
-			bundlepath := warpdrive.Config.Server.BundlesFolder + hash
+			bundlepath := filepath.Join(warpdrive.Config.Server.BundlesFolder, hash)
 
 			//move the bundle file from temp to bundle folder
-			err = os.Rename(filepath, bundlepath)
+			err = os.Rename(filePath, bundlepath)
 
 			if err != nil {
 				return err
@@ -98,8 +99,8 @@ func CreateRelease(
 
 	if err := data.Transaction(fn); err != nil {
 		//we need to remove all temporary files
-		for _, filepath := range filepaths {
-			os.Remove(filepath)
+		for _, filePath := range filepaths {
+			os.Remove(filePath)
 		}
 
 		//since there is an error we need to clean up bundle folder
@@ -294,7 +295,7 @@ func DownloadRelease(
 		warpFile := warp.NewWriter(&buffer)
 
 		for _, bundle := range bundles {
-			path := warpdrive.Config.Server.BundlesFolder + bundle.Hash
+			path := filepath.Join(warpdrive.Config.Server.BundlesFolder, bundle.Hash)
 			warpFile.AddFile(bundle.Name, path)
 		}
 
