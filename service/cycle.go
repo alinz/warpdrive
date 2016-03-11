@@ -90,7 +90,7 @@ func FindAppCycle(appID, cycleID, userID int64) (*data.Cycle, error) {
 	cycle := data.Cycle{}
 
 	err := cycle.Find(warpdrive.DB, db.Cond{
-		"id": appID,
+		"id": cycleID,
 	})
 
 	return &cycle, err

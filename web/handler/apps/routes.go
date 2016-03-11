@@ -23,6 +23,7 @@ func Routes() chi.Router {
 				r.Get("/", allAppCyclesHandler)
 
 				r.Route("/:cycleId", func(r chi.Router) {
+					r.Get("/", appCycle)
 					r.Patch("/", m.BodyParser(updateCycleRequestBuilder, 512), updateAppCycleHandler)
 					r.Get("/config", downloadAppCycleConfigHandler)
 

@@ -30,9 +30,9 @@ if [ -z "$JWT" ]; then
   echo "login failed"
 else
   ACCESS=$(curl --write-out "%{http_code}\n" --silent --output /dev/null \
-           "$DOMAIN/apps/$APPID/cycles/$CYCLEID/config?jwt=$JWT")
+           "$DOMAIN/apps/$APPID/cycles/$CYCLEID?jwt=$JWT")
 
-  if [ "$ACCESS" == "401" ]; then
+  if [ "$ACCESS" == "401" ] || [ "$ACCESS" == "400" ]; then
     echo "you don't access to this app"
     exit
   fi

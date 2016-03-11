@@ -60,6 +60,21 @@ func updateAppCycleHandler(
 	util.AutoDetectResponse(w, nil, err)
 }
 
+func appCycle(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	userID := util.LoggedInUserID(ctx)
+	appID, err := util.ParamValueAsID(ctx, "appId")
+	cycleID, err := util.ParamValueAsID(ctx, "cycleId")
+
+	cycle, err := service.FindAppCycle(appID, cycleID, userID)
+
+	if err != nil {
+		util.RespondError(w, err)
+		return
+	}
+
+	util.Respond(w, 200, cycle)
+}
+
 func downloadAppCycleConfigHandler(
 	ctx context.Context,
 	w http.ResponseWriter,
