@@ -3,7 +3,7 @@
 #
 # Created by Ali Najafizadeh on 2016-02-29.
 # Copyright © 2016 Pressly. All rights reserved.
-# 
+#
 
 rm -rf ./.warpdrive
 mkdir ./.warpdrive
@@ -29,6 +29,14 @@ JWT=$(curl -sS -H "Content-Type: application/json" -X POST                     \
 if [ -z "$JWT" ]; then
   echo "login failed"
 else
+  ACCESS=$(curl --write-out "%{http_code}\n" --silent --output /dev/null \
+           "$DOMAIN/apps/$APPID/cycles/$CYCLEID/config?jwt=$JWT")
+
+  if [ "$ACCESS" == "401" ]; then
+    echo "you don't access to this app"
+    exit
+  fi
+
   echo "$DOMAIN" > ./.warpdrive/.domain
   echo "$JWT" > ./.warpdrive/.token
   echo "$APPID" > ./.warpdrive/.appid
