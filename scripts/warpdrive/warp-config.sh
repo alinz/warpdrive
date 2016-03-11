@@ -53,4 +53,4 @@ DOMAIN=$(cat ./.warpdrive/.domain)
 
 CONFIG_FILE=warpdrive.config
 
-curl "$DOMAIN/apps/$APP_ID/cycles/$CYCLE_ID/config?jwt=$TOKEN" -o "$CONFIG_PATH/$CONFIG_FILE"
+curl "$DOMAIN/apps/$APP_ID/cycles/$CYCLE_ID/config?jwt=$TOKEN" --silent -o "$CONFIG_PATH/$CONFIG_FILE"
