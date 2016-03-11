@@ -22,4 +22,6 @@ ALTER TABLE users ADD UNIQUE ("email");
 
 -- # INSERT Root user
 -- # please change this according to your specification
-INSERT INTO users (id, name, email, password) VALUES (1, 'Mr. Robot', 'root', 'root');
+
+-- the password hash represents `root`
+INSERT INTO users (id, name, email, password) VALUES (1, 'Mr. Robot', 'root', '$2a$10$Rx0M2StVvA5OoEFHJppAh.0HaJwXEmOWz/BfItK8fJMJjRJI3t7nW');
