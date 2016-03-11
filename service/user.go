@@ -1,8 +1,11 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
+
+	"golang.org/x/crypto/bcrypt"
 
 	"upper.io/db.v2"
 
@@ -12,14 +15,30 @@ import (
 	"github.com/pressly/warpdrive/web/security"
 )
 
+func verifyUserPassword(hashedPassword, password, pepper string) bool {
+	if hashedPassword == "" {
+		return false
+	}
+	if password == "" {
+		return false
+	}
+	if err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password+pepper)); err != nil {
+		return false
+	}
+	return true
+}
+
 func FindUserByEmailPassword(email, password string) (*data.User, error) {
 	user := data.User{}
 
 	if err := user.Find(warpdrive.DB, db.Cond{
-		"email":    email,
-		"password": password,
+		"email": email,
 	}); err != nil {
-		return nil, err
+		return nil, errors.New("username or password is incorrect")
+	}
+
+	if !verifyUserPassword(user.Password, password, "") {
+		return nil, errors.New("username or password is incorrect")
 	}
 
 	return &user, nil
@@ -54,13 +73,19 @@ func GenerateJWT(user *data.User) (string, error) {
 }
 
 func CreateUser(name, email, password string) (*data.User, error) {
+	hashpass, err := bcrypt.GenerateFromPassword([]byte(password), 0)
+
+	if err != nil {
+		return nil, err
+	}
+
 	user := data.User{
 		Name:     name,
 		Email:    email,
-		Password: password,
+		Password: string(hashpass),
 	}
 
-	err := user.Save(warpdrive.DB)
+	err = user.Save(warpdrive.DB)
 
 	if err != nil {
 		return nil, err
