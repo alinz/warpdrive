@@ -309,3 +309,26 @@ func DownloadRelease(
 
 	return fn, nil
 }
+
+func RemoveRelease(appID, cycleID, releaseID, userID int64) error {
+	if !HashPermissionToAccessCycle(appID, cycleID, userID) {
+		return errors.New("No access to this app's cycle")
+	}
+
+	fn := func(session db.Database) error {
+		var err error
+		release := data.Release{}
+		err = release.Find(session, db.Cond{
+			"id": releaseID,
+		})
+
+		if err != nil {
+			return err
+		}
+
+		err = release.Remove(session)
+		return err
+	}
+
+	return data.Transaction(fn)
+}

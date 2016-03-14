@@ -30,7 +30,10 @@ func Routes() chi.Router {
 					r.Route("/releases", func(r chi.Router) {
 						r.Post("/", createAppCycleReleaseHandler)
 						r.Get("/", allAppCycleReleaseHandler)
-						r.Patch("/:releaseId/lock", lockAppCycleReleaseHandler)
+						r.Route("/:releaseId", func(r chi.Router) {
+							r.Delete("/", removeAppCycleReleaseHandler)
+							r.Patch("/lock", lockAppCycleReleaseHandler)
+						})
 					})
 				})
 			})

@@ -288,3 +288,21 @@ func downloadAppCycleReleaseHandler(
 	w.Header().Set("Content-Type", "application/zip")
 	w.Write(encryptedData)
 }
+
+func removeAppCycleReleaseHandler(
+	ctx context.Context,
+	w http.ResponseWriter,
+	r *http.Request) {
+	userID := util.LoggedInUserID(ctx)
+	appID, _ := util.ParamValueAsID(ctx, "appId")
+	cycleID, _ := util.ParamValueAsID(ctx, "cycleId")
+	releaseID, _ := util.ParamValueAsID(ctx, "releaseId")
+
+	err := service.RemoveRelease(appID, cycleID, releaseID, userID)
+	if err != nil {
+		util.RespondError(w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
