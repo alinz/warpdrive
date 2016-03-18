@@ -23,6 +23,13 @@ usage ()
   echo ""
 }
 
+function jsonValue() {
+  KEY=$1
+  num=1
+  awk -F"[,:}]" '{for(i=1;i<=NF;i++){if($i~/'$KEY'\042/){print $(i+1)}}}'      \
+  | tr -d '"' | sed -n ${num}p
+}
+
 if [ ! -f ./.warpdrive/.token ]; then
   echo "you need to login first"
   exit
@@ -61,7 +68,16 @@ done
 
 CONFIG_FILE=warpdrive.config
 
-# TODO: check if user can access app_id and cycle_id
+ERROR=$(curl -sS                                                               \
+    "$DOMAIN/apps/$APP_ID/cycles/$CYCLE_ID/config?jwt=$TOKEN" | jsonValue error)
+
+if [ ! -z "$ERROR" ]; then
+  echo "No Access to this configuration"
+  exit 1;
+fi
+
+echo "$APP_ID" > ./.warpdrive/.appid
+echo "$CYCLE_ID" > ./.warpdrive/.cycleid
 
 curl "$DOMAIN/apps/$APP_ID/cycles/$CYCLE_ID/config?jwt=$TOKEN"                 \
      --silent -o "$CONFIG_PATH/$CONFIG_FILE"
