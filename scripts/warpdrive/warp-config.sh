@@ -15,16 +15,28 @@ usage ()
   echo " Options:"
   echo "    -h                        show usage/help"
   echo "    -p <string> optional      path to save config"
+  echo "    -a <number> optional      override app_id"
+  echo "    -c <number> optional      override cycle_id"
   echo ""
   echo "e.g."
   echo "    warp config -p etc/config"
   echo ""
 }
 
+if [ ! -f ./.warpdrive/.token ]; then
+  echo "you need to login first"
+  exit
+fi
+
 #default is current localtion
 CONFIG_PATH=.
 
-while getopts "hp:" OPTION
+APP_ID=$(cat ./.warpdrive/.appid)
+CYCLE_ID=$(cat ./.warpdrive/.cycleid)
+TOKEN=$(cat ./.warpdrive/.token)
+DOMAIN=$(cat ./.warpdrive/.domain)
+
+while getopts "hp:a:c:" OPTION
 do
   case $OPTION in
     h)
@@ -34,6 +46,12 @@ do
     p)
       CONFIG_PATH=$OPTARG
       ;;
+    a)
+      APP_ID=$OPTARG
+      ;;
+    c)
+      CYCLE_ID=$OPTARG
+      ;;
     ?)
       usage
       exit
@@ -41,16 +59,9 @@ do
   esac
 done
 
-if [ ! -f ./.warpdrive/.token ]; then
-  echo "you need to login first"
-  exit
-fi
-
-APP_ID=$(cat ./.warpdrive/.appid)
-CYCLE_ID=$(cat ./.warpdrive/.cycleid)
-TOKEN=$(cat ./.warpdrive/.token)
-DOMAIN=$(cat ./.warpdrive/.domain)
-
 CONFIG_FILE=warpdrive.config
 
-curl "$DOMAIN/apps/$APP_ID/cycles/$CYCLE_ID/config?jwt=$TOKEN" --silent -o "$CONFIG_PATH/$CONFIG_FILE"
+# TODO: check if user can access app_id and cycle_id
+
+curl "$DOMAIN/apps/$APP_ID/cycles/$CYCLE_ID/config?jwt=$TOKEN"                 \
+     --silent -o "$CONFIG_PATH/$CONFIG_FILE"
