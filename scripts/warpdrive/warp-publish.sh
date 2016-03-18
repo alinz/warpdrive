@@ -19,6 +19,13 @@ usage ()
   echo ""
 }
 
+function jsonValue() {
+  KEY=$1
+  num=1
+  awk -F"[,:}]" '{for(i=1;i<=NF;i++){if($i~/'$KEY'\042/){print $(i+1)}}}'      \
+  | tr -d '"' | sed -n ${num}p
+}
+
 PLATFORM=
 VERSION=
 NOTE=
@@ -65,9 +72,21 @@ DOMAIN=$(cat ./.warpdrive/.domain)
 #
 # upload single file bundle
 
+echo "Uploading started"
+
 ALLFILES=$(find .release -type f | sed "s/^\.release\///" | \
            awk '{print "-F \"filename[]="$0"\""" -F \"file=@.release/"$0"\""}')
 ALLFILES=$(echo "$ALLFILES" | tr "\n" ' ')
 
-COMMAND="curl -i -X POST -H 'Content-Type: multipart/form-data' "$ALLFILES" '$DOMAIN/apps/$APP_ID/cycles/$CYCLE_ID/releases?platform=$PLATFORM&version=$VERSION&note=$NOTE&jwt=$TOKEN'"
-eval $COMMAND
+COMMAND="curl -sS -i -X POST -H 'Content-Type: multipart/form-data' "$ALLFILES" '$DOMAIN/apps/$APP_ID/cycles/$CYCLE_ID/releases?platform=$PLATFORM&version=$VERSION&note=$NOTE&jwt=$TOKEN'"
+
+echo "Uploading ended"
+
+RESULT=$(eval $COMMAND)
+RELEASE_ID=$(echo $RESULT | jsonValue id)
+
+echo "Locking release"
+
+curl -X PATCH "$DOMAIN/apps/$APP_ID/cycles/$CYCLE_ID/releases/$RELEASE_ID/lock?jwt=$TOKEN"
+
+echo "Done"
