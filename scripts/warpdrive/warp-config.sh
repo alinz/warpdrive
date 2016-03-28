@@ -66,7 +66,7 @@ do
   esac
 done
 
-CONFIG_FILE=warpdrive.config
+CONFIG_FILE=warpdrive.json
 
 ERROR=$(curl -sS                                                               \
     "$DOMAIN/apps/$APP_ID/cycles/$CYCLE_ID/config?jwt=$TOKEN" | jsonValue error)

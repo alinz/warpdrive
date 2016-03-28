@@ -44,7 +44,7 @@ fi
 rm -rf ./.release
 mkdir ./.release
 
-node --max_old_space_size=8192                                                 \
+node --max-old-space-size=8192                                                 \
   node_modules/react-native/local-cli/cli.js bundle                            \
   --platform "$PLATFORM"                                                       \
   --entry-file "index.$PLATFORM.js"                                            \
