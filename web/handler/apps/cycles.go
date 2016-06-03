@@ -289,6 +289,42 @@ func downloadAppCycleReleaseHandler(
 	w.Write(encryptedData)
 }
 
+func downloadAppCycleReleaseWithoutSecurityHandler(
+	ctx context.Context,
+	w http.ResponseWriter,
+	r *http.Request) {
+
+	appID, _ := util.ParamValueAsID(ctx, "appId")
+	cycleID, _ := util.ParamValueAsID(ctx, "cycleId")
+
+	qs := r.URL.Query()
+
+	version := qs.Get("version")
+	platform := qs.Get("platform")
+
+	process, err := service.DownloadRelease(
+		appID,
+		cycleID,
+		version,
+		platform,
+		nil,
+	)
+
+	if err != nil {
+		util.RespondError(w, err)
+		return
+	}
+
+	encryptedData, err := process()
+	if err != nil {
+		util.RespondError(w, err)
+		return
+	}
+
+	//w.Header().Set("Content-Type", "application/zip")
+	w.Write(encryptedData)
+}
+
 func removeAppCycleReleaseHandler(
 	ctx context.Context,
 	w http.ResponseWriter,

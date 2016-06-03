@@ -239,6 +239,7 @@ func DownloadRelease(
 	appID, cycleID int64,
 	versionStr, platformStr string, encryptedKey []byte,
 ) (func() ([]byte, error), error) {
+	var key []byte = nil
 
 	version, err := data.ParseVersion(versionStr)
 	if err != nil {
@@ -256,9 +257,11 @@ func DownloadRelease(
 		return nil, err
 	}
 
-	key, err := crypto.DecryptByPrivateRSA(encryptedKey, cycle.PrivateKey, "sha1")
-	if err != nil {
-		return nil, err
+	if encryptedKey != nil {
+		key, err = crypto.DecryptByPrivateRSA(encryptedKey, cycle.PrivateKey, "sha1")
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	builder := warpdrive.DB.Builder()
@@ -299,12 +302,16 @@ func DownloadRelease(
 			warpFile.AddFile(bundle.Name, path)
 		}
 
-		encrypted, err := crypto.AESEncrypt(buffer.Bytes(), key)
-		if err != nil {
-			return nil, err
+		if key != nil {
+			encrypted, err := crypto.AESEncrypt(buffer.Bytes(), key)
+			if err != nil {
+				return nil, err
+			}
+
+			return encrypted, nil
 		}
 
-		return encrypted, nil
+		return buffer.Bytes(), nil
 	}
 
 	return fn, nil
