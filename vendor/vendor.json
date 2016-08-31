@@ -1,1 +1,253 @@
-{}
+{
+	"comment": "",
+	"ignore": "",
+	"package": [
+		{
+			"checksumSHA1": "HyoKkpkPoyJwnhE6HVYoxRBwoo4=",
+			"path": "github.com/BurntSushi/toml",
+			"revision": "99064174e013895bbd9b025c31100bd1d9b590ca",
+			"revisionTime": "2016-07-17T15:07:09Z"
+		},
+		{
+			"checksumSHA1": "aRenbS0q/R9mszhHsjwJ8+Pny2U=",
+			"path": "github.com/cznic/b",
+			"revision": "bcff30a622dbdcb425aba904792de1df606dab7c",
+			"revisionTime": "2016-07-16T09:19:50Z"
+		},
+		{
+			"checksumSHA1": "i7GUvWWnVIHDZldmCT2wRXj/KYU=",
+			"path": "github.com/cznic/fileutil",
+			"revision": "1c9c88fbf552b3737c7b97e1f243860359687976",
+			"revisionTime": "2015-07-08T08:07:34Z"
+		},
+		{
+			"checksumSHA1": "SjRadzOaYC8ybng+pNir3W981cs=",
+			"path": "github.com/cznic/internal/buffer",
+			"revision": "d974718a29c814c47fae22e72ded2b5c069005ba",
+			"revisionTime": "2016-08-05T09:43:23Z"
+		},
+		{
+			"checksumSHA1": "hmfMDA4i9SONPEJvMOwJ07tiRAE=",
+			"path": "github.com/cznic/internal/file",
+			"revision": "d974718a29c814c47fae22e72ded2b5c069005ba",
+			"revisionTime": "2016-08-05T09:43:23Z"
+		},
+		{
+			"checksumSHA1": "Gv05o/G8zBQ/SYtm41RwrYqIJ3c=",
+			"path": "github.com/cznic/internal/slice",
+			"revision": "d974718a29c814c47fae22e72ded2b5c069005ba",
+			"revisionTime": "2016-08-05T09:43:23Z"
+		},
+		{
+			"checksumSHA1": "HANeKiscvrtetYx3ZBYjRfSPrzg=",
+			"path": "github.com/cznic/lldb",
+			"revision": "9440a7484d40d79302f6bd49a3d9c018037b0722",
+			"revisionTime": "2016-07-25T11:52:09Z"
+		},
+		{
+			"checksumSHA1": "HzI1LOqVj2/2ovQmpKYUuNK0VVk=",
+			"path": "github.com/cznic/mathutil",
+			"revision": "78ad7f262603437f0ecfebc835d80094f89c8f54",
+			"revisionTime": "2016-06-13T10:48:31Z"
+		},
+		{
+			"checksumSHA1": "I5R4urpQqwOMzgICSCXqd0S6W5c=",
+			"path": "github.com/cznic/ql",
+			"revision": "c81467d34c630800dd4ba81033e234a8159ff2e3",
+			"revisionTime": "2016-07-29T13:25:30Z"
+		},
+		{
+			"checksumSHA1": "X4dRll28rc3dpy6bhFCEO6Fo50o=",
+			"path": "github.com/cznic/ql/driver",
+			"revision": "c81467d34c630800dd4ba81033e234a8159ff2e3",
+			"revisionTime": "2016-07-29T13:25:30Z"
+		},
+		{
+			"checksumSHA1": "DkX6EdyieFhZuWeNgf1ea3dA5zg=",
+			"path": "github.com/cznic/ql/vendored/github.com/camlistore/go4/lock",
+			"revision": "c81467d34c630800dd4ba81033e234a8159ff2e3",
+			"revisionTime": "2016-07-29T13:25:30Z"
+		},
+		{
+			"checksumSHA1": "bIVllxjT6Macy1h8Qlkgn7vPuQw=",
+			"path": "github.com/cznic/sortutil",
+			"revision": "4c7342852e65c2088c981288f2c5610d10b9f7f4",
+			"revisionTime": "2015-06-17T08:33:42Z"
+		},
+		{
+			"checksumSHA1": "bT9ephZxLJOCKLoNdoijN2s3L2M=",
+			"path": "github.com/cznic/strutil",
+			"revision": "1eb03e3cc9d345307a45ec82bd3016cde4bd4464",
+			"revisionTime": "2015-04-30T12:47:30Z"
+		},
+		{
+			"checksumSHA1": "YXg687ogmYH7wbuKsZ9slWPf25w=",
+			"path": "github.com/cznic/zappy",
+			"revision": "2533cb5b45cc6c07421468ce262899ddc9d53fb7",
+			"revisionTime": "2016-07-23T13:35:15Z"
+		},
+		{
+			"checksumSHA1": "6hoza5i1wSFVrZV6bUxWBEfZ0To=",
+			"path": "github.com/edsrzf/mmap-go",
+			"revision": "935e0e8a636ca4ba70b713f3e38a19e1b77739e8",
+			"revisionTime": "2016-05-12T03:30:02Z"
+		},
+		{
+			"checksumSHA1": "3xVanMXn/lblhNfZYORorpd8N6E=",
+			"path": "github.com/go-sql-driver/mysql",
+			"revision": "0b58b37b664c21f3010e836f1b931e1d0b0b0685",
+			"revisionTime": "2016-08-02T11:38:42Z"
+		},
+		{
+			"checksumSHA1": "p5H6CMOaQMFpmEGaiLPvhIq+0pM=",
+			"path": "github.com/lib/pq",
+			"revision": "80f8150043c80fb52dee6bc863a709cdac7ec8f8",
+			"revisionTime": "2016-08-06T14:40:29Z"
+		},
+		{
+			"checksumSHA1": "xppHi82MLqVx1eyQmbhTesAEjx8=",
+			"path": "github.com/lib/pq/oid",
+			"revision": "80f8150043c80fb52dee6bc863a709cdac7ec8f8",
+			"revisionTime": "2016-08-06T14:40:29Z"
+		},
+		{
+			"checksumSHA1": "VgI5y60ymz+88B07EZdXgUGWwpc=",
+			"path": "github.com/mattn/go-sqlite3",
+			"revision": "b5c99a720374818b629fd1fbf6d2cbb4fb9a5644",
+			"revisionTime": "2016-08-21T07:55:01Z"
+		},
+		{
+			"checksumSHA1": "vUcHzx0aV5Vid+r3FyGE1Y7QkHs=",
+			"path": "github.com/mattn/go-sqlite3/sqlite3_test",
+			"revision": "b5c99a720374818b629fd1fbf6d2cbb4fb9a5644",
+			"revisionTime": "2016-08-21T07:55:01Z"
+		},
+		{
+			"checksumSHA1": "yX1T/aUBhFcvaEzAPwyr9PF6r6c=",
+			"path": "github.com/pressly/chi",
+			"revision": "12aad88c7d86de2affe686f855b6ed94a07cba9c",
+			"revisionTime": "2016-08-22T02:12:03Z"
+		},
+		{
+			"checksumSHA1": "+LzBf5W+3aZKK9Xp6p+b5eGhN1E=",
+			"path": "github.com/zenazn/goji/graceful",
+			"revision": "4d7077956293261309684d3cf1af673f773c6819",
+			"revisionTime": "2016-08-23T03:05:49Z"
+		},
+		{
+			"checksumSHA1": "GODQwK7HEa+zSaKonY4ptR2kHxo=",
+			"path": "github.com/zenazn/goji/graceful/listener",
+			"revision": "4d7077956293261309684d3cf1af673f773c6819",
+			"revisionTime": "2016-08-23T03:05:49Z"
+		},
+		{
+			"checksumSHA1": "tefd2MHMp6qRXeE3jqzp3P40mNI=",
+			"path": "gopkg.in/mgo.v2",
+			"revision": "3f83fa5005286a7fe593b055f0d7771a7dce4655",
+			"revisionTime": "2016-08-18T02:01:20Z"
+		},
+		{
+			"checksumSHA1": "+mZKlPX9t4fHOQvkQeCnWw5JjkQ=",
+			"path": "gopkg.in/mgo.v2/bson",
+			"revision": "3f83fa5005286a7fe593b055f0d7771a7dce4655",
+			"revisionTime": "2016-08-18T02:01:20Z"
+		},
+		{
+			"checksumSHA1": "trGhCcEZSOZTwlLfWCRAoXXihW8=",
+			"path": "gopkg.in/mgo.v2/internal/json",
+			"revision": "3f83fa5005286a7fe593b055f0d7771a7dce4655",
+			"revisionTime": "2016-08-18T02:01:20Z"
+		},
+		{
+			"checksumSHA1": "LEvMCnprte47qdAxWvQ/zRxVF1U=",
+			"path": "gopkg.in/mgo.v2/internal/sasl",
+			"revision": "3f83fa5005286a7fe593b055f0d7771a7dce4655",
+			"revisionTime": "2016-08-18T02:01:20Z"
+		},
+		{
+			"checksumSHA1": "fOxeCpKRYNTTM2VCrsU2S/KEd1s=",
+			"path": "gopkg.in/mgo.v2/internal/scram",
+			"revision": "3f83fa5005286a7fe593b055f0d7771a7dce4655",
+			"revisionTime": "2016-08-18T02:01:20Z"
+		},
+		{
+			"checksumSHA1": "+59g0nAGKfBbennPhe3FxRxhNcY=",
+			"path": "upper.io/db.v2",
+			"revision": "0905e0f1d684c6ba8a59011101026b150814f8aa",
+			"revisionTime": "2016-08-24T22:46:21Z"
+		},
+		{
+			"checksumSHA1": "Zy5CknDWgcLfZaS/96v7BadzBiE=",
+			"path": "upper.io/db.v2/internal/cache",
+			"revision": "0905e0f1d684c6ba8a59011101026b150814f8aa",
+			"revisionTime": "2016-08-24T22:46:21Z"
+		},
+		{
+			"checksumSHA1": "LaFlzu6hFgt3xf+x3RCjFI/WHso=",
+			"path": "upper.io/db.v2/internal/cache/hashstructure",
+			"revision": "0905e0f1d684c6ba8a59011101026b150814f8aa",
+			"revisionTime": "2016-08-24T22:46:21Z"
+		},
+		{
+			"checksumSHA1": "Lxwz/zM1ncf1gNCa67W35Jv9i9c=",
+			"path": "upper.io/db.v2/internal/logger",
+			"revision": "0905e0f1d684c6ba8a59011101026b150814f8aa",
+			"revisionTime": "2016-08-24T22:46:21Z"
+		},
+		{
+			"checksumSHA1": "joaqxSp8rbTXiiSMMaEJfntn+sY=",
+			"path": "upper.io/db.v2/internal/sqladapter",
+			"revision": "0905e0f1d684c6ba8a59011101026b150814f8aa",
+			"revisionTime": "2016-08-24T22:46:21Z"
+		},
+		{
+			"checksumSHA1": "xLj8VGkPAfxB8hbRRk72itdaj14=",
+			"path": "upper.io/db.v2/internal/sqladapter/exql",
+			"revision": "0905e0f1d684c6ba8a59011101026b150814f8aa",
+			"revisionTime": "2016-08-24T22:46:21Z"
+		},
+		{
+			"checksumSHA1": "Db2OnSoimgBgKITMK/1tw1a84vk=",
+			"path": "upper.io/db.v2/lib/reflectx",
+			"revision": "0905e0f1d684c6ba8a59011101026b150814f8aa",
+			"revisionTime": "2016-08-24T22:46:21Z"
+		},
+		{
+			"checksumSHA1": "I/2Wt/6Uf2Zefucw4gGe7vMIPB8=",
+			"path": "upper.io/db.v2/lib/sqlbuilder",
+			"revision": "0905e0f1d684c6ba8a59011101026b150814f8aa",
+			"revisionTime": "2016-08-24T22:46:21Z"
+		},
+		{
+			"checksumSHA1": "eg+nDRthzMUwVGgcIRq1ibHQ8i0=",
+			"path": "upper.io/db.v2/mongo",
+			"revision": "0905e0f1d684c6ba8a59011101026b150814f8aa",
+			"revisionTime": "2016-08-24T22:46:21Z"
+		},
+		{
+			"checksumSHA1": "qAC8xlk2DClFhir27RMNh8k+g60=",
+			"path": "upper.io/db.v2/mysql",
+			"revision": "0905e0f1d684c6ba8a59011101026b150814f8aa",
+			"revisionTime": "2016-08-24T22:46:21Z"
+		},
+		{
+			"checksumSHA1": "OvAqwQY4Temc0aj1Oz8l5Ho1svw=",
+			"path": "upper.io/db.v2/postgresql",
+			"revision": "0905e0f1d684c6ba8a59011101026b150814f8aa",
+			"revisionTime": "2016-08-24T22:46:21Z"
+		},
+		{
+			"checksumSHA1": "kLfk4w73T5Vlfif6IHgm8KgOR0o=",
+			"path": "upper.io/db.v2/ql",
+			"revision": "0905e0f1d684c6ba8a59011101026b150814f8aa",
+			"revisionTime": "2016-08-24T22:46:21Z"
+		},
+		{
+			"checksumSHA1": "5N8Q6JaI5YLKUSGXFO+7fpaHCOg=",
+			"path": "upper.io/db.v2/sqlite",
+			"revision": "0905e0f1d684c6ba8a59011101026b150814f8aa",
+			"revisionTime": "2016-08-24T22:46:21Z"
+		}
+	],
+	"rootPath": "github.com/pressly/warpdrive"
+}
