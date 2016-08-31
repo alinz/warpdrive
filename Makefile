@@ -1,70 +1,45 @@
-#
-# Variables
+LDFLAGS+=-X github.com/pressly/warpdrive.VERSION=$$(git describe --tags --abbrev=0 --always)
+LDFLAGS+=-X github.com/pressly/warpdrive.LONGVERSION=$$(git describe --tags --long --always --dirty)
 
-OS=darwin linux windows
-ARCH=386 amd64
-
-LDFLAGS+=-X github.com/pressly/warpdrive/warpdrive.Version=$$(scripts/version.sh --long)
-
-#
-# Cleaning
-
-clean:
-	@rm -rf ./bin
-	@mkdir -p ./bin/bundles
-
-#
-# Vendoring
-
+##
+## Tools
+##
 tools:
+	go get -u github.com/pressly/fresh
 	go get -u github.com/kardianos/govendor
+	go get -u github.com/jstemmer/gotags
+	go get -u github.com/pressly/sup
+	go get -u golang.org/x/tools/cmd/goimports
 
+##
+## Dependency mgmt
+##
 vendor-list:
 	@govendor list
 
 vendor-update:
 	@govendor update +external
 
+vendor-sync:
+	@govendor sync +external
 
-#
-# Killing
-
-kill-fresh:
-	@ps -ef | grep 'f[r]esh' | awk '{print $$2}' | xargs kill
-
-kill-by-port:
-	@lsof -t -i:8221 | xargs kill
-
-kill: kill-fresh kill-by-port
-
-
-#
-# Development
-
-db-reset:
-	@(cd ./scripts && bash ./db-reset.sh)
-
-dev: kill
-	@(export CONFIG=$$PWD/etc/warpdrive.conf && \
-		cd ./cmd/warpdrive && \
-		fresh -c ../../etc/fresh-runner.conf -w=../..)
-
-
-#
-# Building
-
-build-all: clean
-	for GOOS in $(OS); do 																											\
-		for GOARCH in $(ARCH); do 																								\
-			echo "building $$GOOS $$GOARCH ..."; 																		\
-			export GOGC=off;																												\
-			export GOOS=$$GOOS; 																										\
-			export GOARCH=$$GOARCH; 																								\
-			go build -ldflags "$(LDFLAGS)" 																					\
-			-o ./bin/warpdrive-$$GOOS-$$GOARCH ./cmd/warpdrive;       		          \
-		done 																																			\
-	done)
+##
+## Building
+##
+clean:
+	@rm -rf ./bin
+	@mkdir -p ./bin
 
 build: clean
-	export GOGC=off;                                       	 		        				\
-	go build -ldflags "$(LDFLAGS)" -o ./bin/warpdrive ./cmd/warpdrive;
+	GOGC=off go build -i -gcflags="-e" -ldflags "$(LDFLAGS)" -o ./bin/api ./cmd/api
+
+##
+## Database
+##
+
+
+##
+## Development
+##
+run:
+	fresh -c ./etc/fresh-runner.conf -p ./cmd/api -r '-config=./etc/api.conf' -o ./bin/api 

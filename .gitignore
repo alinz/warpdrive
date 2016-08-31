@@ -1,5 +1,10 @@
-warpdrive.conf
-bin
-tmp
+
+*.DS_Store
+
 .tags
 .tags1
+
+bin
+tmp
+temp
+warpdrive.conf
