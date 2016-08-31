@@ -7,8 +7,9 @@ import (
 	"upper.io/db.v2/postgresql"
 )
 
-//DB is global database variable
-var DB sqlbuilder.Database
+//dbSession is private and only access by data package.
+//this make sure that services only touch database via data or Transaction.
+var dbSession sqlbuilder.Database
 
 //NewDatabase creates a new database based on what set in global Conf.
 //it is better to call this func once and inside your main func.
@@ -22,7 +23,13 @@ func NewDatabase() (sqlbuilder.Database, error) {
 	}
 
 	session, err := postgresql.Open(settings)
-	DB = session
+	dbSession = session
 
 	return session, err
+}
+
+//Transaction creates a transaction. I don't want any one elese outside of data package
+//access directly to dbSession.
+func Transaction(fn func(sqlbuilder.Tx) error) error {
+	return dbSession.Tx(fn)
 }
