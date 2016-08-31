@@ -6,9 +6,10 @@ LDFLAGS+=-X github.com/pressly/warpdrive.LONGVERSION=$$(git describe --tags --lo
 ##
 tools:
 	go get -u github.com/pressly/fresh
+	go get -u github.com/pressly/goose
+	go get -u github.com/pressly/sup
 	go get -u github.com/kardianos/govendor
 	go get -u github.com/jstemmer/gotags
-	go get -u github.com/pressly/sup
 	go get -u golang.org/x/tools/cmd/goimports
 
 ##
@@ -36,10 +37,20 @@ build: clean
 ##
 ## Database
 ##
+db-create:
+	@goose up
 
+db-destroy:
+	@goose down
+
+db-reset: db-destroy db-create
 
 ##
 ## Development
 ##
-run:
+build-dev-folder:
+	@rm -rf ./bin
+	@mkdir -p ./bin/tmp/warpdrive
+
+run: build-dev-folder
 	fresh -c ./etc/fresh-runner.conf -p ./cmd/warpdrive -r '-config=./etc/warpdrive.conf' -o ./bin/warpdrive 
