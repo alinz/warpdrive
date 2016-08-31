@@ -8,7 +8,7 @@ import (
 
 	"github.com/pressly/warpdrive"
 	"github.com/pressly/warpdrive/data"
-	"github.com/pressly/warpdrive/routes"
+	"github.com/pressly/warpdrive/web/routes"
 
 	"github.com/zenazn/goji/graceful"
 )
