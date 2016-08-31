@@ -31,7 +31,7 @@ clean:
 	@mkdir -p ./bin
 
 build: clean
-	GOGC=off go build -i -gcflags="-e" -ldflags "$(LDFLAGS)" -o ./bin/api ./cmd/api
+	GOGC=off go build -i -gcflags="-e" -ldflags "$(LDFLAGS)" -o ./bin/warpdrive ./cmd/warpdrive
 
 ##
 ## Database
@@ -42,4 +42,4 @@ build: clean
 ## Development
 ##
 run:
-	fresh -c ./etc/fresh-runner.conf -p ./cmd/api -r '-config=./etc/api.conf' -o ./bin/api 
+	fresh -c ./etc/fresh-runner.conf -p ./cmd/warpdrive -r '-config=./etc/warpdrive.conf' -o ./bin/warpdrive 
