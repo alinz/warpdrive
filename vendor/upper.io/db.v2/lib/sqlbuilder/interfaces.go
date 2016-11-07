@@ -175,9 +175,13 @@ type Selector interface {
 	// the Marshaler interface, then with fmt.Stringer and finally, if the
 	// argument does not satisfy any of those interfaces Where() will use
 	// fmt.Sprintf("%v", arg) to transform the type into a string.
+	//
+	// Subsequent calls to Where() will overwrite previously set conditions, if
+	// you want these new conditions to be appended use And() instead.
 	Where(conds ...interface{}) Selector
 
-	// And appends more arguments to the WHERE clause.
+	// And appends more constraints to the WHERE clause without overwriting
+	// conditions that have been already set.
 	And(conds ...interface{}) Selector
 
 	// GroupBy represents a GROUP BY statement.
@@ -312,6 +316,9 @@ type Inserter interface {
 	//   i.Values(map[string][string]{"name": "María"})
 	Values(...interface{}) Inserter
 
+	// Arguments returns the arguments that are prepared for this query.
+	Arguments() []interface{}
+
 	// Returning represents a RETURNING clause.
 	//
 	// RETURNING specifies which columns should be returned after INSERT.
@@ -358,6 +365,9 @@ type Deleter interface {
 	// fmt.Stringer provides `String() string`, you can use `String()` to compile
 	// the `Inserter` into a string.
 	fmt.Stringer
+
+	// Arguments returns the arguments that are prepared for this query.
+	Arguments() []interface{}
 }
 
 // Updater represents an UPDATE statement.
@@ -381,6 +391,9 @@ type Updater interface {
 	// fmt.Stringer provides `String() string`, you can use `String()` to compile
 	// the `Inserter` into a string.
 	fmt.Stringer
+
+	// Arguments returns the arguments that are prepared for this query.
+	Arguments() []interface{}
 }
 
 // Execer provides methods for executing statements that do not return results.

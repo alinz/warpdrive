@@ -10,3 +10,11 @@ CREATE DATABASE warpdrivedb;
 ```
 
 and make sure to set the correct username, password and database in warpdrive.conf.
+
+# Warpfile
+
+server:
+  addr: 192.168.0.1:3000
+cycles:
+  production:
+    build: react-native build $PLATFORM

@@ -24,6 +24,8 @@ vendor-update:
 vendor-sync:
 	@govendor sync +external
 
+install: vendor-list vendor-update vendor-sync
+
 ##
 ## Building
 ##
@@ -53,4 +55,4 @@ build-dev-folder:
 	@mkdir -p ./bin/tmp/warpdrive
 
 run: build-dev-folder
-	fresh -c ./etc/fresh-runner.conf -p ./cmd/warpdrive -r '-config=./etc/warpdrive.conf' -o ./bin/warpdrive 
+	fresh -c ./etc/fresh-runner.conf -p ./cmd/warpdrive -r '-config=./etc/warpdrive.conf' -o ./bin/warpdrive

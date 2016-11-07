@@ -5,6 +5,8 @@ import (
 	"os"
 )
 
+// CopyDataToFile copies data from given input io.Reader and put it into
+// a given file name.
 func CopyDataToFile(in io.Reader, to string) error {
 	out, err := os.Create(to)
 	if err != nil {

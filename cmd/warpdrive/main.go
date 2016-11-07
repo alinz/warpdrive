@@ -14,6 +14,8 @@ import (
 )
 
 func main() {
+	log := warpdrive.Logger
+
 	//warpdrive.Logger.Printf("Version: %s", warpdrive.VERSION)
 	flags := flag.NewFlagSet("warpdrive", flag.ExitOnError)
 	confFile := flags.String("config", "", "path to config file")
@@ -23,14 +25,14 @@ func main() {
 	//
 	conf, err := warpdrive.NewConfig(*confFile)
 	if err != nil {
-		warpdrive.Logger.Fatal(err)
+		log.Fatal(err)
 	}
 
 	//setup database
 	//
 	_, err = data.NewDatabase()
 	if err != nil {
-		warpdrive.Logger.Fatal(err)
+		log.Fatal(err)
 	}
 
 	//setup routes
@@ -42,16 +44,16 @@ func main() {
 	graceful.AddSignal(syscall.SIGINT, syscall.SIGTERM)
 	graceful.Timeout(10 * time.Second) // Wait timeout for handlers to finish.
 	graceful.PreHook(func() {
-		warpdrive.Logger.Println("waiting for requests to finish..")
+		log.Println("waiting for requests to finish..")
 	})
 	graceful.PostHook(func() {
-		warpdrive.Logger.Println("...")
+		log.Println("...")
 	})
 
-	warpdrive.Logger.Printf("Warodrive API server runs at %s\n", conf.Server.Addr)
+	log.Printf("Warodrive API server runs at %s\n", conf.Server.Addr)
 	err = graceful.ListenAndServe(conf.Server.Addr, r)
 	if err != nil {
-		warpdrive.Logger.Fatal(err)
+		log.Fatal(err)
 	}
 
 	graceful.Wait()

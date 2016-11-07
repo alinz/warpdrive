@@ -27,6 +27,10 @@ func (qi *inserter) Batch(n int) *BatchInserter {
 	return newBatchInserter(qi.clone(), n)
 }
 
+func (qi *inserter) Arguments() []interface{} {
+	return qi.arguments
+}
+
 func (qi *inserter) columnsToFragments(dst *[]exql.Fragment, columns []string) error {
 	l := len(columns)
 	f := make([]exql.Fragment, l)
@@ -65,18 +69,23 @@ func (qi *inserter) Columns(columns ...string) Inserter {
 }
 
 func (qi *inserter) Values(values ...interface{}) Inserter {
-	if len(qi.columns) == 0 && len(values) == 1 {
-		ff, vv, _ := Map(values[0])
+	if len(values) == 1 {
+		ff, vv, err := Map(values[0], &MapOptions{IncludeZeroed: true, IncludeNil: true})
+		if err == nil {
+			columns, vals, arguments, _ := qi.builder.t.ToColumnsValuesAndArguments(ff, vv)
 
-		columns, vals, arguments, _ := qi.builder.t.ToColumnsValuesAndArguments(ff, vv)
-
-		qi.arguments = append(qi.arguments, arguments...)
-		qi.values = append(qi.values, vals)
-
-		for _, c := range columns.Columns {
-			qi.columns = append(qi.columns, c)
+			qi.arguments = append(qi.arguments, arguments...)
+			qi.values = append(qi.values, vals)
+			if len(qi.columns) == 0 {
+				for _, c := range columns.Columns {
+					qi.columns = append(qi.columns, c)
+				}
+			}
+			return qi
 		}
-	} else if len(qi.columns) == 0 || len(values) == len(qi.columns) {
+	}
+
+	if len(qi.columns) == 0 || len(values) == len(qi.columns) {
 		qi.arguments = append(qi.arguments, values...)
 
 		l := len(values)
