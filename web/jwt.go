@@ -3,9 +3,12 @@ package web
 import (
 	"context"
 	"net/http"
+	"strings"
+	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/goware/jwtauth"
+	"github.com/pressly/warpdrive"
 )
 
 var (
@@ -48,4 +51,32 @@ func Authenticator(next http.Handler) http.Handler {
 		// Token is authenticated, pass it through
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
+}
+
+func SetJWTCookie(w http.ResponseWriter, r *http.Request, value string) {
+	path := warpdrive.Conf.JWT.Path
+	maxAge := warpdrive.Conf.JWT.MaxAge
+	expires := time.Now().AddDate(1, 0, 0) // expiry date in 1 year
+
+	if value == "" {
+		maxAge = -1               // delete cookie now
+		expires = time.Unix(1, 0) // set to epoche for delete
+	}
+
+	host := warpdrive.Conf.JWT.Domain
+	if strings.Index(host, "localhost") >= 0 {
+		host = ""
+	}
+
+	cookie := http.Cookie{
+		Name:     "jwt",
+		Domain:   host,
+		Path:     path,
+		Secure:   warpdrive.Conf.JWT.Secure,
+		MaxAge:   maxAge,
+		Expires:  expires,
+		HttpOnly: true,
+		Value:    value,
+	}
+	http.SetCookie(w, &cookie)
 }

@@ -1,12 +1,12 @@
 package session
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
 	"golang.org/x/crypto/bcrypt"
 
+	"github.com/goware/jwtauth"
 	"github.com/pressly/warpdrive/services"
 	"github.com/pressly/warpdrive/web"
 )
@@ -29,17 +29,23 @@ func startSessionHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println(password)
-
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
 		log.Println(err.Error())
 		web.Respond(w, http.StatusUnauthorized, nil)
 		return
 	}
 
+	var claims jwtauth.Claims
+	claims = make(map[string]interface{})
+	claims.Set("user:id", user.ID)
+
+	_, token, _ := web.TokenAuth.Encode(claims)
+
+	web.SetJWTCookie(w, r, token)
 	web.Respond(w, 200, nil)
 }
 
 func endSessionHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte(`end`))
+	web.SetJWTCookie(w, r, "")
+	web.Respond(w, 200, nil)
 }
