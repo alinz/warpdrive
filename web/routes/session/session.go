@@ -1,7 +1,11 @@
 package session
 
 import (
+	"fmt"
+	"log"
 	"net/http"
+
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/pressly/warpdrive/services"
 	"github.com/pressly/warpdrive/web"
@@ -18,9 +22,18 @@ func startSessionHandler(w http.ResponseWriter, r *http.Request) {
 	email := *body.Email
 	password := *body.Password
 
-	if err := services.FindUserByEmailPassword(email, password); err != nil {
-		statusCode := statusCodeError(err)
-		web.Respond(w, statusCode, err)
+	user := services.FindUserByEmail(email)
+
+	if user == nil {
+		web.Respond(w, http.StatusUnauthorized, nil)
+		return
+	}
+
+	fmt.Println(password)
+
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
+		log.Println(err.Error())
+		web.Respond(w, http.StatusUnauthorized, nil)
 		return
 	}
 

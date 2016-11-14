@@ -7,10 +7,10 @@ import (
 	"upper.io/db.v2"
 )
 
-func FindUserByEmailPassword(email, password string) *data.User {
+func FindUserByEmail(email string) *data.User {
 	var user data.User
 
-	if err := user.Find(nil, db.Cond{"email": email, "password": password}); err != nil {
+	if err := user.Find(nil, db.Cond{"email": email}); err != nil {
 		log.Println(err.Error())
 		return nil
 	}
@@ -20,5 +20,5 @@ func FindUserByEmailPassword(email, password string) *data.User {
 	// 	return nil
 	// })
 
-	return nil
+	return &user
 }

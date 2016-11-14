@@ -85,7 +85,7 @@ ALTER TABLE permissions ADD FOREIGN KEY ("app_id") REFERENCES apps("id") ON DELE
 ALTER TABLE permissions ADD UNIQUE (user_id, app_id);
 
 -- the password hash represents `root`
-INSERT INTO users (id, name, email, password) VALUES (1, 'Mr. Robot', 'root', '$2a$10$u0NH2a95xrx83EZQhZ5nNesbKrjAMW3GZRe3MZHjXlB.Hqca.nrca');
+INSERT INTO users (id, name, email, password) VALUES (1, 'Mr. Robot', 'admin@pressly.com', '$2a$10$aWHlz4foaCzhIxRPwz.PeuA1c328upMUkc6iJqx5h4ggly1hY0DMS');
 
 -- +goose Down
 
