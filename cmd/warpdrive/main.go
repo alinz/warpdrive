@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"log"
 	"os"
 	"syscall"
 	"time"
@@ -14,8 +15,6 @@ import (
 )
 
 func main() {
-	log := warpdrive.Logger
-
 	//warpdrive.Logger.Printf("Version: %s", warpdrive.VERSION)
 	flags := flag.NewFlagSet("warpdrive", flag.ExitOnError)
 	confFile := flags.String("config", "", "path to config file")

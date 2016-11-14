@@ -1,23 +1,18 @@
 package services
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/pressly/warpdrive/data"
 	"upper.io/db.v2"
 )
 
-var (
-	// ErrorLogin returns when email or password are wrong
-	ErrorLogin = fmt.Errorf("email and/or password are incorrect")
-)
-
-func CreateSession(email, password string) error {
+func FindUserByEmailPassword(email, password string) *data.User {
 	var user data.User
 
 	if err := user.Find(nil, db.Cond{"email": email, "password": password}); err != nil {
 		log.Println(err.Error())
-		return ErrorLogin
+		return nil
 	}
 
 	// err := data.Transaction(func(session sqlbuilder.Tx) error {
@@ -25,9 +20,5 @@ func CreateSession(email, password string) error {
 	// 	return nil
 	// })
 
-	return nil
-}
-
-func DestorySession() error {
 	return nil
 }

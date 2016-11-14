@@ -26,6 +26,13 @@ func (u User) Query(session db.Database, query db.Cond) db.Result {
 	return session.Collection(u.CollectionName()).Find(query)
 }
 
+func (u *User) Load(session db.Database) error {
+	if session == nil {
+		session = dbSession
+	}
+	return u.Query(session, db.Cond{"id": u.ID}).One(u)
+}
+
 func (u *User) Find(session db.Database, query db.Cond) error {
 	if session == nil {
 		session = dbSession

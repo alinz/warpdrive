@@ -1,6 +1,7 @@
 package web
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -97,4 +98,34 @@ func JSONValidation(jsonObj interface{}) error {
 	}
 
 	return nil
+}
+
+//BodyParser loads builder with maxSize and tries to load the message.
+//if for some reason it can't parse the message, it will return an error.
+//if successful, it will put the processed data into context with key 'json_body'
+//
+func BodyParser(body interface{}, maxSize int64) func(next http.Handler) http.Handler {
+	//body needs to be a pointer type
+	bodyType := reflect.TypeOf(body).Elem()
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// to is a new instance of type of body. It is an interface.
+			to := reflect.New(bodyType).Interface()
+
+			if err := StreamJSONToStructWithLimit(r.Body, to, maxSize); err != nil {
+				Respond(w, http.StatusUnprocessableEntity, err)
+				return
+			}
+
+			//check for required fields
+			if err := JSONValidation(to); err != nil {
+				Respond(w, http.StatusBadRequest, err)
+				return
+			}
+
+			ctx := context.WithValue(r.Context(), "parsed:body", to)
+
+			next.ServeHTTP(w, r.WithContext(ctx))
+		})
+	}
 }
