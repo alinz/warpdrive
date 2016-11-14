@@ -7,6 +7,7 @@ import (
 	"github.com/pressly/warpdrive"
 	"github.com/pressly/warpdrive/web"
 	"github.com/pressly/warpdrive/web/routes/session"
+	"github.com/pressly/warpdrive/web/routes/users"
 )
 
 func New() chi.Router {
@@ -22,6 +23,8 @@ func New() chi.Router {
 	r.Group(func(r chi.Router) {
 		r.Use(web.TokenAuth.Verifier)
 		r.Use(web.Authenticator)
+
+		r.Mount("/users", users.Routes())
 	})
 
 	return r

@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"strconv"
+
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/goware/jwtauth"
 	"github.com/pressly/warpdrive"
@@ -46,7 +48,8 @@ func Authenticator(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx = context.WithValue(ctx, "userid", userID.(int))
+		id, _ := strconv.ParseInt(userID.(string), 10, 64)
+		ctx = context.WithValue(ctx, "userid", id)
 
 		// Token is authenticated, pass it through
 		next.ServeHTTP(w, r.WithContext(ctx))

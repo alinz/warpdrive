@@ -6,6 +6,8 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
+	"fmt"
+
 	"github.com/goware/jwtauth"
 	"github.com/pressly/warpdrive/services"
 	"github.com/pressly/warpdrive/web"
@@ -37,7 +39,7 @@ func startSessionHandler(w http.ResponseWriter, r *http.Request) {
 
 	var claims jwtauth.Claims
 	claims = make(map[string]interface{})
-	claims.Set("user:id", user.ID)
+	claims.Set("userid", fmt.Sprintf("%v", user.ID))
 
 	_, token, _ := web.TokenAuth.Encode(claims)
 
