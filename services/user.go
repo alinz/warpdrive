@@ -26,3 +26,15 @@ func FindUserByEmail(email string) *data.User {
 func QueryUsersByEmail(email string) []*data.User {
 	return data.QueryUsersByEmail(email)
 }
+
+func FindUserByID(id int64) *data.User {
+	var user data.User
+	user.ID = id
+	err := user.Load(nil)
+
+	if err != nil {
+		return nil
+	}
+
+	return &user
+}

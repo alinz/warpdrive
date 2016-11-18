@@ -17,7 +17,21 @@ func getUsersHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func getUserHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte(`¯\_(ツ)_/¯`))
+	userID, err := web.ParamAsInt64(r, "userId")
+
+	if err != nil {
+		web.Respond(w, http.StatusBadRequest, err)
+		return
+	}
+
+	user := services.FindUserByID(userID)
+
+	if user == nil {
+		web.Respond(w, http.StatusNotFound, nil)
+		return
+	}
+
+	web.Respond(w, http.StatusOK, user)
 }
 
 func createUserHandler(w http.ResponseWriter, r *http.Request) {
