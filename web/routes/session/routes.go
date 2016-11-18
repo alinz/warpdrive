@@ -17,7 +17,7 @@ func Routes() http.Handler {
 		r.Use(web.TokenAuth.Verifier)
 		r.Use(web.Authenticator)
 
-		r.Get("/validate", validateSessionHandler)
+		r.Get("/", validateSessionHandler)
 	})
 
 	return r

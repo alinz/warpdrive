@@ -21,46 +21,46 @@ cycles:
 
 # APIs
 
-GET       /session
-POST      /session/start
-GET       /session/end
+- [x] GET       /session
+- [x] POST      /session/start
+- [x] GET       /session/end
 
-GET       /users?q=
-GET       /users/:userId
-POST      /users
-PUT       /users
+- [x] GET       /users?q=
+- [ ] GET       /users/:userId
+- [ ] POST      /users
+- [ ] PUT       /users
 
-GET       /apps
-GET       /apps/:appId
-POST      /apps
-PUT       /apps/:appId
+- [ ] GET       /apps
+- [ ] GET       /apps/:appId
+- [ ] POST      /apps
+- [ ] PUT       /apps/:appId
 
-GET       /apps/:appId/users
-POST      /apps/:appId/users/:userId
-DELETE    /apps/:appId/users/:userId
+- [ ] GET       /apps/:appId/users
+- [ ] POST      /apps/:appId/users/:userId
+- [ ] DELETE    /apps/:appId/users/:userId
 
-GET       /apps/:appId/cycles
-GET       /apps/:appId/cycles/:cycleId
-POST      /apps/:appId/cycles
-GET       /apps/:appId/cycles/:cycleId/key
-PUT       /apps/:appId/cycles/:cycleId
-DELETE    /apps/:appId/cycles/:cycleId
+- [ ] GET       /apps/:appId/cycles
+- [ ] GET       /apps/:appId/cycles/:cycleId
+- [ ] POST      /apps/:appId/cycles
+- [ ] GET       /apps/:appId/cycles/:cycleId/key
+- [ ] PUT       /apps/:appId/cycles/:cycleId
+- [ ] DELETE    /apps/:appId/cycles/:cycleId
 
-GET       /apps/:appId/cycles/:cycleId/releases
-GET       /apps/:appId/cycles/:cycleId/releases/:releaseId
-POST      /apps/:appId/cycles/:cycleId/releases
-PUT       /apps/:appId/cycles/:cycleId/releases/:releaseId
-DELETE    /apps/:appId/cycles/:cycleId/releases/:releaseId
-POST      /apps/:appId/cycles/:cycleId/releases/:releaseId/bundles
-GET       /apps/:appId/cycles/:cycleId/releases/:releaseId/bundles
-POST      /apps/:appId/cycles/:cycleId/releases/:releaseId/lock
-DELETE    /apps/:appId/cycles/:cycleId/releases/:releaseId/lock
+- [ ] GET       /apps/:appId/cycles/:cycleId/releases
+- [ ] GET       /apps/:appId/cycles/:cycleId/releases/:releaseId
+- [ ] POST      /apps/:appId/cycles/:cycleId/releases
+- [ ] PUT       /apps/:appId/cycles/:cycleId/releases/:releaseId
+- [ ] DELETE    /apps/:appId/cycles/:cycleId/releases/:releaseId
+- [ ] POST      /apps/:appId/cycles/:cycleId/releases/:releaseId/bundles
+- [ ] GET       /apps/:appId/cycles/:cycleId/releases/:releaseId/bundles
+- [ ] POST      /apps/:appId/cycles/:cycleId/releases/:releaseId/lock
+- [ ] DELETE    /apps/:appId/cycles/:cycleId/releases/:releaseId/lock
 
 ## the following apis call in clinet native, also they are public
 
-GET       /apps/:appId/cycles/:cycleId/releases/latest/:version
-POST      /apps/:appId/cycles/:cycleId/releases/:releaseId/download
+- [ ] GET       /apps/:appId/cycles/:cycleId/releases/latest/:version
+- [ ] POST      /apps/:appId/cycles/:cycleId/releases/:releaseId/download
 
 ## this following api calls for any auditing
 
-GET       /apps/:appId/logs
+- [ ] GET       /apps/:appId/logs
