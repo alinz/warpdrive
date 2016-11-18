@@ -1,9 +1,13 @@
 package data
 
 import (
+	"fmt"
 	"time"
 
+	"log"
+
 	db "upper.io/db.v2"
+	"upper.io/db.v2/lib/sqlbuilder"
 )
 
 type User struct {
@@ -19,28 +23,28 @@ func (u User) CollectionName() string {
 	return "users"
 }
 
-func (u User) Query(session db.Database, query db.Cond) db.Result {
+func (u User) Query(session sqlbuilder.Database, query db.Cond) db.Result {
 	if session == nil {
 		session = dbSession
 	}
 	return session.Collection(u.CollectionName()).Find(query)
 }
 
-func (u *User) Load(session db.Database) error {
+func (u *User) Load(session sqlbuilder.Database) error {
 	if session == nil {
 		session = dbSession
 	}
 	return u.Query(session, db.Cond{"id": u.ID}).One(u)
 }
 
-func (u *User) Find(session db.Database, query db.Cond) error {
+func (u *User) Find(session sqlbuilder.Database, query db.Cond) error {
 	if session == nil {
 		session = dbSession
 	}
 	return u.Query(session, query).One(u)
 }
 
-func (u *User) Save(session db.Database) error {
+func (u *User) Save(session sqlbuilder.Database) error {
 	if session == nil {
 		session = dbSession
 	}
@@ -66,9 +70,29 @@ func (u *User) Save(session db.Database) error {
 	return err
 }
 
-func (u *User) Remove(session db.Database) error {
+func (u *User) Remove(session sqlbuilder.Database) error {
 	if session == nil {
 		session = dbSession
 	}
 	return u.Query(session, db.Cond{"id": u.ID}).Delete()
+}
+
+func QueryUsersByEmail(email string) []*User {
+	sql := fmt.Sprintf(`SELECT * from users WHERE email LIKE '%%%s%%'`, email)
+	rows, err := dbSession.Query(sql)
+	if err != nil {
+		log.Println(err.Error())
+		return nil
+	}
+
+	var users []*User
+	iter := sqlbuilder.NewIterator(rows)
+	err = iter.All(&users)
+
+	if err != nil {
+		log.Println(err.Error())
+		return nil
+	}
+
+	return users
 }

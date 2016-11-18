@@ -9,8 +9,10 @@ import (
 func Routes() http.Handler {
 	r := chi.NewRouter()
 
-	// r.With(web.BodyParser(&sessionLogin{}, 256)).Post("/start", startSessionHandler)
-	r.Get("/", getUserProfileHandler)
+	r.Get("/", getUsersHandler)
+	r.Get("/:userId", getUserHandler)
+	r.Post("/", createUserHandler)
+	r.Put("/", updateUserHandler)
 
 	return r
 }

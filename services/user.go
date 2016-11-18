@@ -22,3 +22,7 @@ func FindUserByEmail(email string) *data.User {
 
 	return &user
 }
+
+func QueryUsersByEmail(email string) []*data.User {
+	return data.QueryUsersByEmail(email)
+}

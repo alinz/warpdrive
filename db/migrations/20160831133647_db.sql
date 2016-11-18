@@ -75,8 +75,7 @@ ALTER TABLE bundles ADD FOREIGN KEY ("release_id") REFERENCES releases("id") ON 
 CREATE TABLE permissions (
     id bigint PRIMARY KEY,
     user_id bigint NOT NULL,
-    app_id bigint NOT NULL,
-    permission int NOT NULL
+    app_id bigint NOT NULL
 );
 
 ALTER TABLE permissions ADD FOREIGN KEY ("user_id") REFERENCES users("id") ON DELETE CASCADE ON UPDATE CASCADE;

@@ -51,3 +51,7 @@ func endSessionHandler(w http.ResponseWriter, r *http.Request) {
 	web.SetJWTCookie(w, r, "")
 	web.Respond(w, 200, nil)
 }
+
+func validateSessionHandler(w http.ResponseWriter, r *http.Request) {
+	web.Respond(w, 200, nil)
+}
