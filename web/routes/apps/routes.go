@@ -13,7 +13,7 @@ func Routes() http.Handler {
 	r.Get("/", getAppsHandler)
 	r.Get("/:appId", getAppHandler)
 	r.With(web.BodyParser(&createApp{}, 256)).Post("/", createAppHandler)
-	// r.With(web.BodyParser(&updateUser{}, 256)).Put("/", updateUserHandler)
+	r.With(web.BodyParser(&updateApp{}, 256)).Put("/:appId", updateAppHandler)
 
 	return r
 }

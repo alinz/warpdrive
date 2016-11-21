@@ -39,7 +39,7 @@ func startSessionHandler(w http.ResponseWriter, r *http.Request) {
 
 	var claims jwtauth.Claims
 	claims = make(map[string]interface{})
-	claims.Set("userid", fmt.Sprintf("%v", user.ID))
+	claims.Set("userId", fmt.Sprintf("%v", user.ID))
 
 	_, token, _ := web.TokenAuth.Encode(claims)
 
