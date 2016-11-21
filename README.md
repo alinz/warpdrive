@@ -25,12 +25,12 @@ cycles:
 - [x] POST      /session/start
 - [x] GET       /session/end
 
-- [x] GET       /users?q=
+- [x] GET       /users?name=&email=
 - [x] GET       /users/:userId
 - [X] POST      /users
 - [X] PUT       /users
 
-- [x] GET       /apps?q=
+- [x] GET       /apps?name=
 - [x] GET       /apps/:appId
 - [x] POST      /apps
 - [X] PUT       /apps/:appId
@@ -39,7 +39,7 @@ cycles:
 - [x] POST      /apps/:appId/users/:userId
 - [x] DELETE    /apps/:appId/users/:userId
 
-- [ ] GET       /apps/:appId/cycles
+- [ ] GET       /apps/:appId/cycles?name=
 - [ ] GET       /apps/:appId/cycles/:cycleId
 - [ ] POST      /apps/:appId/cycles
 - [ ] GET       /apps/:appId/cycles/:cycleId/key
