@@ -1,9 +1,6 @@
 package data
 
-import (
-	db "upper.io/db.v2"
-	"upper.io/db.v2/lib/sqlbuilder"
-)
+import db "upper.io/db.v2"
 
 //Permission this is reppresentation of Permissions tbale
 type Permission struct {
@@ -16,15 +13,15 @@ func (p Permission) CollectionName() string {
 	return "permissions"
 }
 
-func (p Permission) Query(session sqlbuilder.Database, query db.Cond) db.Result {
+func (p Permission) Query(session db.Database, query db.Cond) db.Result {
 	return session.Collection(p.CollectionName()).Find(query)
 }
 
-func (p *Permission) Find(session sqlbuilder.Database, query db.Cond) error {
+func (p *Permission) Find(session db.Database, query db.Cond) error {
 	return p.Query(session, query).One(p)
 }
 
-func (p *Permission) Save(session sqlbuilder.Database) error {
+func (p *Permission) Save(session db.Database) error {
 	collection := session.Collection(p.CollectionName())
 	var err error
 
@@ -43,6 +40,6 @@ func (p *Permission) Save(session sqlbuilder.Database) error {
 	return err
 }
 
-func (p *Permission) Remove(session sqlbuilder.Database) error {
+func (p *Permission) Remove(session db.Database) error {
 	return p.Query(session, db.Cond{"id": p.ID}).Delete()
 }
