@@ -10,7 +10,7 @@ func Routes() http.Handler {
 	r := chi.NewRouter()
 
 	r.Get("/", getAppsHandler)
-	// r.Get("/:userId", getUserHandler)
+	r.Get("/:appId", getAppHandler)
 	// r.With(web.BodyParser(&createUser{}, 256)).Post("/", createUserHandler)
 	// r.With(web.BodyParser(&updateUser{}, 256)).Put("/", updateUserHandler)
 

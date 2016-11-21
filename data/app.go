@@ -27,6 +27,13 @@ func (a *App) Find(session db.Database, query db.Cond) error {
 	return a.Query(session, query).One(a)
 }
 
+func (a *App) Load(session db.Database) error {
+	if session == nil {
+		session = dbSession
+	}
+	return a.Query(session, db.Cond{"id": a.ID}).One(a)
+}
+
 func (a *App) Save(session db.Database) error {
 	collection := session.Collection(a.CollectionName())
 	var err error
@@ -73,4 +80,28 @@ func SearchAppsByName(userID int64, name string) []*App {
 	iter.All(&apps)
 
 	return apps
+}
+
+func FindAppByUserIDAppID(userID, appID int64) *App {
+	sql := fmt.Sprintf(`
+		SELECT apps.id, apps.name, apps.updated_at, apps.created_at
+		FROM apps
+		JOIN permissions
+		ON apps.id=permissions.app_id
+		WHERE permissions.user_id=%d AND apps.id=%d`, userID, appID)
+	rows, err := dbSession.Query(sql)
+
+	if err != nil {
+		return nil
+	}
+
+	var apps []*App
+	iter := sqlbuilder.NewIterator(rows)
+	iter.All(&apps)
+
+	if len(apps) == 1 {
+		return apps[0]
+	}
+
+	return nil
 }

@@ -31,7 +31,7 @@ cycles:
 - [X] PUT       /users
 
 - [x] GET       /apps?q=
-- [ ] GET       /apps/:appId
+- [x] GET       /apps/:appId
 - [ ] POST      /apps
 - [ ] PUT       /apps/:appId
 

@@ -12,3 +12,7 @@ func SearchApps(userID int64, name string) []*data.App {
 
 	return apps
 }
+
+func FindAppByID(userID, appID int64) *data.App {
+	return data.FindAppByUserIDAppID(userID, appID)
+}
