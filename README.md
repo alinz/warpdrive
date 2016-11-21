@@ -46,13 +46,13 @@ cycles:
 - [ ] PUT       /apps/:appId/cycles/:cycleId
 - [ ] DELETE    /apps/:appId/cycles/:cycleId
 
-- [ ] GET       /apps/:appId/cycles/:cycleId/releases
+- [ ] GET       /apps/:appId/cycles/:cycleId/releases?platforn=&version=&note=
 - [ ] GET       /apps/:appId/cycles/:cycleId/releases/:releaseId
 - [ ] POST      /apps/:appId/cycles/:cycleId/releases
 - [ ] PUT       /apps/:appId/cycles/:cycleId/releases/:releaseId
 - [ ] DELETE    /apps/:appId/cycles/:cycleId/releases/:releaseId
 - [ ] POST      /apps/:appId/cycles/:cycleId/releases/:releaseId/bundles
-- [ ] GET       /apps/:appId/cycles/:cycleId/releases/:releaseId/bundles
+- [ ] GET       /apps/:appId/cycles/:cycleId/releases/:releaseId/bundles?name=
 - [ ] POST      /apps/:appId/cycles/:cycleId/releases/:releaseId/lock
 - [ ] DELETE    /apps/:appId/cycles/:cycleId/releases/:releaseId/lock
 

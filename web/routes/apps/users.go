@@ -73,5 +73,5 @@ func unassignUserFromAppHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	web.Respond(w, http.StatusCreated, nil)
+	web.Respond(w, http.StatusOK, nil)
 }
