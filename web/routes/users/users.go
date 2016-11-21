@@ -13,6 +13,12 @@ type createUser struct {
 	Password *string `json:"password,required"`
 }
 
+type updateUser struct {
+	Name     *string `json:"name"`
+	Email    *string `json:"email"`
+	Password *string `json:"password"`
+}
+
 func getUsersHandler(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	search := query.Get("q")
@@ -58,5 +64,16 @@ func createUserHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func updateUserHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte(`¯\_(ツ)_/¯`))
+	ctx := r.Context()
+	userID := ctx.Value("userid").(int64)
+	body := ctx.Value("parsed:body").(*updateUser)
+
+	user, err := services.UpdateUser(userID, body.Name, body.Email, body.Password)
+
+	if err != nil {
+		web.Respond(w, http.StatusBadRequest, err)
+		return
+	}
+
+	web.Respond(w, http.StatusOK, user)
 }

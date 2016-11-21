@@ -23,28 +23,28 @@ func (u User) CollectionName() string {
 	return "users"
 }
 
-func (u User) Query(session sqlbuilder.Database, query db.Cond) db.Result {
+func (u User) Query(session db.Database, query db.Cond) db.Result {
 	if session == nil {
 		session = dbSession
 	}
 	return session.Collection(u.CollectionName()).Find(query)
 }
 
-func (u *User) Load(session sqlbuilder.Database) error {
+func (u *User) Load(session db.Database) error {
 	if session == nil {
 		session = dbSession
 	}
 	return u.Query(session, db.Cond{"id": u.ID}).One(u)
 }
 
-func (u *User) Find(session sqlbuilder.Database, query db.Cond) error {
+func (u *User) Find(session db.Database, query db.Cond) error {
 	if session == nil {
 		session = dbSession
 	}
 	return u.Query(session, query).One(u)
 }
 
-func (u *User) Save(session sqlbuilder.Database) error {
+func (u *User) Save(session db.Database) error {
 	if session == nil {
 		session = dbSession
 	}
@@ -70,7 +70,7 @@ func (u *User) Save(session sqlbuilder.Database) error {
 	return err
 }
 
-func (u *User) Remove(session sqlbuilder.Database) error {
+func (u *User) Remove(session db.Database) error {
 	if session == nil {
 		session = dbSession
 	}

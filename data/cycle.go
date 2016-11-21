@@ -4,7 +4,6 @@ import (
 	"time"
 
 	db "upper.io/db.v2"
-	"upper.io/db.v2/lib/sqlbuilder"
 )
 
 type Cycle struct {
@@ -21,15 +20,15 @@ func (c Cycle) CollectionName() string {
 	return "cycles"
 }
 
-func (c Cycle) Query(session sqlbuilder.Database, query db.Cond) db.Result {
+func (c Cycle) Query(session db.Database, query db.Cond) db.Result {
 	return session.Collection(c.CollectionName()).Find(query)
 }
 
-func (c *Cycle) Find(session sqlbuilder.Database, query db.Cond) error {
+func (c *Cycle) Find(session db.Database, query db.Cond) error {
 	return c.Query(session, query).One(c)
 }
 
-func (c *Cycle) Save(session sqlbuilder.Database) error {
+func (c *Cycle) Save(session db.Database) error {
 	collection := session.Collection(c.CollectionName())
 	var err error
 
@@ -52,6 +51,6 @@ func (c *Cycle) Save(session sqlbuilder.Database) error {
 	return err
 }
 
-func (c *Cycle) Remove(session sqlbuilder.Database) error {
+func (c *Cycle) Remove(session db.Database) error {
 	return c.Query(session, db.Cond{"id": c.ID}).Delete()
 }

@@ -4,7 +4,6 @@ import (
 	"time"
 
 	db "upper.io/db.v2"
-	"upper.io/db.v2/lib/sqlbuilder"
 )
 
 type App struct {
@@ -18,15 +17,15 @@ func (a App) CollectionName() string {
 	return "apps"
 }
 
-func (a App) Query(session sqlbuilder.Database, query db.Cond) db.Result {
+func (a App) Query(session db.Database, query db.Cond) db.Result {
 	return session.Collection(a.CollectionName()).Find(query)
 }
 
-func (a *App) Find(session sqlbuilder.Database, query db.Cond) error {
+func (a *App) Find(session db.Database, query db.Cond) error {
 	return a.Query(session, query).One(a)
 }
 
-func (a *App) Save(session sqlbuilder.Database) error {
+func (a *App) Save(session db.Database) error {
 	collection := session.Collection(a.CollectionName())
 	var err error
 
@@ -49,6 +48,6 @@ func (a *App) Save(session sqlbuilder.Database) error {
 	return err
 }
 
-func (a *App) Remove(session sqlbuilder.Database) error {
+func (a *App) Remove(session db.Database) error {
 	return a.Query(session, db.Cond{"id": a.ID}).Delete()
 }

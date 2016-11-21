@@ -28,7 +28,7 @@ cycles:
 - [x] GET       /users?q=
 - [x] GET       /users/:userId
 - [X] POST      /users
-- [ ] PUT       /users
+- [X] PUT       /users
 
 - [ ] GET       /apps
 - [ ] GET       /apps/:appId

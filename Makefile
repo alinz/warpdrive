@@ -56,3 +56,6 @@ build-dev-folder:
 
 run: build-dev-folder
 	fresh -c ./etc/fresh-runner.conf -p ./cmd/warpdrive -r '-config=./etc/warpdrive.conf' -o ./bin/warpdrive
+
+kill:
+	@lsof -t -i:8221 | xargs kill

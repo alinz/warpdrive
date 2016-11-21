@@ -3,8 +3,13 @@ package services
 import (
 	"log"
 
+	"golang.org/x/crypto/bcrypt"
+
+	"fmt"
+
 	"github.com/pressly/warpdrive/data"
 	"upper.io/db.v2"
+	"upper.io/db.v2/lib/sqlbuilder"
 )
 
 // FindUserByEmail try to find a single user by an email. email has to be matached. no
@@ -45,13 +50,53 @@ func FindUserByID(id int64) *data.User {
 
 // CreateUser creates a new user
 func CreateUser(name, email, password string) (*data.User, error) {
+	hashpass, err := bcrypt.GenerateFromPassword([]byte(password), 0)
+
+	if err != nil {
+		return nil, fmt.Errorf("couldn't create a proper password")
+	}
+
 	user := &data.User{
 		Name:     name,
 		Email:    email,
-		Password: password,
+		Password: string(hashpass),
 	}
 
-	err := user.Save(nil)
+	err = user.Save(nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func UpdateUser(userID int64, name, email, password *string) (*data.User, error) {
+	user := FindUserByID(userID)
+
+	if user == nil {
+		return nil, fmt.Errorf("you don't have access to this user")
+	}
+
+	if name != nil {
+		user.Name = *name
+	}
+
+	if email != nil {
+		user.Email = *email
+	}
+
+	if password != nil {
+		hashpass, err := bcrypt.GenerateFromPassword([]byte(*password), 0)
+		if err != nil {
+			return nil, fmt.Errorf("couldn't create a proper password")
+		}
+		user.Password = string(hashpass)
+	}
+
+	err := data.Transaction(func(session sqlbuilder.Tx) error {
+		return user.Save(session)
+	})
+
 	if err != nil {
 		return nil, err
 	}
