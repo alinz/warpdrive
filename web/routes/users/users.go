@@ -7,6 +7,12 @@ import (
 	"github.com/pressly/warpdrive/web"
 )
 
+type createUser struct {
+	Name     *string `json:"name,required"`
+	Email    *string `json:"email,required"`
+	Password *string `json:"password,required"`
+}
+
 func getUsersHandler(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	search := query.Get("q")
@@ -35,7 +41,20 @@ func getUserHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func createUserHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte(`¯\_(ツ)_/¯`))
+	ctx := r.Context()
+	body := ctx.Value("parsed:body").(*createUser)
+
+	name := *body.Name
+	email := *body.Email
+	password := *body.Password
+
+	user, err := services.CreateUser(name, email, password)
+	if err != nil {
+		web.Respond(w, http.StatusBadRequest, err)
+		return
+	}
+
+	web.Respond(w, http.StatusOK, user)
 }
 
 func updateUserHandler(w http.ResponseWriter, r *http.Request) {
