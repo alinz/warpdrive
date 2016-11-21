@@ -22,11 +22,6 @@ func FindUserByEmail(email string) *data.User {
 		return nil
 	}
 
-	// err := data.Transaction(func(session sqlbuilder.Tx) error {
-	// 	user.Query(session, db.Cond{"email": email, "password": password})
-	// 	return nil
-	// })
-
 	return &user
 }
 

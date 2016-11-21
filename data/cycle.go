@@ -1,9 +1,11 @@
 package data
 
 import (
+	"fmt"
 	"time"
 
 	db "upper.io/db.v2"
+	"upper.io/db.v2/lib/sqlbuilder"
 )
 
 type Cycle struct {
@@ -26,6 +28,13 @@ func (c Cycle) Query(session db.Database, query db.Cond) db.Result {
 
 func (c *Cycle) Find(session db.Database, query db.Cond) error {
 	return c.Query(session, query).One(c)
+}
+
+func (c *Cycle) Load(session db.Database) error {
+	if session == nil {
+		session = dbSession
+	}
+	return c.Query(session, db.Cond{"id": c.ID}).One(c)
 }
 
 func (c *Cycle) Save(session db.Database) error {
@@ -53,4 +62,32 @@ func (c *Cycle) Save(session db.Database) error {
 
 func (c *Cycle) Remove(session db.Database) error {
 	return c.Query(session, db.Cond{"id": c.ID}).Delete()
+}
+
+func FindCyclesApp(userID, appID int64, name string) []*Cycle {
+	app := FindAppByUserIDAppID(userID, appID)
+
+	if app == nil {
+		return nil
+	}
+
+	sql := fmt.Sprintf(`
+		SELECT *
+		FROM cycles
+		WHERE cycles.app_id=%d AND name='%%%s%%'`, appID, name)
+	rows, err := dbSession.Query(sql)
+
+	if err != nil {
+		return nil
+	}
+
+	var cycles []*Cycle
+	iter := sqlbuilder.NewIterator(rows)
+	err = iter.All(&cycles)
+
+	if err != nil {
+		return nil
+	}
+
+	return cycles
 }
