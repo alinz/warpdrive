@@ -6,6 +6,7 @@ import (
 	"github.com/pressly/chi"
 	"github.com/pressly/warpdrive"
 	"github.com/pressly/warpdrive/web"
+	"github.com/pressly/warpdrive/web/routes/apps"
 	"github.com/pressly/warpdrive/web/routes/session"
 	"github.com/pressly/warpdrive/web/routes/users"
 )
@@ -25,6 +26,7 @@ func New() chi.Router {
 		r.Use(web.Authenticator)
 
 		r.Mount("/users", users.Routes())
+		r.Mount("/apps", apps.Routes())
 	})
 
 	return r
