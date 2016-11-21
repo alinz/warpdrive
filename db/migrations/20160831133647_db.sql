@@ -3,8 +3,15 @@
 
 -- users table
 
+CREATE SEQUENCE user_id_seq
+    START WITH 2
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
 CREATE TABLE users (
-    id bigint PRIMARY KEY,
+    id bigint DEFAULT nextval('user_id_seq'::regclass) NOT NULL PRIMARY KEY,
     name varchar(128) NOT NULL,
     email varchar(256) NOT NULL,
     password varchar(128) NOT NULL,
@@ -16,8 +23,15 @@ ALTER TABLE users ADD UNIQUE ("email");
 
 -- apps table
 
+CREATE SEQUENCE app_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
 CREATE TABLE apps (
-    id bigint PRIMARY KEY,
+    id bigint DEFAULT nextval('app_id_seq'::regclass) NOT NULL PRIMARY KEY,
     name varchar(256) NOT NULL,
     created_at timestamp DEFAULT now() NOT NULL,
     updated_at timestamp DEFAULT now() NOT NULL
@@ -27,8 +41,15 @@ ALTER TABLE apps ADD UNIQUE ("name");
 
 -- cycles table
 
+CREATE SEQUENCE cycle_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
 CREATE TABLE cycles (
-    id bigint PRIMARY KEY,
+    id bigint DEFAULT nextval('cycle_id_seq'::regclass) NOT NULL PRIMARY KEY,
     app_id bigint NOT NULL,
     name varchar(128) NOT NULL,
     public_key text NOT NULL,
@@ -42,8 +63,15 @@ ALTER TABLE cycles ADD FOREIGN KEY (app_id) REFERENCES apps(id) ON DELETE CASCAD
 
 -- releases table
 
+CREATE SEQUENCE release_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
 CREATE TABLE releases (
-    id bigint PRIMARY KEY,
+    id bigint DEFAULT nextval('release_id_seq'::regclass) NOT NULL PRIMARY KEY,
     cycle_id bigint NOT NULL,
     platform int NOT NULL,
     version bigint NOT NULL,
@@ -59,8 +87,15 @@ ALTER TABLE releases ADD UNIQUE (cycle_id, platform, version);
 
 -- bundles table
 
+CREATE SEQUENCE bundle_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
 CREATE TABLE bundles (
-    id bigint PRIMARY KEY,
+    id bigint DEFAULT nextval('bundle_id_seq'::regclass) NOT NULL PRIMARY KEY,
     release_id bigint NOT NULL,
     hash varchar(128) NOT NULL,
     name varchar(1024) NOT NULL,
@@ -90,7 +125,16 @@ INSERT INTO users (id, name, email, password) VALUES (1, 'Mr. Robot', 'admin@pre
 
 DROP TABLE IF EXISTS permissions;
 DROP TABLE IF EXISTS bundles;
+DROP SEQUENCE IF EXISTS bundle_id_seq;
 DROP TABLE IF EXISTS releases;
+DROP SEQUENCE IF EXISTS release_id_seq;
 DROP TABLE IF EXISTS cycles;
+DROP SEQUENCE IF EXISTS cycle_id_seq;
 DROP TABLE IF EXISTS apps;
+DROP SEQUENCE IF EXISTS app_id_seq;
 DROP TABLE IF EXISTS users;
+DROP SEQUENCE IF EXISTS user_id_seq;
+
+
+
+
