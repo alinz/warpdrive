@@ -107,8 +107,15 @@ ALTER TABLE bundles ADD FOREIGN KEY ("release_id") REFERENCES releases("id") ON 
 
 -- permissions table
 
+CREATE SEQUENCE permission_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
 CREATE TABLE permissions (
-    id bigint PRIMARY KEY,
+    id bigint DEFAULT nextval('permission_id_seq'::regclass) NOT NULL PRIMARY KEY,
     user_id bigint NOT NULL,
     app_id bigint NOT NULL
 );

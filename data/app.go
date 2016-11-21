@@ -1,9 +1,11 @@
 package data
 
 import (
+	"fmt"
 	"time"
 
 	db "upper.io/db.v2"
+	"upper.io/db.v2/lib/sqlbuilder"
 )
 
 type App struct {
@@ -50,4 +52,25 @@ func (a *App) Save(session db.Database) error {
 
 func (a *App) Remove(session db.Database) error {
 	return a.Query(session, db.Cond{"id": a.ID}).Delete()
+}
+
+// SearchAppsByName returns the list of find apps under that user's permission
+func SearchAppsByName(userID int64, name string) []*App {
+	sql := fmt.Sprintf(`
+		SELECT apps.id, apps.name, apps.updated_at, apps.created_at
+		FROM apps
+		JOIN permissions
+		ON apps.id=permissions.app_id
+		WHERE permissions.user_id=%d AND apps.name LIKE '%%%s%%'`, userID, name)
+	rows, err := dbSession.Query(sql)
+
+	if err != nil {
+		return nil
+	}
+
+	var apps []*App
+	iter := sqlbuilder.NewIterator(rows)
+	iter.All(&apps)
+
+	return apps
 }

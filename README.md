@@ -30,7 +30,7 @@ cycles:
 - [X] POST      /users
 - [X] PUT       /users
 
-- [ ] GET       /apps
+- [x] GET       /apps?q=
 - [ ] GET       /apps/:appId
 - [ ] POST      /apps
 - [ ] PUT       /apps/:appId

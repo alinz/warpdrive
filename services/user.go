@@ -32,7 +32,13 @@ func FindUserByEmail(email string) *data.User {
 
 // QueryUsersByEmail this method returns users based on partial email search
 func QueryUsersByEmail(email string) []*data.User {
-	return data.QueryUsersByEmail(email)
+	users := data.QueryUsersByEmail(email)
+
+	if users == nil {
+		users = make([]*data.User, 0)
+	}
+
+	return users
 }
 
 // FindUserByID load user by id

@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	"log"
-
 	db "upper.io/db.v2"
 	"upper.io/db.v2/lib/sqlbuilder"
 )
@@ -81,7 +79,6 @@ func QueryUsersByEmail(email string) []*User {
 	sql := fmt.Sprintf(`SELECT * from users WHERE email LIKE '%%%s%%'`, email)
 	rows, err := dbSession.Query(sql)
 	if err != nil {
-		log.Println(err.Error())
 		return nil
 	}
 
@@ -90,7 +87,6 @@ func QueryUsersByEmail(email string) []*User {
 	err = iter.All(&users)
 
 	if err != nil {
-		log.Println(err.Error())
 		return nil
 	}
 
