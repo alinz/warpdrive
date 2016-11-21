@@ -64,6 +64,8 @@ func UpdateApp(userID, appID int64, name string) *data.App {
 		if err != nil {
 			return nil
 		}
+
+		return app
 	}
 
 	return nil
