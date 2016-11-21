@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	"strings"
+
 	db "upper.io/db.v2"
 	"upper.io/db.v2/lib/sqlbuilder"
 )
@@ -75,8 +77,46 @@ func (u *User) Remove(session db.Database) error {
 	return u.Query(session, db.Cond{"id": u.ID}).Delete()
 }
 
-func QueryUsersByEmail(email string) []*User {
-	sql := fmt.Sprintf(`SELECT * from users WHERE email LIKE '%%%s%%'`, email)
+func QueryUsersByEmail(name, email string) []*User {
+	name = strings.ToLower(name)
+	email = strings.ToLower(email)
+	sql := fmt.Sprintf(`
+		SELECT * from users WHERE lower(email) LIKE '%%%s%%' AND lower(name) LIKE '%%%s%%'
+	`, email, name)
+	rows, err := dbSession.Query(sql)
+	if err != nil {
+		return nil
+	}
+
+	var users []*User
+	iter := sqlbuilder.NewIterator(rows)
+	err = iter.All(&users)
+
+	if err != nil {
+		return nil
+	}
+
+	return users
+}
+
+func FindUsersWithinApp(userID, appID int64, name, email string) []*User {
+	// first we need to make sure that userID has access to appID
+	app := FindAppByUserIDAppID(userID, appID)
+
+	if app == nil {
+		return nil
+	}
+
+	name = strings.ToLower(name)
+	email = strings.ToLower(email)
+
+	sql := fmt.Sprintf(`
+		SELECT users.id, users.name, users.email, users.updated_at, users.created_at
+		FROM users
+		JOIN permissions
+		ON permissions.user_id=users.id
+		WHERE permissions.app_id=%d AND lower(users.name) LIKE '%%%s%%' AND lower(users.email) LIKE '%%%s%%'
+	`, appID, name, email)
 	rows, err := dbSession.Query(sql)
 	if err != nil {
 		return nil

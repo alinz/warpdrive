@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	"strings"
+
 	db "upper.io/db.v2"
 	"upper.io/db.v2/lib/sqlbuilder"
 )
@@ -63,12 +65,14 @@ func (a *App) Remove(session db.Database) error {
 
 // SearchAppsByName returns the list of find apps under that user's permission
 func SearchAppsByName(userID int64, name string) []*App {
+	name = strings.ToLower(name)
+
 	sql := fmt.Sprintf(`
 		SELECT apps.id, apps.name, apps.updated_at, apps.created_at
 		FROM apps
 		JOIN permissions
 		ON apps.id=permissions.app_id
-		WHERE permissions.user_id=%d AND apps.name LIKE '%%%s%%'`, userID, name)
+		WHERE permissions.user_id=%d AND lower(apps.name) LIKE '%%%s%%'`, userID, name)
 	rows, err := dbSession.Query(sql)
 
 	if err != nil {

@@ -21,9 +21,10 @@ type updateUser struct {
 
 func getUsersHandler(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
-	search := query.Get("q")
+	name := query.Get("name")
+	email := query.Get("email")
 
-	users := services.QueryUsersByEmail(search)
+	users := services.QueryUsersByEmail(name, email)
 
 	web.Respond(w, http.StatusOK, users)
 }

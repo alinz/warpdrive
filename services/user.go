@@ -31,8 +31,8 @@ func FindUserByEmail(email string) *data.User {
 }
 
 // QueryUsersByEmail this method returns users based on partial email search
-func QueryUsersByEmail(email string) []*data.User {
-	users := data.QueryUsersByEmail(email)
+func QueryUsersByEmail(name, email string) []*data.User {
+	users := data.QueryUsersByEmail(name, email)
 
 	if users == nil {
 		users = make([]*data.User, 0)
@@ -108,4 +108,49 @@ func UpdateUser(userID int64, name, email, password *string) (*data.User, error)
 	}
 
 	return user, nil
+}
+
+func FindUsersWithinApp(userID, appID int64, name, email string) []*data.User {
+	users := data.FindUsersWithinApp(userID, appID, name, email)
+
+	if users == nil {
+		users = make([]*data.User, 0)
+	}
+
+	return users
+}
+
+func AssignUserToApp(currentUserID, userID, appID int64) error {
+	app := data.FindAppByUserIDAppID(currentUserID, appID)
+
+	if app == nil {
+		return fmt.Errorf("app is not found")
+	}
+
+	return data.Transaction(func(session sqlbuilder.Tx) error {
+		permission := &data.Permission{
+			UserID: userID,
+			AppID:  appID,
+		}
+		return permission.Save(session)
+	})
+}
+
+func UnassignUserFromApp(currentUserID, userID, appID int64) error {
+	app := data.FindAppByUserIDAppID(currentUserID, appID)
+
+	if app == nil {
+		return fmt.Errorf("app is not found")
+	}
+
+	return data.Transaction(func(session sqlbuilder.Tx) error {
+		permission := &data.Permission{}
+		err := permission.Find(session, db.Cond{"user_id": userID, "app_id": appID})
+
+		if err != nil {
+			return err
+		}
+
+		return permission.Remove(session)
+	})
 }

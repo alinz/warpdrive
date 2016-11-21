@@ -35,9 +35,9 @@ cycles:
 - [x] POST      /apps
 - [X] PUT       /apps/:appId
 
-- [ ] GET       /apps/:appId/users
-- [ ] POST      /apps/:appId/users/:userId
-- [ ] DELETE    /apps/:appId/users/:userId
+- [x] GET       /apps/:appId/users?name=&email=
+- [x] POST      /apps/:appId/users/:userId
+- [x] DELETE    /apps/:appId/users/:userId
 
 - [ ] GET       /apps/:appId/cycles
 - [ ] GET       /apps/:appId/cycles/:cycleId
