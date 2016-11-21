@@ -65,7 +65,7 @@ func createUserHandler(w http.ResponseWriter, r *http.Request) {
 
 func updateUserHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	userID := ctx.Value("userid").(int64)
+	userID := ctx.Value("userId").(int64)
 	body := ctx.Value("parsed:body").(*updateUser)
 
 	user, err := services.UpdateUser(userID, body.Name, body.Email, body.Password)

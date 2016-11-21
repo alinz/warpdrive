@@ -50,3 +50,21 @@ func CreateApp(userID int64, name string) *data.App {
 
 	return app
 }
+
+func UpdateApp(userID, appID int64, name string) *data.App {
+	app := FindAppByID(userID, appID)
+
+	if app != nil {
+		app.Name = name
+
+		err := data.Transaction(func(session sqlbuilder.Tx) error {
+			return app.Save(session)
+		})
+
+		if err != nil {
+			return nil
+		}
+	}
+
+	return nil
+}

@@ -13,9 +13,13 @@ type createApp struct {
 	Name *string `json:"name,required"`
 }
 
+type updateApp struct {
+	Name *string `json:"name,required"`
+}
+
 func getAppsHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	userID := ctx.Value("userid").(int64)
+	userID := ctx.Value("userId").(int64)
 	query := r.URL.Query()
 	search := query.Get("q")
 
@@ -26,8 +30,8 @@ func getAppsHandler(w http.ResponseWriter, r *http.Request) {
 
 func getAppHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	userID := ctx.Value("userid").(int64)
-	appID, err := web.ParamAsInt64(r, "userId")
+	userID := ctx.Value("userId").(int64)
+	appID, err := web.ParamAsInt64(r, "appId")
 
 	if err != nil {
 		web.Respond(w, http.StatusBadRequest, err)
@@ -46,13 +50,34 @@ func getAppHandler(w http.ResponseWriter, r *http.Request) {
 
 func createAppHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	userID := ctx.Value("userid").(int64)
+	userID := ctx.Value("userId").(int64)
 	body := ctx.Value("parsed:body").(*createApp)
 
 	app := services.CreateApp(userID, *body.Name)
 
 	if app == nil {
 		web.Respond(w, http.StatusBadRequest, fmt.Errorf("app could not be created"))
+		return
+	}
+
+	web.Respond(w, http.StatusOK, app)
+}
+
+func updateAppHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	userID := ctx.Value("userId").(int64)
+	body := ctx.Value("parsed:body").(*updateApp)
+	appID, err := web.ParamAsInt64(r, "appId")
+
+	if err != nil {
+		web.Respond(w, http.StatusBadRequest, err)
+		return
+	}
+
+	app := services.UpdateApp(userID, appID, *body.Name)
+
+	if app == nil {
+		web.Respond(w, http.StatusNotFound, fmt.Errorf("app not found to be updated"))
 		return
 	}
 
