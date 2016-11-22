@@ -51,7 +51,7 @@ cycles:
 - [x] POST      /apps/:appId/cycles/:cycleId/releases
 - [x] PUT       /apps/:appId/cycles/:cycleId/releases/:releaseId
 - [x] DELETE    /apps/:appId/cycles/:cycleId/releases/:releaseId
-- [ ] POST      /apps/:appId/cycles/:cycleId/releases/:releaseId/bundles
+- [x] POST      /apps/:appId/cycles/:cycleId/releases/:releaseId/bundles
 - [ ] GET       /apps/:appId/cycles/:cycleId/releases/:releaseId/bundles?name=
 - [x] POST      /apps/:appId/cycles/:cycleId/releases/:releaseId/lock
 - [x] DELETE    /apps/:appId/cycles/:cycleId/releases/:releaseId/lock
@@ -64,3 +64,6 @@ cycles:
 ## this following api calls for any auditing
 
 - [ ] GET       /apps/:appId/logs
+
+# Rollback
+you have to unlock those version that you don't want
