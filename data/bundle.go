@@ -1,9 +1,11 @@
 package data
 
 import (
+	"fmt"
 	"time"
 
 	db "upper.io/db.v2"
+	"upper.io/db.v2/lib/sqlbuilder"
 )
 
 type Bundle struct {
@@ -60,4 +62,26 @@ func (b *Bundle) Save(session db.Database) error {
 
 func (b *Bundle) Remove(session db.Database) error {
 	return b.Query(session, db.Cond{"id": b.ID}).Delete()
+}
+
+func SearchBundlesByName(releaseId int64, name string) ([]*Bundle, error) {
+	sql := fmt.Sprintf(`
+    SELECT * FROM bundles
+    WHERE release_id=%d AND name like '%%%s%%'
+  `, releaseId, name)
+	rows, err := dbSession.Query(sql)
+
+	if err != nil {
+		return nil, nil
+	}
+
+	var bundles []*Bundle
+	iter := sqlbuilder.NewIterator(rows)
+	err = iter.All(&bundles)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return bundles, nil
 }

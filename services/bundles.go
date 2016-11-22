@@ -89,3 +89,12 @@ func CreateBundles(userID, appID, cycleID, releaseID int64, mapFiles map[string]
 
 	return bundles, nil
 }
+
+func SearchBundles(userID, appID, cycleID, releaseID int64, name string) ([]*data.Bundle, error) {
+	_, err := FindReleaseByID(userID, appID, cycleID, releaseID)
+	if err != nil {
+		return nil, err
+	}
+
+	return data.SearchBundlesByName(releaseID, name)
+}

@@ -52,7 +52,7 @@ cycles:
 - [x] PUT       /apps/:appId/cycles/:cycleId/releases/:releaseId
 - [x] DELETE    /apps/:appId/cycles/:cycleId/releases/:releaseId
 - [x] POST      /apps/:appId/cycles/:cycleId/releases/:releaseId/bundles
-- [ ] GET       /apps/:appId/cycles/:cycleId/releases/:releaseId/bundles?name=
+- [x] GET       /apps/:appId/cycles/:cycleId/releases/:releaseId/bundles?name=
 - [x] POST      /apps/:appId/cycles/:cycleId/releases/:releaseId/lock
 - [x] DELETE    /apps/:appId/cycles/:cycleId/releases/:releaseId/lock
 
