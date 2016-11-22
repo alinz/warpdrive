@@ -4,6 +4,7 @@ import (
 	"github.com/pressly/warpdrive"
 	"github.com/pressly/warpdrive/data"
 	"github.com/pressly/warpdrive/lib/crypto"
+	"upper.io/db.v2/lib/sqlbuilder"
 )
 
 func SearchAppCycles(userID, appID int64, name string) []*data.Cycle {
@@ -79,4 +80,53 @@ func GetAppCyclePublicKey(userID, appID, cycleID int64) (string, error) {
 	}
 
 	return cycle.PublicKey, nil
+}
+
+func UpdateCycle(userID, appID, cycleID int64, name string) (*data.Cycle, error) {
+	_, err := FindAppByID(userID, appID)
+	if err != nil {
+		return nil, err
+	}
+
+	cycle := &data.Cycle{
+		ID: cycleID,
+	}
+
+	err = data.Transaction(func(session sqlbuilder.Tx) error {
+		err = cycle.Load(session)
+		if err != nil {
+			return err
+		}
+
+		cycle.Name = name
+		err = cycle.Save(session)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return cycle, nil
+}
+
+func RemoveCycle(userID, appID, cycleID int64) error {
+	_, err := FindAppByID(userID, appID)
+	if err != nil {
+		return err
+	}
+
+	err = data.Transaction(func(session sqlbuilder.Tx) error {
+		cycle := &data.Cycle{
+			ID: cycleID,
+		}
+
+		return cycle.Remove(session)
+	})
+
+	return err
 }

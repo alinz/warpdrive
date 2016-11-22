@@ -43,8 +43,8 @@ cycles:
 - [x] GET       /apps/:appId/cycles/:cycleId
 - [x] POST      /apps/:appId/cycles
 - [X] GET       /apps/:appId/cycles/:cycleId/key
-- [ ] PUT       /apps/:appId/cycles/:cycleId
-- [ ] DELETE    /apps/:appId/cycles/:cycleId
+- [X] PUT       /apps/:appId/cycles/:cycleId
+- [X] DELETE    /apps/:appId/cycles/:cycleId
 
 - [ ] GET       /apps/:appId/cycles/:cycleId/releases?platforn=&version=&note=
 - [ ] GET       /apps/:appId/cycles/:cycleId/releases/:releaseId

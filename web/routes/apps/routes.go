@@ -31,7 +31,7 @@ func Routes() http.Handler {
 
 			r.Route("/:cycleId", func(r chi.Router) {
 				r.Get("/", getCycleAppHandler)
-				r.Put("/", updateCycleAppHandler)
+				r.With(web.BodyParser(&updateCycle{}, 128)).Put("/", updateCycleAppHandler)
 				r.Delete("/", removeCycleAppHandler)
 				r.Get("/key", getKeyCycleAppHandler)
 

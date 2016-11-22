@@ -11,6 +11,10 @@ type createCycle struct {
 	Name *string `json:"name,required"`
 }
 
+type updateCycle struct {
+	Name *string `json:"name,required"`
+}
+
 func cyclesAppHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	userID := ctx.Value("user:id").(int64)
@@ -100,7 +104,50 @@ func getKeyCycleAppHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func updateCycleAppHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	userID := ctx.Value("user:id").(int64)
+	body := ctx.Value("parsed:body").(*updateCycle)
+	appID, err := web.ParamAsInt64(r, "appId")
+	if err != nil {
+		web.Respond(w, http.StatusBadRequest, err)
+		return
+	}
+	cycleID, err := web.ParamAsInt64(r, "cycleId")
+	if err != nil {
+		web.Respond(w, http.StatusBadRequest, err)
+		return
+	}
+
+	cycle, err := services.UpdateCycle(userID, appID, cycleID, *body.Name)
+
+	if err != nil {
+		web.Respond(w, http.StatusBadRequest, err)
+		return
+	}
+
+	web.Respond(w, http.StatusOK, cycle)
 }
 
 func removeCycleAppHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	userID := ctx.Value("user:id").(int64)
+	appID, err := web.ParamAsInt64(r, "appId")
+	if err != nil {
+		web.Respond(w, http.StatusBadRequest, err)
+		return
+	}
+	cycleID, err := web.ParamAsInt64(r, "cycleId")
+	if err != nil {
+		web.Respond(w, http.StatusBadRequest, err)
+		return
+	}
+
+	err = services.RemoveCycle(userID, appID, cycleID)
+
+	if err != nil {
+		web.Respond(w, http.StatusBadRequest, err)
+		return
+	}
+
+	web.Respond(w, http.StatusOK, nil)
 }
