@@ -14,6 +14,12 @@ type createRelease struct {
 	Note     *string        `json:"note"`
 }
 
+type updateRelease struct {
+	Platform *data.Platform `json:"platform"`
+	Version  *data.Version  `json:"version"`
+	Note     *string        `json:"note"`
+}
+
 func getReleasesHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	userID := ctx.Value("user:id").(int64)
@@ -101,7 +107,35 @@ func createReleaseHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func updateReleaseHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	userID := ctx.Value("user:id").(int64)
+	body := ctx.Value("parsed:body").(*updateRelease)
 
+	appID, err := web.ParamAsInt64(r, "appId")
+	if err != nil {
+		web.Respond(w, http.StatusBadRequest, err)
+		return
+	}
+
+	cycleID, err := web.ParamAsInt64(r, "cycleId")
+	if err != nil {
+		web.Respond(w, http.StatusBadRequest, err)
+		return
+	}
+
+	releaseID, err := web.ParamAsInt64(r, "releaseId")
+	if err != nil {
+		web.Respond(w, http.StatusBadRequest, err)
+		return
+	}
+
+	release, err := services.UpdateRelease(userID, appID, cycleID, releaseID, body.Platform, body.Version, body.Note)
+	if err != nil {
+		web.Respond(w, http.StatusBadRequest, err)
+		return
+	}
+
+	web.Respond(w, http.StatusOK, release)
 }
 
 func removeReleaseHandler(w http.ResponseWriter, r *http.Request) {

@@ -37,10 +37,10 @@ func Routes() http.Handler {
 
 				r.Route("/releases", func(r chi.Router) {
 					r.Get("/", getReleasesHandler)
-					r.Post("/", createReleaseHandler)
+					r.With(web.BodyParser(&createRelease{}, 1024)).Post("/", createReleaseHandler)
 					r.Route("/:releaseId", func(r chi.Router) {
 						r.Get("/", getReleaseHandler)
-						r.Put("/", updateReleaseHandler)
+						r.With(web.BodyParser(&updateRelease{}, 1024)).Put("/", updateReleaseHandler)
 						r.Delete("/", removeReleaseHandler)
 
 						r.Route("/bundles", func(r chi.Router) {

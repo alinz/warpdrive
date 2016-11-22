@@ -67,3 +67,39 @@ func CreateRelease(userID, appID, cycleID int64, platform data.Platform, version
 
 	return release, nil
 }
+
+func UpdateRelease(userID, appID, cycleID, releaseID int64, platfrom *data.Platform, version *data.Version, note *string) (*data.Release, error) {
+	_, err := FindCycleByID(userID, appID, cycleID)
+	if err != nil {
+		return nil, err
+	}
+
+	release := &data.Release{ID: releaseID}
+
+	err = data.Transaction(func(session sqlbuilder.Tx) error {
+		err := release.Load(session)
+		if err != nil {
+			return err
+		}
+
+		if platfrom != nil {
+			release.Platform = *platfrom
+		}
+
+		if version != nil {
+			release.Version = *version
+		}
+
+		if note != nil {
+			release.Note = *note
+		}
+
+		return release.Save(session)
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return release, nil
+}

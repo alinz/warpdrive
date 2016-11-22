@@ -31,6 +31,13 @@ func (r *Release) Find(session db.Database, query db.Cond) error {
 	return r.Query(session, query).One(r)
 }
 
+func (r *Release) Load(session db.Database) error {
+	if session == nil {
+		session = dbSession
+	}
+	return r.Query(session, db.Cond{"id": r.ID}).One(r)
+}
+
 func (r *Release) Save(session db.Database) error {
 	if session == nil {
 		session = dbSession
