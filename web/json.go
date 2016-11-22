@@ -20,6 +20,13 @@ func WriteAsJSON(w http.ResponseWriter, response interface{}, status int) {
 	}
 }
 
+//WriteAsText a helper function to simplifies the string serilization
+func WriteAsText(w http.ResponseWriter, response interface{}, status int) {
+	w.Header().Set("Content-Type", "text/plain; charset=UTF-8")
+	w.WriteHeader(status)
+	w.Write([]byte(fmt.Sprintf("%v", response)))
+}
+
 //StreamJSONToStruct converts stream of json to a defined struct
 func StreamJSONToStruct(r io.Reader, v interface{}) error {
 	data, err := ioutil.ReadAll(r)

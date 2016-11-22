@@ -38,6 +38,10 @@ func (c *Cycle) Load(session db.Database) error {
 }
 
 func (c *Cycle) Save(session db.Database) error {
+	if session == nil {
+		session = dbSession
+	}
+
 	collection := session.Collection(c.CollectionName())
 	var err error
 
@@ -74,7 +78,7 @@ func FindCyclesApp(userID, appID int64, name string) []*Cycle {
 	sql := fmt.Sprintf(`
 		SELECT *
 		FROM cycles
-		WHERE cycles.app_id=%d AND name='%%%s%%'`, appID, name)
+		WHERE cycles.app_id=%d AND name LIKE '%%%s%%'`, appID, name)
 	rows, err := dbSession.Query(sql)
 
 	if err != nil {

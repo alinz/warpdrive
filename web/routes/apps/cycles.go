@@ -76,6 +76,27 @@ func createCycleAppHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func getKeyCycleAppHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	userID := ctx.Value("user:id").(int64)
+	appID, err := web.ParamAsInt64(r, "appId")
+	if err != nil {
+		web.Respond(w, http.StatusBadRequest, err)
+		return
+	}
+	cycleID, err := web.ParamAsInt64(r, "cycleId")
+	if err != nil {
+		web.Respond(w, http.StatusBadRequest, err)
+		return
+	}
+
+	publicKey, err := services.GetAppCyclePublicKey(userID, appID, cycleID)
+
+	if err != nil {
+		web.Respond(w, http.StatusBadRequest, err)
+		return
+	}
+
+	web.Respond(w, http.StatusOK, publicKey)
 }
 
 func updateCycleAppHandler(w http.ResponseWriter, r *http.Request) {

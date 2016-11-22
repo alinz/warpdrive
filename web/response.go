@@ -11,7 +11,12 @@ func Respond(w http.ResponseWriter, status int, v interface{}) {
 	}
 
 	if v != nil {
-		WriteAsJSON(w, v, status)
+		switch v := v.(type) {
+		case string:
+			WriteAsText(w, v, status)
+		default:
+			WriteAsJSON(w, v, status)
+		}
 	} else {
 		w.WriteHeader(status)
 	}

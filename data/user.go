@@ -48,6 +48,7 @@ func (u *User) Save(session db.Database) error {
 	if session == nil {
 		session = dbSession
 	}
+
 	collection := session.Collection(u.CollectionName())
 	var err error
 

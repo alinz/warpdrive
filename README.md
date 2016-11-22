@@ -42,7 +42,7 @@ cycles:
 - [x] GET       /apps/:appId/cycles?name=
 - [x] GET       /apps/:appId/cycles/:cycleId
 - [x] POST      /apps/:appId/cycles
-- [ ] GET       /apps/:appId/cycles/:cycleId/key
+- [X] GET       /apps/:appId/cycles/:cycleId/key
 - [ ] PUT       /apps/:appId/cycles/:cycleId
 - [ ] DELETE    /apps/:appId/cycles/:cycleId
 

@@ -30,6 +30,10 @@ func (r *Release) Find(session db.Database, query db.Cond) error {
 }
 
 func (r *Release) Save(session db.Database) error {
+	if session == nil {
+		session = dbSession
+	}
+
 	collection := session.Collection(r.CollectionName())
 	var err error
 

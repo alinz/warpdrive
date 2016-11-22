@@ -37,6 +37,10 @@ func (a *App) Load(session db.Database) error {
 }
 
 func (a *App) Save(session db.Database) error {
+	if session == nil {
+		session = dbSession
+	}
+
 	collection := session.Collection(a.CollectionName())
 	var err error
 

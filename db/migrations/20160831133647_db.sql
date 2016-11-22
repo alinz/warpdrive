@@ -131,6 +131,7 @@ INSERT INTO users (id, name, email, password) VALUES (1, 'Mr. Robot', 'admin@pre
 -- +goose Down
 
 DROP TABLE IF EXISTS permissions;
+DROP SEQUENCE IF EXISTS permission_id_seq;
 DROP TABLE IF EXISTS bundles;
 DROP SEQUENCE IF EXISTS bundle_id_seq;
 DROP TABLE IF EXISTS releases;

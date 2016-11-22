@@ -62,3 +62,21 @@ func CreateCycle(userID, appID int64, name string) (*data.Cycle, error) {
 
 	return cycle, nil
 }
+
+func GetAppCyclePublicKey(userID, appID, cycleID int64) (string, error) {
+	_, err := FindAppByID(userID, appID)
+	if err != nil {
+		return "", err
+	}
+
+	cycle := &data.Cycle{
+		ID: cycleID,
+	}
+
+	err = cycle.Load(nil)
+	if err != nil {
+		return "", err
+	}
+
+	return cycle.PublicKey, nil
+}
