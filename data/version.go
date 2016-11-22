@@ -27,6 +27,10 @@ func ParseVersion(version string) (Version, error) {
 	return Version(value), nil
 }
 
+func VersionToInt(version Version) uint64 {
+	return uint64(version)
+}
+
 //VersionEncode convert Version to string represantation
 func VersionEncode(major, minor, patch uint64) string {
 	return strconv.FormatUint(major, 10) + "." +

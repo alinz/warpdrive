@@ -1,9 +1,11 @@
 package data
 
 import (
+	"fmt"
 	"time"
 
 	db "upper.io/db.v2"
+	"upper.io/db.v2/lib/sqlbuilder"
 )
 
 type Release struct {
@@ -67,5 +69,23 @@ func FindAllReleases(session db.Database, query db.Cond) ([]*Release, error) {
 	if err != nil {
 		return nil, err
 	}
+	return releases, nil
+}
+
+func FindReleases(cycleID int64, platform Platform, version Version, note string) ([]*Release, error) {
+	sql := fmt.Sprintf(`
+		SELECT * FROM releases 
+		WHERE cycle_id=%d AND version=%d AND platform=%d AND note like '%%%s%%'
+	`, cycleID, VersionToInt(version), PlatformToInt(platform), note)
+	rows, err := dbSession.Query(sql)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var releases []*Release
+	iter := sqlbuilder.NewIterator(rows)
+	iter.All(&releases)
+
 	return releases, nil
 }
