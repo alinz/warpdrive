@@ -21,6 +21,11 @@ func New() chi.Router {
 
 	r.Mount("/session", session.Routes())
 
+	r.Route("/apps/:appId/cycles/:cycleId/releases", func(r chi.Router) {
+		r.Get("/latest/:version", checkVersionHandler)
+		r.Post("/:releaseId/download", downloadHandler)
+	})
+
 	r.Group(func(r chi.Router) {
 		r.Use(web.TokenAuth.Verifier)
 		r.Use(web.Authenticator)
