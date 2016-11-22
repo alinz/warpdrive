@@ -108,3 +108,30 @@ func UpdateRelease(userID, appID, cycleID, releaseID int64, platfrom *data.Platf
 
 	return release, nil
 }
+
+func RemoveRelease(userID, appID, cycleID, releaseID int64) error {
+	_, err := FindCycleByID(userID, appID, cycleID)
+	if err != nil {
+		return err
+	}
+
+	err = data.Transaction(func(session sqlbuilder.Tx) error {
+		release := &data.Release{
+			ID: releaseID,
+		}
+
+		err := release.Load(session)
+		if err != nil {
+			return err
+		}
+
+		// we need to make sure that if released is locked, you can not delete it
+		if release.Locked {
+			return ErrReleaseLocked
+		}
+
+		return release.Remove(session)
+	})
+
+	return nil
+}

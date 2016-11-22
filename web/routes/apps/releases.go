@@ -139,7 +139,34 @@ func updateReleaseHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func removeReleaseHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	userID := ctx.Value("user:id").(int64)
 
+	appID, err := web.ParamAsInt64(r, "appId")
+	if err != nil {
+		web.Respond(w, http.StatusBadRequest, err)
+		return
+	}
+
+	cycleID, err := web.ParamAsInt64(r, "cycleId")
+	if err != nil {
+		web.Respond(w, http.StatusBadRequest, err)
+		return
+	}
+
+	releaseID, err := web.ParamAsInt64(r, "releaseId")
+	if err != nil {
+		web.Respond(w, http.StatusBadRequest, err)
+		return
+	}
+
+	err = services.RemoveRelease(userID, appID, cycleID, releaseID)
+	if err != nil {
+		web.Respond(w, http.StatusBadRequest, err)
+		return
+	}
+
+	web.Respond(w, http.StatusOK, nil)
 }
 
 func lockReleaseHandler(w http.ResponseWriter, r *http.Request) {
