@@ -5,8 +5,6 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	"fmt"
-
 	"github.com/pressly/warpdrive/data"
 	"upper.io/db.v2"
 	"upper.io/db.v2/lib/sqlbuilder"
@@ -54,7 +52,7 @@ func CreateUser(name, email, password string) (*data.User, error) {
 	hashpass, err := bcrypt.GenerateFromPassword([]byte(password), 0)
 
 	if err != nil {
-		return nil, fmt.Errorf("couldn't create a proper password")
+		return nil, ErrCreatePassword
 	}
 
 	user := &data.User{
@@ -75,7 +73,7 @@ func UpdateUser(userID int64, name, email, password *string) (*data.User, error)
 	user := FindUserByID(userID)
 
 	if user == nil {
-		return nil, fmt.Errorf("you don't have access to this user")
+		return nil, ErrUpdateUser
 	}
 
 	if name != nil {
@@ -89,7 +87,7 @@ func UpdateUser(userID int64, name, email, password *string) (*data.User, error)
 	if password != nil {
 		hashpass, err := bcrypt.GenerateFromPassword([]byte(*password), 0)
 		if err != nil {
-			return nil, fmt.Errorf("couldn't create a proper password")
+			return nil, ErrCreatePassword
 		}
 		user.Password = string(hashpass)
 	}
@@ -119,7 +117,7 @@ func AssignUserToApp(currentUserID, userID, appID int64) error {
 	app := data.FindAppByUserIDAppID(currentUserID, appID)
 
 	if app == nil {
-		return fmt.Errorf("app is not found")
+		return ErrAppNotFound
 	}
 
 	return data.Transaction(func(session sqlbuilder.Tx) error {
@@ -135,7 +133,7 @@ func UnassignUserFromApp(currentUserID, userID, appID int64) error {
 	app := data.FindAppByUserIDAppID(currentUserID, appID)
 
 	if app == nil {
-		return fmt.Errorf("app is not found")
+		return ErrAppNotFound
 	}
 
 	return data.Transaction(func(session sqlbuilder.Tx) error {

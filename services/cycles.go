@@ -16,35 +16,35 @@ func SearchAppCycles(userID, appID int64, name string) []*data.Cycle {
 	return cycles
 }
 
-func FindCycleByID(userID, appID, cycleID int64) *data.Cycle {
-	app := data.FindAppByUserIDAppID(userID, appID)
-	if app == nil {
-		return nil
+func FindCycleByID(userID, appID, cycleID int64) (*data.Cycle, error) {
+	_, err := FindAppByID(userID, appID)
+	if err != nil {
+		return nil, err
 	}
 
 	cycle := &data.Cycle{
 		ID: cycleID,
 	}
 
-	err := cycle.Load(nil)
+	err = cycle.Load(nil)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
-	return cycle
+	return cycle, nil
 }
 
-func CreateCycle(userID, appID int64, name string) *data.Cycle {
-	app := data.FindAppByUserIDAppID(userID, appID)
-	if app == nil {
-		return nil
+func CreateCycle(userID, appID int64, name string) (*data.Cycle, error) {
+	_, err := FindAppByID(userID, appID)
+	if err != nil {
+		return nil, err
 	}
 
 	keySize := warpdrive.Conf.Security.KeySize
 	privateKey, publicKey, err := crypto.RSAKeyPair(keySize)
 
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
 	cycle := &data.Cycle{
@@ -55,10 +55,10 @@ func CreateCycle(userID, appID int64, name string) *data.Cycle {
 	}
 
 	err = cycle.Save(nil)
-	
+
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
-	return cycle
+	return cycle, nil
 }

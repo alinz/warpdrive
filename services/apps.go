@@ -16,11 +16,17 @@ func SearchApps(userID int64, name string) []*data.App {
 	return apps
 }
 
-func FindAppByID(userID, appID int64) *data.App {
-	return data.FindAppByUserIDAppID(userID, appID)
+func FindAppByID(userID, appID int64) (*data.App, error) {
+	app := data.FindAppByUserIDAppID(userID, appID)
+
+	if app == nil {
+		return nil, ErrAppNotFound
+	}
+
+	return app, nil
 }
 
-func CreateApp(userID int64, name string) *data.App {
+func CreateApp(userID int64, name string) (*data.App, error) {
 	app := &data.App{
 		Name: name,
 	}
@@ -45,28 +51,28 @@ func CreateApp(userID int64, name string) *data.App {
 	})
 
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
-	return app
+	return app, nil
 }
 
-func UpdateApp(userID, appID int64, name string) *data.App {
-	app := FindAppByID(userID, appID)
+func UpdateApp(userID, appID int64, name string) (*data.App, error) {
+	app, err := FindAppByID(userID, appID)
 
-	if app != nil {
-		app.Name = name
-
-		err := data.Transaction(func(session sqlbuilder.Tx) error {
-			return app.Save(session)
-		})
-
-		if err != nil {
-			return nil
-		}
-
-		return app
+	if err != nil {
+		return nil, err
 	}
 
-	return nil
+	app.Name = name
+
+	err = data.Transaction(func(session sqlbuilder.Tx) error {
+		return app.Save(session)
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return app, nil
 }

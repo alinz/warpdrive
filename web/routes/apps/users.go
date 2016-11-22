@@ -9,7 +9,7 @@ import (
 
 func usersAppHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	userID := ctx.Value("userId").(int64)
+	userID := ctx.Value("user:id").(int64)
 	appID, err := web.ParamAsInt64(r, "appId")
 
 	if err != nil {
@@ -28,7 +28,7 @@ func usersAppHandler(w http.ResponseWriter, r *http.Request) {
 
 func assignUserToAppHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	currentUserID := ctx.Value("userId").(int64)
+	currentUserID := ctx.Value("user:id").(int64)
 
 	appID, err := web.ParamAsInt64(r, "appId")
 	if err != nil {
@@ -53,7 +53,7 @@ func assignUserToAppHandler(w http.ResponseWriter, r *http.Request) {
 
 func unassignUserFromAppHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	currentUserID := ctx.Value("userId").(int64)
+	currentUserID := ctx.Value("user:id").(int64)
 
 	appID, err := web.ParamAsInt64(r, "appId")
 	if err != nil {

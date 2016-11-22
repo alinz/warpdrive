@@ -42,14 +42,14 @@ func Authenticator(next http.Handler) http.Handler {
 			return
 		}
 
-		userID, ok := jwtToken.Claims["userId"]
+		userID, ok := jwtToken.Claims["user:id"]
 		if !ok {
 			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 			return
 		}
 
 		id, _ := strconv.ParseInt(userID.(string), 10, 64)
-		ctx = context.WithValue(ctx, "userId", id)
+		ctx = context.WithValue(ctx, "user:id", id)
 
 		// Token is authenticated, pass it through
 		next.ServeHTTP(w, r.WithContext(ctx))

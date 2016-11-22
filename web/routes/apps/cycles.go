@@ -3,8 +3,6 @@ package apps
 import (
 	"net/http"
 
-	"fmt"
-
 	"github.com/pressly/warpdrive/services"
 	"github.com/pressly/warpdrive/web"
 )
@@ -15,7 +13,7 @@ type createCycle struct {
 
 func cyclesAppHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	userID := ctx.Value("userId").(int64)
+	userID := ctx.Value("user:id").(int64)
 	appID, err := web.ParamAsInt64(r, "appId")
 
 	if err != nil {
@@ -33,7 +31,7 @@ func cyclesAppHandler(w http.ResponseWriter, r *http.Request) {
 
 func getCycleAppHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	userID := ctx.Value("userId").(int64)
+	userID := ctx.Value("user:id").(int64)
 	appID, err := web.ParamAsInt64(r, "appId")
 	if err != nil {
 		web.Respond(w, http.StatusBadRequest, err)
@@ -46,10 +44,10 @@ func getCycleAppHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cycle := services.FindCycleByID(userID, appID, cycleID)
+	cycle, err := services.FindCycleByID(userID, appID, cycleID)
 
-	if cycle == nil {
-		web.Respond(w, http.StatusNotFound, fmt.Errorf("cycle not found"))
+	if err != nil {
+		web.Respond(w, http.StatusNotFound, err)
 		return
 	}
 
@@ -58,7 +56,7 @@ func getCycleAppHandler(w http.ResponseWriter, r *http.Request) {
 
 func createCycleAppHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	userID := ctx.Value("userId").(int64)
+	userID := ctx.Value("user:id").(int64)
 	appID, err := web.ParamAsInt64(r, "appId")
 	body := ctx.Value("parsed:body").(*createCycle)
 
@@ -67,10 +65,10 @@ func createCycleAppHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cycle := services.CreateCycle(userID, appID, *body.Name)
+	cycle, err := services.CreateCycle(userID, appID, *body.Name)
 
-	if cycle == nil {
-		web.Respond(w, http.StatusBadRequest, fmt.Errorf("cycle couldn't be created"))
+	if err != nil {
+		web.Respond(w, http.StatusBadRequest, err)
 		return
 	}
 

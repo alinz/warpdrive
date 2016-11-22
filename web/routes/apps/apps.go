@@ -3,8 +3,6 @@ package apps
 import (
 	"net/http"
 
-	"fmt"
-
 	"github.com/pressly/warpdrive/services"
 	"github.com/pressly/warpdrive/web"
 )
@@ -19,7 +17,7 @@ type updateApp struct {
 
 func getAppsHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	userID := ctx.Value("userId").(int64)
+	userID := ctx.Value("user:id").(int64)
 	query := r.URL.Query()
 	name := query.Get("name")
 
@@ -30,7 +28,7 @@ func getAppsHandler(w http.ResponseWriter, r *http.Request) {
 
 func getAppHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	userID := ctx.Value("userId").(int64)
+	userID := ctx.Value("user:id").(int64)
 	appID, err := web.ParamAsInt64(r, "appId")
 
 	if err != nil {
@@ -38,10 +36,10 @@ func getAppHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app := services.FindAppByID(userID, appID)
+	app, err := services.FindAppByID(userID, appID)
 
-	if app == nil {
-		web.Respond(w, http.StatusNotFound, fmt.Errorf("app not found"))
+	if err != nil {
+		web.Respond(w, http.StatusNotFound, err)
 		return
 	}
 
@@ -50,13 +48,13 @@ func getAppHandler(w http.ResponseWriter, r *http.Request) {
 
 func createAppHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	userID := ctx.Value("userId").(int64)
+	userID := ctx.Value("user:id").(int64)
 	body := ctx.Value("parsed:body").(*createApp)
 
-	app := services.CreateApp(userID, *body.Name)
+	app, err := services.CreateApp(userID, *body.Name)
 
-	if app == nil {
-		web.Respond(w, http.StatusBadRequest, fmt.Errorf("app could not be created"))
+	if err != nil {
+		web.Respond(w, http.StatusBadRequest, err)
 		return
 	}
 
@@ -65,7 +63,7 @@ func createAppHandler(w http.ResponseWriter, r *http.Request) {
 
 func updateAppHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	userID := ctx.Value("userId").(int64)
+	userID := ctx.Value("user:id").(int64)
 	body := ctx.Value("parsed:body").(*updateApp)
 	appID, err := web.ParamAsInt64(r, "appId")
 
@@ -74,10 +72,10 @@ func updateAppHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app := services.UpdateApp(userID, appID, *body.Name)
+	app, err := services.UpdateApp(userID, appID, *body.Name)
 
-	if app == nil {
-		web.Respond(w, http.StatusNotFound, fmt.Errorf("app not found to be updated"))
+	if err != nil {
+		web.Respond(w, http.StatusNotFound, err)
 		return
 	}
 
