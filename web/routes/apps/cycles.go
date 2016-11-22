@@ -42,7 +42,7 @@ func getCycleAppHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cycle := services.FindCycleByID(userId, appID, cycleID)
+	cycle := services.FindCycleByID(userID, appID, cycleID)
 
 	if cycle == nil {
 		web.Respond(w, http.StatusNotFound, fmt.Errorf("cycle not found"))
