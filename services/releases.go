@@ -82,6 +82,11 @@ func UpdateRelease(userID, appID, cycleID, releaseID int64, platfrom *data.Platf
 			return err
 		}
 
+		// we need to make sure that if released is locked, you can not edit it
+		if release.Locked {
+			return ErrReleaseLocked
+		}
+
 		if platfrom != nil {
 			release.Platform = *platfrom
 		}
