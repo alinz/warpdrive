@@ -27,7 +27,7 @@ func Routes() http.Handler {
 
 		r.Route("/cycles", func(r chi.Router) {
 			r.Get("/", cyclesAppHandler)
-			r.Post("/", createCycleAppHandler)
+			r.With(web.BodyParser(&createCycle{}, 128)).Post("/", createCycleAppHandler)
 
 			r.Route("/:cycleId", func(r chi.Router) {
 				r.Get("/", getCycleAppHandler)

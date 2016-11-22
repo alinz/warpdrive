@@ -9,6 +9,10 @@ import (
 	"github.com/pressly/warpdrive/web"
 )
 
+type createCycle struct {
+	Name *string `json:"name,required"`
+}
+
 func cyclesAppHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	userID := ctx.Value("userId").(int64)
@@ -53,6 +57,24 @@ func getCycleAppHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func createCycleAppHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	userID := ctx.Value("userId").(int64)
+	appID, err := web.ParamAsInt64(r, "appId")
+	body := ctx.Value("parsed:body").(*createCycle)
+
+	if err != nil {
+		web.Respond(w, http.StatusBadRequest, err)
+		return
+	}
+
+	cycle := services.CreateCycle(userID, appID, *body.Name)
+
+	if cycle == nil {
+		web.Respond(w, http.StatusBadRequest, fmt.Errorf("cycle couldn't be created"))
+		return
+	}
+
+	web.Respond(w, http.StatusOK, cycle)
 }
 
 func getKeyCycleAppHandler(w http.ResponseWriter, r *http.Request) {
