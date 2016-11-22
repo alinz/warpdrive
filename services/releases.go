@@ -29,3 +29,14 @@ func SearchReleases(userID, appID, cycleID int64, platform, version, note string
 
 	return releases, nil
 }
+
+func FindReleaseByID(userID, appID, cycleID, releaseID int64) (*data.Release, error) {
+	_, err := FindCycleByID(userID, appID, cycleID)
+	if err != nil {
+		return nil, err
+	}
+
+	release, err := data.FindReleaseByID(cycleID, releaseID)
+
+	return release, err
+}
