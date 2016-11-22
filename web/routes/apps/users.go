@@ -7,7 +7,7 @@ import (
 	"github.com/pressly/warpdrive/web"
 )
 
-func usersAppHandler(w http.ResponseWriter, r *http.Request) {
+func getUsersAppHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	userID := ctx.Value("user:id").(int64)
 	appID, err := web.ParamAsInt64(r, "appId")

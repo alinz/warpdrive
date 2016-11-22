@@ -15,7 +15,7 @@ type updateCycle struct {
 	Name *string `json:"name,required"`
 }
 
-func cyclesAppHandler(w http.ResponseWriter, r *http.Request) {
+func getCyclesHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	userID := ctx.Value("user:id").(int64)
 	appID, err := web.ParamAsInt64(r, "appId")
@@ -33,7 +33,7 @@ func cyclesAppHandler(w http.ResponseWriter, r *http.Request) {
 	web.Respond(w, http.StatusOK, cycles)
 }
 
-func getCycleAppHandler(w http.ResponseWriter, r *http.Request) {
+func getCycleHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	userID := ctx.Value("user:id").(int64)
 	appID, err := web.ParamAsInt64(r, "appId")
@@ -58,7 +58,7 @@ func getCycleAppHandler(w http.ResponseWriter, r *http.Request) {
 	web.Respond(w, http.StatusOK, cycle)
 }
 
-func createCycleAppHandler(w http.ResponseWriter, r *http.Request) {
+func createCycleHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	userID := ctx.Value("user:id").(int64)
 	appID, err := web.ParamAsInt64(r, "appId")
@@ -79,7 +79,7 @@ func createCycleAppHandler(w http.ResponseWriter, r *http.Request) {
 	web.Respond(w, http.StatusOK, cycle)
 }
 
-func getKeyCycleAppHandler(w http.ResponseWriter, r *http.Request) {
+func getCycleKeyHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	userID := ctx.Value("user:id").(int64)
 	appID, err := web.ParamAsInt64(r, "appId")
@@ -103,7 +103,7 @@ func getKeyCycleAppHandler(w http.ResponseWriter, r *http.Request) {
 	web.Respond(w, http.StatusOK, publicKey)
 }
 
-func updateCycleAppHandler(w http.ResponseWriter, r *http.Request) {
+func updateCycleHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	userID := ctx.Value("user:id").(int64)
 	body := ctx.Value("parsed:body").(*updateCycle)
@@ -128,7 +128,7 @@ func updateCycleAppHandler(w http.ResponseWriter, r *http.Request) {
 	web.Respond(w, http.StatusOK, cycle)
 }
 
-func removeCycleAppHandler(w http.ResponseWriter, r *http.Request) {
+func removeCycleHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	userID := ctx.Value("user:id").(int64)
 	appID, err := web.ParamAsInt64(r, "appId")

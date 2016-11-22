@@ -18,7 +18,7 @@ func Routes() http.Handler {
 	r.Route("/:appId", func(r chi.Router) {
 
 		r.Route("/users", func(r chi.Router) {
-			r.Get("/", usersAppHandler)
+			r.Get("/", getUsersAppHandler)
 			r.Route("/:userId", func(r chi.Router) {
 				r.Post("/", assignUserToAppHandler)
 				r.Delete("/", unassignUserFromAppHandler)
@@ -26,16 +26,33 @@ func Routes() http.Handler {
 		})
 
 		r.Route("/cycles", func(r chi.Router) {
-			r.Get("/", cyclesAppHandler)
-			r.With(web.BodyParser(&createCycle{}, 128)).Post("/", createCycleAppHandler)
+			r.Get("/", getCyclesHandler)
+			r.With(web.BodyParser(&createCycle{}, 128)).Post("/", createCycleHandler)
 
 			r.Route("/:cycleId", func(r chi.Router) {
-				r.Get("/", getCycleAppHandler)
-				r.With(web.BodyParser(&updateCycle{}, 128)).Put("/", updateCycleAppHandler)
-				r.Delete("/", removeCycleAppHandler)
-				r.Get("/key", getKeyCycleAppHandler)
+				r.Get("/", getCycleHandler)
+				r.With(web.BodyParser(&updateCycle{}, 128)).Put("/", updateCycleHandler)
+				r.Delete("/", removeCycleHandler)
+				r.Get("/key", getCycleKeyHandler)
 
 				r.Route("/releases", func(r chi.Router) {
+					r.Get("/", getReleasesHandler)
+					r.Post("/", createReleaseHandler)
+					r.Route("/:releaseId", func(r chi.Router) {
+						r.Get("/", getReleaseHandler)
+						r.Put("/", updateReleaseHandler)
+						r.Delete("/", removeReleaseHandler)
+
+						r.Route("/bundles", func(r chi.Router) {
+							r.Post("/", uploadBundlesHandler)
+							r.Get("/", getBundlesHandler)
+						})
+
+						r.Route("/lock", func(r chi.Router) {
+							r.Post("/", lockReleaseHandler)
+							r.Delete("/", unlockReleaseHandler)
+						})
+					})
 
 				})
 			})
