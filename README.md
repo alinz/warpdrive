@@ -53,8 +53,8 @@ cycles:
 - [x] DELETE    /apps/:appId/cycles/:cycleId/releases/:releaseId
 - [ ] POST      /apps/:appId/cycles/:cycleId/releases/:releaseId/bundles
 - [ ] GET       /apps/:appId/cycles/:cycleId/releases/:releaseId/bundles?name=
-- [ ] POST      /apps/:appId/cycles/:cycleId/releases/:releaseId/lock
-- [ ] DELETE    /apps/:appId/cycles/:cycleId/releases/:releaseId/lock
+- [x] POST      /apps/:appId/cycles/:cycleId/releases/:releaseId/lock
+- [x] DELETE    /apps/:appId/cycles/:cycleId/releases/:releaseId/lock
 
 ## the following apis call in clinet native, also they are public
 

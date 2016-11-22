@@ -135,3 +135,55 @@ func RemoveRelease(userID, appID, cycleID, releaseID int64) error {
 
 	return nil
 }
+
+func LockRelease(userID, appID, cycleID, releaseID int64) error {
+	_, err := FindCycleByID(userID, appID, cycleID)
+	if err != nil {
+		return err
+	}
+
+	release := &data.Release{ID: releaseID}
+
+	err = data.Transaction(func(session sqlbuilder.Tx) error {
+		err := release.Load(session)
+		if err != nil {
+			return err
+		}
+
+		if release.Locked {
+			return ErrReleaseAlreadyLocked
+		}
+
+		release.Locked = true
+
+		return release.Save(session)
+	})
+
+	return nil
+}
+
+func UnlockRelease(userID, appID, cycleID, releaseID int64) error {
+	_, err := FindCycleByID(userID, appID, cycleID)
+	if err != nil {
+		return err
+	}
+
+	release := &data.Release{ID: releaseID}
+
+	err = data.Transaction(func(session sqlbuilder.Tx) error {
+		err := release.Load(session)
+		if err != nil {
+			return err
+		}
+
+		if !release.Locked {
+			return ErrReleaseAlreadyUnlocked
+		}
+
+		release.Locked = false
+
+		return release.Save(session)
+	})
+
+	return nil
+}
