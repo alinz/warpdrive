@@ -100,14 +100,7 @@ func QueryUsersByEmail(name, email string) []*User {
 	return users
 }
 
-func FindUsersWithinApp(userID, appID int64, name, email string) []*User {
-	// first we need to make sure that userID has access to appID
-	app := FindAppByUserIDAppID(userID, appID)
-
-	if app == nil {
-		return nil
-	}
-
+func FindUsersWithinApp(appID int64, name, email string) []*User {
 	name = strings.ToLower(name)
 	email = strings.ToLower(email)
 

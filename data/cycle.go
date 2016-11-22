@@ -68,13 +68,7 @@ func (c *Cycle) Remove(session db.Database) error {
 	return c.Query(session, db.Cond{"id": c.ID}).Delete()
 }
 
-func FindCyclesApp(userID, appID int64, name string) []*Cycle {
-	app := FindAppByUserIDAppID(userID, appID)
-
-	if app == nil {
-		return nil
-	}
-
+func FindCyclesApp(appID int64, name string) ([]*Cycle, error) {
 	sql := fmt.Sprintf(`
 		SELECT *
 		FROM cycles
@@ -82,7 +76,7 @@ func FindCyclesApp(userID, appID int64, name string) []*Cycle {
 	rows, err := dbSession.Query(sql)
 
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
 	var cycles []*Cycle
@@ -90,8 +84,8 @@ func FindCyclesApp(userID, appID int64, name string) []*Cycle {
 	err = iter.All(&cycles)
 
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
-	return cycles
+	return cycles, nil
 }

@@ -7,14 +7,22 @@ import (
 	"upper.io/db.v2/lib/sqlbuilder"
 )
 
-func SearchAppCycles(userID, appID int64, name string) []*data.Cycle {
-	cycles := data.FindCyclesApp(userID, appID, name)
+func SearchAppCycles(userID, appID int64, name string) ([]*data.Cycle, error) {
+	_, err := FindAppByID(userID, appID)
+	if err != nil {
+		return nil, err
+	}
+
+	cycles, err := data.FindCyclesApp(appID, name)
+	if err != nil {
+		return nil, err
+	}
 
 	if cycles == nil {
 		cycles = make([]*data.Cycle, 0)
 	}
 
-	return cycles
+	return cycles, nil
 }
 
 func FindCycleByID(userID, appID, cycleID int64) (*data.Cycle, error) {

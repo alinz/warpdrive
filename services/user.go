@@ -103,14 +103,19 @@ func UpdateUser(userID int64, name, email, password *string) (*data.User, error)
 	return user, nil
 }
 
-func FindUsersWithinApp(userID, appID int64, name, email string) []*data.User {
-	users := data.FindUsersWithinApp(userID, appID, name, email)
+func FindUsersWithinApp(userID, appID int64, name, email string) ([]*data.User, error) {
+	_, err := FindAppByID(userID, appID)
+	if err != nil {
+		return nil, err
+	}
+
+	users := data.FindUsersWithinApp(appID, name, email)
 
 	if users == nil {
 		users = make([]*data.User, 0)
 	}
 
-	return users
+	return users, nil
 }
 
 func AssignUserToApp(currentUserID, userID, appID int64) error {

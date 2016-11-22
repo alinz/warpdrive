@@ -21,7 +21,11 @@ func getUsersAppHandler(w http.ResponseWriter, r *http.Request) {
 	name := query.Get("name")
 	email := query.Get("email")
 
-	users := services.FindUsersWithinApp(userID, appID, name, email)
+	users, err := services.FindUsersWithinApp(userID, appID, name, email)
+	if err != nil {
+		web.Respond(w, http.StatusBadRequest, err)
+		return
+	}
 
 	web.Respond(w, http.StatusOK, users)
 }

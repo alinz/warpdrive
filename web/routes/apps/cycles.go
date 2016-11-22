@@ -28,7 +28,11 @@ func getCyclesHandler(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	name := query.Get("name")
 
-	cycles := services.SearchAppCycles(userID, appID, name)
+	cycles, err := services.SearchAppCycles(userID, appID, name)
+	if err != nil {
+		web.Respond(w, http.StatusBadRequest, err)
+		return
+	}
 
 	web.Respond(w, http.StatusOK, cycles)
 }
