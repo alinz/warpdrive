@@ -1,6 +1,9 @@
 package services
 
-import "github.com/pressly/warpdrive/data"
+import (
+	"github.com/pressly/warpdrive/data"
+	"upper.io/db.v2/lib/sqlbuilder"
+)
 
 func SearchReleases(userID, appID, cycleID int64, platform, version, note string) ([]*data.Release, error) {
 	plat, err := data.ParsePlatform(platform)
@@ -39,4 +42,28 @@ func FindReleaseByID(userID, appID, cycleID, releaseID int64) (*data.Release, er
 	release, err := data.FindReleaseByID(cycleID, releaseID)
 
 	return release, err
+}
+
+func CreateRelease(userID, appID, cycleID int64, platform data.Platform, version data.Version, note string) (*data.Release, error) {
+	_, err := FindCycleByID(userID, appID, cycleID)
+	if err != nil {
+		return nil, err
+	}
+
+	release := &data.Release{
+		CycleID:  cycleID,
+		Platform: platform,
+		Version:  version,
+		Note:     note,
+	}
+
+	err = data.Transaction(func(session sqlbuilder.Tx) error {
+		return release.Save(session)
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return release, nil
 }
