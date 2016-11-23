@@ -17,6 +17,7 @@ func New() chi.Router {
 
 	r := chi.NewRouter()
 
+	// Public routes
 	r.Get("/", index)
 
 	r.Mount("/session", session.Routes())
@@ -26,6 +27,7 @@ func New() chi.Router {
 		r.Post("/:releaseId/download", downloadHandler)
 	})
 
+	// Private routes
 	r.Group(func(r chi.Router) {
 		r.Use(web.TokenAuth.Verifier)
 		r.Use(web.Authenticator)
