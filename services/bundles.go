@@ -98,3 +98,7 @@ func SearchBundles(userID, appID, cycleID, releaseID int64, name string) ([]*dat
 
 	return data.SearchBundlesByName(releaseID, name)
 }
+
+func FindAllBundlesByReleaseID(releaseID int64) ([]*data.Bundle, error) {
+	return data.SearchBundlesByName(releaseID, "")
+}

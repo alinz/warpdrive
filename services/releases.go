@@ -1,9 +1,14 @@
 package services
 
 import (
+	"bytes"
 	"io"
+	"path/filepath"
 
+	"github.com/pressly/warpdrive"
 	"github.com/pressly/warpdrive/data"
+	"github.com/pressly/warpdrive/lib/crypto"
+	"github.com/pressly/warpdrive/lib/warp"
 	"upper.io/db.v2/lib/sqlbuilder"
 )
 
@@ -41,9 +46,11 @@ func FindReleaseByID(userID, appID, cycleID, releaseID int64) (*data.Release, er
 		return nil, err
 	}
 
-	release, err := data.FindReleaseByID(cycleID, releaseID)
+	return data.FindReleaseByID(cycleID, releaseID)
+}
 
-	return release, err
+func FindLockedRelease(cycleID, releaseID int64) (*data.Release, error) {
+	return data.FindLockedReleaseByID(cycleID, releaseID)
 }
 
 func CreateRelease(userID, appID, cycleID int64, platform data.Platform, version data.Version, note string) (*data.Release, error) {
@@ -223,5 +230,46 @@ func LatestRelease(appID, cycleID int64, version string, platform string) (map[s
 }
 
 func DownloadRelease(appID, cycleID, releaseID int64, encryptedKey []byte) (io.Reader, error) {
-	return nil, nil
+	// checks if cycle id belongs to app id and also we need cycle object
+	// for PrivateKey
+	cycle, err := FindCycleByAppIdCycleId(appID, cycleID)
+	if err != nil {
+		return nil, err
+	}
+
+	// checks if release id belongs to cycle if
+	_, err = FindLockedRelease(cycleID, releaseID)
+	if err != nil {
+		return nil, err
+	}
+
+	// gets all bundles for a specific release id
+	bundles, err := FindAllBundlesByReleaseID(releaseID)
+	if err != nil {
+		return nil, err
+	}
+
+	// decrypts the key by using private key
+	key, err := crypto.DecryptByPrivateRSA(encryptedKey, cycle.PrivateKey, "sha1")
+	if err != nil {
+		return nil, err
+	}
+
+	// creates buffer for warpFile.
+	var buffer bytes.Buffer
+	warpFile := warp.NewWriter(&buffer)
+
+	// goes over all bundles and add them to warpFile
+	for _, bundle := range bundles {
+		path := filepath.Join(warpdrive.Conf.Server.BundlesFolder, bundle.Hash)
+		warpFile.AddFile(bundle.Name, path)
+	}
+
+	// we are encrypting the warpFile with key that we got from client
+	encrypted, err := crypto.AESEncrypt(buffer.Bytes(), key)
+	if err != nil {
+		return nil, err
+	}
+
+	return bytes.NewReader(encrypted), nil
 }

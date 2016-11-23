@@ -108,6 +108,17 @@ func FindReleaseByID(cycleID, releaseID int64) (*Release, error) {
 	return &release, nil
 }
 
+func FindLockedReleaseByID(cycleID, releaseID int64) (*Release, error) {
+	var release Release
+
+	err := release.Find(dbSession, db.Cond{"id": releaseID, "cycle_id": releaseID, "lock": true})
+	if err != nil {
+		return nil, err
+	}
+
+	return &release, nil
+}
+
 func FindLatestSoftRelease(cycleID int64, platform Platform, version Version) (*Release, error) {
 	nextMajorVersion := VersionAdd(version, 1, 0, 0)
 

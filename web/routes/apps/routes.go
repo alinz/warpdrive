@@ -53,10 +53,10 @@ func Routes() http.Handler {
 							r.Delete("/", unlockReleaseHandler)
 						})
 					})
-
 				})
 			})
 		})
+
 	})
 
 	return r
