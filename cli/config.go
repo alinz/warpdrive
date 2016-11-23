@@ -42,6 +42,35 @@ func (g *globalConfig) Path() string {
 	return path.Join(home, ".warp")
 }
 
+func (g *globalConfig) getSession(serverAddr string) string {
+	for _, session := range g.Sessions {
+		if session[0] == serverAddr {
+			return session[1]
+		}
+	}
+	return ""
+}
+
+func (g *globalConfig) setSession(serverAddr, value string) {
+	var found bool
+
+	if g.Sessions == nil {
+		g.Sessions = make([][]string, 0)
+	}
+
+	for _, session := range g.Sessions {
+		if session[0] == serverAddr {
+			session[1] = value
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		g.Sessions = append(g.Sessions, []string{serverAddr, value})
+	}
+}
+
 func configLoad(conf config) error {
 	_, err := toml.DecodeFile(conf.Path(), conf)
 	return err

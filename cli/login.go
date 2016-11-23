@@ -40,15 +40,8 @@ func (t *loginCommand) Run(args []string) int {
 	cookie := resp.Cookies()[0]
 	jwt := cookie.Value
 
-	globalConfig, err := GlobalConfig()
-	if err != nil {
-		globalConfig.Sessions = make([][]string, 0)
-	}
-
-	globalConfig.Sessions = append(globalConfig.Sessions, []string{
-		projectConfig.Server.Addr,
-		jwt,
-	})
+	globalConfig, _ := GlobalConfig()
+	globalConfig.setSession(projectConfig.Server.Addr, jwt)
 
 	err = configSave(globalConfig)
 	if err != nil {
