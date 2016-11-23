@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-//Version holds version in uint64
+// Version holds version of the upgradeable application in uint64
 type Version uint64
 
 const MaxMajor = 0xffff000000000000
@@ -35,14 +35,14 @@ func VersionToInt(version Version) uint64 {
 	return uint64(version)
 }
 
-//VersionEncode convert Version to string represantation
+// VersionEncode convert Version to string represantation
 func VersionEncode(major, minor, patch uint64) string {
 	return strconv.FormatUint(major, 10) + "." +
 		strconv.FormatUint(minor, 10) + "." +
 		strconv.FormatUint(patch, 10)
 }
 
-//VersionDecode gets an major.minor.patch and returns array of parsed version
+// VersionDecode gets an major.minor.patch and returns array of parsed version
 func VersionDecode(value string) ([]uint64, error) {
 	versionSegments := strings.Split(value, ".")
 
@@ -68,7 +68,7 @@ func VersionDecode(value string) ([]uint64, error) {
 	return []uint64{major, minor, patch}, nil
 }
 
-//MarshalJSON for type Version
+// MarshalJSON for type Version
 func (v Version) MarshalJSON() ([]byte, error) {
 	value := uint64(v)
 
@@ -81,7 +81,7 @@ func (v Version) MarshalJSON() ([]byte, error) {
 	return json.Marshal(version)
 }
 
-//UnmarshalJSON for type Version
+// UnmarshalJSON for type Version
 func (v *Version) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err != nil {
@@ -89,7 +89,6 @@ func (v *Version) UnmarshalJSON(data []byte) error {
 	}
 
 	version, err := VersionDecode(s)
-
 	if err != nil {
 		return err
 	}
@@ -136,11 +135,9 @@ func MaskVersion(version Version, major, minor, patch uint64) Version {
 	if major == 0 {
 		v1 = 0
 	}
-
 	if minor == 0 {
 		v2 = 0
 	}
-
 	if patch == 0 {
 		v3 = 0
 	}

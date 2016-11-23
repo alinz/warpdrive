@@ -10,17 +10,17 @@ import (
 )
 
 type fileHeader struct {
-	FileSize int64     //8 bytes
-	Hash     [20]byte  //20 bytes
-	Name     [996]byte //996 bytes -> total is 1024bytes or 1kb
+	FileSize int64     // 8 bytes
+	Hash     [20]byte  // 20 bytes
+	Name     [996]byte // 996 bytes -> total is 1024bytes or 1kb
 }
 
-//Warp is a type to support new file encoding
+// Warp is a type to support new file encoding
 type Warp struct {
 	w io.Writer
 }
 
-//AddFile adds a new filw inside warp file
+// AddFile adds a new filw inside warp file
 func (w *Warp) AddFile(name, path string) error {
 	file, err := os.Open(path)
 	if err != nil {
@@ -36,7 +36,7 @@ func (w *Warp) AddFile(name, path string) error {
 		return err
 	}
 
-	//we need to reset the file to 0, 0, so copy io can performe.
+	// we need to reset the file to 0, 0, so copy io can performe.
 	file.Seek(0, 0)
 
 	fh := fileHeader{
@@ -61,7 +61,7 @@ func (w *Warp) AddFile(name, path string) error {
 	return nil
 }
 
-//NewWriter creates a new Warp
+// NewWriter creates a new Warp
 func NewWriter(w io.Writer) *Warp {
 	return &Warp{w: w}
 }

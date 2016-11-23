@@ -6,14 +6,12 @@ import (
 	"strings"
 )
 
-//Platform defines type of platform
+// Platform defines type of device platform
 type Platform int
 
 const (
 	_ Platform = iota
-	//IOS represents apple ios devices
 	IOS
-	//ANDROID represents google android devices
 	ANDROID
 )
 
@@ -29,7 +27,7 @@ var (
 	}
 )
 
-//MarshalJSON for type Platform
+// MarshalJSON for type Platform
 func (p Platform) MarshalJSON() ([]byte, error) {
 	if s, ok := interface{}(p).(fmt.Stringer); ok {
 		return json.Marshal(s.String())
@@ -41,7 +39,7 @@ func (p Platform) MarshalJSON() ([]byte, error) {
 	return json.Marshal(strings.ToLower(s))
 }
 
-//UnmarshalJSON for type Platform
+// UnmarshalJSON for type Platform
 func (p *Platform) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err != nil {

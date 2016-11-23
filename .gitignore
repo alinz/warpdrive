@@ -8,4 +8,4 @@
 bin
 tmp
 temp
-warpdrive.conf
+etc/warpdrive.conf

@@ -2,18 +2,17 @@ package data
 
 import (
 	"github.com/pressly/warpdrive"
-
-	db "upper.io/db.v2"
+	"upper.io/db.v2"
 	"upper.io/db.v2/lib/sqlbuilder"
 	"upper.io/db.v2/postgresql"
 )
 
-//dbSession is private and only access by data package.
-//this make sure that services only touch database via data or Transaction.
+// dbSession is private and only accessed by data package.
+// this make sure that services only touch database via data or Transaction.
 var dbSession sqlbuilder.Database
 
-//NewDatabase creates a new database based on what set in global Conf.
-//it is better to call this func once and inside your main func.
+// NewDatabase creates a new database based on what set in global Conf.
+// it is better to call this func once and inside your main func.
 func NewDatabase() (sqlbuilder.Database, error) {
 	db.Conf.SetLogging(true)
 
@@ -31,8 +30,8 @@ func NewDatabase() (sqlbuilder.Database, error) {
 	return session, err
 }
 
-//Transaction creates a transaction. I don't want any one elese outside of data package
-//access directly to dbSession.
+// Transaction creates a transaction. I don't want any one elese outside of data package
+// access directly to dbSession.
 func Transaction(fn func(sqlbuilder.Tx) error) error {
 	return dbSession.Tx(fn)
 }
