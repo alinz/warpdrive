@@ -1,6 +1,8 @@
 package services
 
 import (
+	"io"
+
 	"github.com/pressly/warpdrive/data"
 	"upper.io/db.v2/lib/sqlbuilder"
 )
@@ -218,4 +220,8 @@ func LatestRelease(appID, cycleID int64, version string, platform string) (map[s
 	}
 
 	return releases, nil
+}
+
+func DownloadRelease(appID, cycleID, releaseID int64, encryptedKey []byte) (io.Reader, error) {
+	return nil, nil
 }
