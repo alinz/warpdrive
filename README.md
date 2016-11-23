@@ -59,7 +59,7 @@ cycles:
 ## the following apis call in clinet native, also they are public
 
 - [x] GET       /apps/:appId/cycles/:cycleId/releases/latest/version/:version/platform/:platform
-- [ ] POST      /apps/:appId/cycles/:cycleId/releases/:releaseId/download
+- [x] POST      /apps/:appId/cycles/:cycleId/releases/:releaseId/download
 
 ## this following api calls for any auditing
 
