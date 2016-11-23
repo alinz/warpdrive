@@ -10,6 +10,10 @@ import (
 //Version holds version in uint64
 type Version uint64
 
+const MaxMajor = 0xffff000000000000
+const MaxMinor = 0x0000ffff00000000
+const MaxPatch = 0x00000000ffffffff
+
 func ParseVersion(version string) (Version, error) {
 	decode, err := VersionDecode(version)
 	if err != nil {
@@ -18,9 +22,9 @@ func ParseVersion(version string) (Version, error) {
 
 	var value uint64
 
-	decode[0] = (decode[0] << 48) & 0xffff000000000000
-	decode[1] = (decode[1] << 32) & 0x0000ffff00000000
-	decode[2] = decode[2] & 0x00000000ffffffff
+	decode[0] = (decode[0] << 48) & MaxMajor
+	decode[1] = (decode[1] << 32) & MaxMinor
+	decode[2] = decode[2] & MaxPatch
 
 	value = decode[0] | decode[1] | decode[2]
 
@@ -68,9 +72,9 @@ func VersionDecode(value string) ([]uint64, error) {
 func (v Version) MarshalJSON() ([]byte, error) {
 	value := uint64(v)
 
-	major := (value & 0xffff000000000000) >> 48
-	minor := (value & 0x0000ffff00000000) >> 32
-	patch := (value & 0x00000000ffffffff)
+	major := (value & MaxMajor) >> 48
+	minor := (value & MaxMinor) >> 32
+	patch := (value & MaxPatch)
 
 	version := VersionEncode(major, minor, patch)
 
@@ -92,9 +96,9 @@ func (v *Version) UnmarshalJSON(data []byte) error {
 
 	var value uint64
 
-	version[0] = (version[0] << 48) & 0xffff000000000000
-	version[1] = (version[1] << 32) & 0x0000ffff00000000
-	version[2] = version[2] & 0x00000000ffffffff
+	version[0] = (version[0] << 48) & MaxMajor
+	version[1] = (version[1] << 32) & MaxMinor
+	version[2] = version[2] & MaxPatch
 
 	value = version[0] | version[1] | version[2]
 
@@ -102,16 +106,20 @@ func (v *Version) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (v Version) ValueAsInt() uint64 {
+	return uint64(v)
+}
+
 func VersionAdd(version Version, major, minor, patch uint64) Version {
 	value := uint64(version)
 
-	major = major + ((value & 0xffff000000000000) >> 48)
-	minor = minor + ((value & 0x0000ffff00000000) >> 32)
-	patch = patch + (value & 0x00000000ffffffff)
+	major = major + ((value & MaxMajor) >> 48)
+	minor = minor + ((value & MaxMinor) >> 32)
+	patch = patch + (value & MaxPatch)
 
-	major = (major << 48) & 0xffff000000000000
-	minor = (minor << 32) & 0x0000ffff00000000
-	patch = patch & 0x00000000ffffffff
+	major = (major << 48) & MaxMajor
+	minor = (minor << 32) & MaxMinor
+	patch = patch & MaxPatch
 
 	value = major | minor | patch
 
@@ -121,9 +129,9 @@ func VersionAdd(version Version, major, minor, patch uint64) Version {
 func MaskVersion(version Version, major, minor, patch uint64) Version {
 	value := uint64(version)
 
-	v1 := (value & 0xffff000000000000) >> 48
-	v2 := (value & 0x0000ffff00000000) >> 32
-	v3 := value & 0x00000000ffffffff
+	v1 := (value & MaxMajor) >> 48
+	v2 := (value & MaxMinor) >> 32
+	v3 := value & MaxPatch
 
 	if major == 0 {
 		v1 = 0
@@ -137,9 +145,9 @@ func MaskVersion(version Version, major, minor, patch uint64) Version {
 		v3 = 0
 	}
 
-	v1 = (v1 << 48) & 0xffff000000000000
-	v2 = (v2 << 32) & 0x0000ffff00000000
-	v3 = v3 & 0x00000000ffffffff
+	v1 = (v1 << 48) & MaxMajor
+	v2 = (v2 << 32) & MaxMinor
+	v3 = v3 & MaxPatch
 
 	value = v1 | v2 | v3
 

@@ -63,6 +63,10 @@ func ParsePlatform(platform string) (Platform, error) {
 	return Platform(v), nil
 }
 
+func (p Platform) ValueAsInt() int {
+	return int(p)
+}
+
 func PlatformToInt(platfrom Platform) int {
 	return int(platfrom)
 }

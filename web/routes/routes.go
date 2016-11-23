@@ -22,7 +22,7 @@ func New() chi.Router {
 	r.Mount("/session", session.Routes())
 
 	r.Route("/apps/:appId/cycles/:cycleId/releases", func(r chi.Router) {
-		r.Get("/latest/:version", checkVersionHandler)
+		r.Get("/latest/version/:version/platform/:platform", checkVersionHandler)
 		r.Post("/:releaseId/download", downloadHandler)
 	})
 

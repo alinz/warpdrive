@@ -25,22 +25,26 @@ func SearchAppCycles(userID, appID int64, name string) ([]*data.Cycle, error) {
 	return cycles, nil
 }
 
+func FindCycleByAppIdCycleId(appID, cycleID int64) (*data.Cycle, error) {
+	cycle := &data.Cycle{
+		ID: cycleID,
+	}
+
+	err := cycle.Load(nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return cycle, nil
+}
+
 func FindCycleByID(userID, appID, cycleID int64) (*data.Cycle, error) {
 	_, err := FindAppByID(userID, appID)
 	if err != nil {
 		return nil, err
 	}
 
-	cycle := &data.Cycle{
-		ID: cycleID,
-	}
-
-	err = cycle.Load(nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return cycle, nil
+	return FindCycleByAppIdCycleId(appID, cycleID)
 }
 
 func CreateCycle(userID, appID int64, name string) (*data.Cycle, error) {

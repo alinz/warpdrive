@@ -10,3 +10,7 @@ import (
 func ParamAsInt64(r *http.Request, name string) (int64, error) {
 	return strconv.ParseInt(chi.URLParam(r, name), 10, 64)
 }
+
+func ParamAsString(r *http.Request, name string) string {
+	return chi.URLParam(r, name)
+}

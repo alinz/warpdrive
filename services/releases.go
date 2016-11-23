@@ -187,3 +187,35 @@ func UnlockRelease(userID, appID, cycleID, releaseID int64) error {
 
 	return nil
 }
+
+func LatestRelease(appID, cycleID int64, version string, platform string) (map[string]*data.Release, error) {
+	// check if cycle id belongs to app id
+	_, err := FindCycleByAppIdCycleId(appID, cycleID)
+	if err != nil {
+		return nil, err
+	}
+
+	vers, err := data.ParseVersion(version)
+	if err != nil {
+		return nil, err
+	}
+
+	plat, err := data.ParsePlatform(platform)
+	if err != nil {
+		return nil, err
+	}
+
+	releases := make(map[string]*data.Release)
+
+	softRelease, err := data.FindLatestSoftRelease(cycleID, plat, vers)
+	if err != nil {
+		releases["soft"] = softRelease
+	}
+
+	hardRelease, err := data.FindLatestHardRelease(cycleID, plat, vers)
+	if err != nil {
+		releases["hard"] = hardRelease
+	}
+
+	return releases, nil
+}

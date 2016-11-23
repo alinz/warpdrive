@@ -107,3 +107,57 @@ func FindReleaseByID(cycleID, releaseID int64) (*Release, error) {
 
 	return &release, nil
 }
+
+func FindLatestSoftRelease(cycleID int64, platform Platform, version Version) (*Release, error) {
+	nextMajorVersion := VersionAdd(version, 1, 0, 0)
+
+	sql := fmt.Sprintf(`
+		SELECT * FROM releases
+		WHERE cycle_id=%d AND platform=%d AND locked=TRUE AND version < %d
+		ORDER BY version DESC					
+	`, cycleID, platform.ValueAsInt(), nextMajorVersion.ValueAsInt())
+
+	rows, err := dbSession.Query(sql)
+
+	if err != nil {
+		return nil, err
+	}
+
+	release := Release{}
+	iter := sqlbuilder.NewIterator(rows)
+	err = iter.One(&release)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &release, nil
+}
+
+func FindLatestHardRelease(cycleID int64, platform Platform, version Version) (*Release, error) {
+	// here what I did was max minor and patch value so I can easily find the next
+	// hard release.
+	versionMasked := version.ValueAsInt() | MaxMinor | MaxPatch
+
+	sql := fmt.Sprintf(`
+		SELECT * FROM releases
+		WHERE cycle_id=%d AND platform=%d AND locked=TRUE AND version > %d
+		ORDER BY version DESC					
+	`, cycleID, platform.ValueAsInt(), versionMasked)
+
+	rows, err := dbSession.Query(sql)
+
+	if err != nil {
+		return nil, err
+	}
+
+	release := Release{}
+	iter := sqlbuilder.NewIterator(rows)
+	err = iter.One(&release)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &release, nil
+}
