@@ -10,7 +10,6 @@ func (t *initCommand) Help() string {
 
 func (t *initCommand) Run(args []string) int {
 	projectConfig, err := ProjectConfig()
-
 	if err == nil {
 		return 0
 	}
