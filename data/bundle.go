@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	db "upper.io/db.v2"
+	"upper.io/db.v2"
 	"upper.io/db.v2/lib/sqlbuilder"
 )
 

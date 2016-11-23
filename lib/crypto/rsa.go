@@ -21,8 +21,8 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-//PublicKey gets the encoded version of public key and returns a rsa.PublicKey
-//struct
+// PublicKey gets the encoded version of public key and returns a rsa.PublicKey
+// struct
 func PublicKey(publicKey string) (*rsa.PublicKey, error) {
 	block, _ := pem.Decode([]byte(publicKey))
 	pub, err := x509.ParsePKIXPublicKey(block.Bytes)
@@ -39,8 +39,8 @@ func PublicKey(publicKey string) (*rsa.PublicKey, error) {
 	return rsaPub, nil
 }
 
-//PrivateKey gets the encoded version of private key and returns a
-//rsa.PrivateKey struct
+// PrivateKey gets the encoded version of private key and returns a
+// rsa.PrivateKey struct
 func PrivateKey(privateKey string) (*rsa.PrivateKey, error) {
 	block, _ := pem.Decode([]byte(privateKey))
 	rsaPriv, err := x509.ParsePKCS1PrivateKey(block.Bytes)
@@ -67,17 +67,17 @@ func hashAlgorithm(algo string) (hash.Hash, crypto.Hash) {
 	panic("something is wrong")
 }
 
-//EncryptByPublicRSA encrypts using Public key and message
+// EncryptByPublicRSA encrypts using Public key and message
 func EncryptByPublicRSA(message []byte, publicKey, algo string) ([]byte, error) {
 	public, err := PublicKey(publicKey)
 	if err != nil {
 		return nil, err
 	}
 
-	//func EncryptPKCS1v15(rand io.Reader, pub *PublicKey, msg []byte) (out []byte, err error)
+	//f unc EncryptPKCS1v15(rand io.Reader, pub *PublicKey, msg []byte) (out []byte, err error)
 
-	//h, _ := hashAlgorithm(algo)
-	//encrypted, err := rsa.EncryptOAEP(h, rand.Reader, public, message, nil)
+	// h, _ := hashAlgorithm(algo)
+	// encrypted, err := rsa.EncryptOAEP(h, rand.Reader, public, message, nil)
 	encrypted, err := rsa.EncryptPKCS1v15(rand.Reader, public, message)
 	if err != nil {
 		return nil, err
@@ -86,17 +86,17 @@ func EncryptByPublicRSA(message []byte, publicKey, algo string) ([]byte, error) 
 	return encrypted, nil
 }
 
-//DecryptByPrivateRSA decrypt message using Private key
+// DecryptByPrivateRSA decrypt message using Private key
 func DecryptByPrivateRSA(message []byte, privateKey, algo string) ([]byte, error) {
 	key, err := PrivateKey(privateKey)
 	if err != nil {
 		return nil, err
 	}
 
-	//func DecryptPKCS1v15(rand io.Reader, priv *PrivateKey, ciphertext []byte) (out []byte, err error)
+	// func DecryptPKCS1v15(rand io.Reader, priv *PrivateKey, ciphertext []byte) (out []byte, err error)
 
-	//h, _ := hashAlgorithm(algo)
-	//plaintext, err := rsa.DecryptOAEP(h, rand.Reader, key, message, nil)
+	// h, _ := hashAlgorithm(algo)
+	// plaintext, err := rsa.DecryptOAEP(h, rand.Reader, key, message, nil)
 	plaintext, err := rsa.DecryptPKCS1v15(rand.Reader, key, message)
 	if err != nil {
 		fmt.Println(err)
@@ -106,7 +106,7 @@ func DecryptByPrivateRSA(message []byte, privateKey, algo string) ([]byte, error
 	return plaintext, nil
 }
 
-//RSAKeyPair returns a pair of encoded string version of public/private keys
+// RSAKeyPair returns a pair of encoded string version of public/private keys
 func RSAKeyPair(size int) (string, string, error) {
 	privateKey, err := rsa.GenerateKey(rand.Reader, size)
 	if err != nil {
@@ -139,7 +139,7 @@ func RSAKeyPair(size int) (string, string, error) {
 	return privateBuffer.String(), publicBuffer.String(), nil
 }
 
-//SSHKeyPair returns pair of public and private key in format of ssh
+// SSHKeyPair returns pair of public and private key in format of ssh
 func SSHKeyPair(size int, pubKeyPath, privateKeyPath string) error {
 	privateKey, err := rsa.GenerateKey(rand.Reader, size)
 	if err != nil {

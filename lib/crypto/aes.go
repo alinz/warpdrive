@@ -14,7 +14,7 @@ var (
 	iv = []byte("PresslyWarpdrive") //it needs to be 16 bytes
 )
 
-//MakeAESKey generates random key for aes
+// MakeAESKey generates random key for aes
 func MakeAESKey(size int) ([]byte, error) {
 	switch size {
 	case 16, 24, 32:

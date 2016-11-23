@@ -1,16 +1,14 @@
 package session
 
 import (
+	"fmt"
 	"log"
 	"net/http"
-
-	"golang.org/x/crypto/bcrypt"
-
-	"fmt"
 
 	"github.com/goware/jwtauth"
 	"github.com/pressly/warpdrive/services"
 	"github.com/pressly/warpdrive/web"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type sessionLogin struct {

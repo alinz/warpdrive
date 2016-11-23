@@ -1,8 +1,8 @@
 package data
 
-import db "upper.io/db.v2"
+import "upper.io/db.v2"
 
-//Permission this is reppresentation of Permissions tbale
+// Permission this is reppresentation of Permissions tbale
 type Permission struct {
 	ID     int64 `db:"id,omitempty,pk" json:"-"`
 	UserID int64 `db:"user_id" json:"-"`

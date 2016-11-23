@@ -9,9 +9,9 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
-//Config the configuration of warpdrive app
+// Config the configuration of warpdrive app
 type Config struct {
-	//[server]
+	// [server]
 	Server struct {
 		Addr          string `toml:"addr"`
 		DataDir       string `toml:"data_dir"`
@@ -19,16 +19,16 @@ type Config struct {
 		TempFolder    string
 	} `toml:"server"`
 
-	//[jwt]
+	// [jwt]
 	JWT struct {
-		SecretKey string `toml:"jwt_key"`
+		SecretKey string `toml:"secret_key"`
 		MaxAge    int    `toml:"max_age"`
 		Path      string `toml:"path"`
 		Domain    string `toml:"domain"`
 		Secure    bool   `toml:"secure"`
 	} `toml:"jwt"`
 
-	//[db]
+	// [db]
 	DB struct {
 		Database string `toml:"database"`
 		Hosts    string `toml:"hosts"`
@@ -36,22 +36,22 @@ type Config struct {
 		Password string `toml:"password"`
 	} `toml:"db"`
 
-	//[security]
+	// [security]
 	Security struct {
 		KeySize int `toml:"key_size"`
 	} `toml:"security"`
 
-	//[file_upload]
+	// [file_upload]
 	FileUpload struct {
 		FileMaxSize int64 `toml:"file_max_size"`
 	} `toml:"file_upload"`
 }
 
-//Conf global config variable.
+// Conf global config variable.
 var Conf *Config
 
-//NewConfig reads the config file and instanciated to global conf.
-//you only need to call this one once. use it in your main app
+// NewConfig reads the config file and instanciated to global conf.
+// you only need to call this one once. use it in your main app
 func NewConfig(filename string) (*Config, error) {
 	config := Config{}
 
