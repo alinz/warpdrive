@@ -3,7 +3,6 @@ package cli
 import (
 	"bufio"
 	"fmt"
-	"log"
 	"os"
 	"path"
 	"syscall"
@@ -49,17 +48,16 @@ func joinURL(base, target string) (string, error) {
 	return u.String(), nil
 }
 
-func apiURL(path string) string {
+func apiURL(path string) (string, error) {
 	projectConfig, err := ProjectConfig()
 	if err != nil {
-		log.Println(err.Error())
-		return ""
+		return "", err
 	}
 
 	url, err := joinURL(projectConfig.Server.Addr, path)
 	if err != nil {
-		log.Println(err.Error())
+		return "", err
 	}
 
-	return url
+	return url, nil
 }

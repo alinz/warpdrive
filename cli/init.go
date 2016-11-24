@@ -2,7 +2,9 @@ package cli
 
 import "github.com/mitchellh/cli"
 
-type initCommand struct{}
+type initCommand struct {
+	ui cli.Ui
+}
 
 func (t *initCommand) Help() string {
 	return "setup WarpFile"
@@ -14,9 +16,12 @@ func (t *initCommand) Run(args []string) int {
 		return 0
 	}
 
-	projectConfig.Server.Addr = Input("warpdriver server address:", false)
+	serverAddr := Input("warpdriver server address:", false)
+	projectConfig.setServerAddr(serverAddr)
+
 	err = configSave(projectConfig)
 	if err != nil {
+		t.ui.Error(err.Error())
 		return 1
 	}
 
@@ -27,8 +32,10 @@ func (t *initCommand) Synopsis() string {
 	return "Setup WarpFile for the first time in current folder"
 }
 
-func InitCommand() cli.CommandFactory {
+func newInitCommandFn(ui cli.Ui) cli.CommandFactory {
 	return func() (cli.Command, error) {
-		return &initCommand{}, nil
+		return &initCommand{
+			ui: ui,
+		}, nil
 	}
 }

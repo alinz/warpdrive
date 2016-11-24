@@ -24,6 +24,10 @@ func (p *projectConfig) Path() string {
 	return "./WarpFile"
 }
 
+func (p *projectConfig) setServerAddr(addr string) {
+	p.Server.Addr = addr
+}
+
 type globalConfig struct {
 	Sessions [][]string `toml:"sessions"`
 }
