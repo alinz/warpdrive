@@ -9,3 +9,5 @@ bin
 tmp
 temp
 etc/warpdrive.conf
+WarpFile
+.warp
