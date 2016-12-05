@@ -14,7 +14,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:pressly/react-native-warpdrive.git"
+    "url": "git@github.com:pressly/warpdrive.git"
   },
   "keywords": [
     "react-native",
@@ -25,7 +25,7 @@
   "author": "Ali Najafizadeh",
   "license": "BSD",
   "bugs": {
-    "url": "https://github.com/pressly/react-native-warpdrive/issues"
+    "url": "https://github.com/pressly/warpdrive/issues"
   },
-  "homepage": "https://github.com/pressly/react-native-warpdrive"
+  "homepage": "https://github.com/pressly/warpdrive"
 }
