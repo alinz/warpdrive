@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		41DE17EF1DF5E8E800D2F615 /* Warpdrive.m in Sources */ = {isa = PBXBuildFile; fileRef = 41DE17EE1DF5E8E800D2F615 /* Warpdrive.m */; };
-		41DE17F11DF5E8F100D2F615 /* Warpdrive.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 41DE17F01DF5E8F100D2F615 /* Warpdrive.framework */; };
+		41DE180B1DF5FB2B00D2F615 /* WarpdriveManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 41DE180A1DF5FB2B00D2F615 /* WarpdriveManager.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -27,7 +27,7 @@
 		41DE17E01DF5E76D00D2F615 /* libWarpdrive.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libWarpdrive.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		41DE17ED1DF5E8E800D2F615 /* Warpdrive.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Warpdrive.h; sourceTree = SOURCE_ROOT; };
 		41DE17EE1DF5E8E800D2F615 /* Warpdrive.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Warpdrive.m; sourceTree = SOURCE_ROOT; };
-		41DE17F01DF5E8F100D2F615 /* Warpdrive.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Warpdrive.framework; sourceTree = "<group>"; };
+		41DE180A1DF5FB2B00D2F615 /* WarpdriveManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WarpdriveManager.m; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -35,7 +35,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				41DE17F11DF5E8F100D2F615 /* Warpdrive.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -45,7 +44,6 @@
 		41DE17D71DF5E76D00D2F615 = {
 			isa = PBXGroup;
 			children = (
-				41DE17EC1DF5E78400D2F615 /* Frameworks */,
 				41DE17E21DF5E76D00D2F615 /* Warpdrive */,
 				41DE17E11DF5E76D00D2F615 /* Products */,
 			);
@@ -64,16 +62,9 @@
 			children = (
 				41DE17ED1DF5E8E800D2F615 /* Warpdrive.h */,
 				41DE17EE1DF5E8E800D2F615 /* Warpdrive.m */,
+				41DE180A1DF5FB2B00D2F615 /* WarpdriveManager.m */,
 			);
 			path = Warpdrive;
-			sourceTree = "<group>";
-		};
-		41DE17EC1DF5E78400D2F615 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				41DE17F01DF5E8F100D2F615 /* Warpdrive.framework */,
-			);
-			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -133,6 +124,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				41DE180B1DF5FB2B00D2F615 /* WarpdriveManager.m in Sources */,
 				41DE17EF1DF5E8E800D2F615 /* Warpdrive.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -180,6 +172,10 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/../../../node_modules/React/**",
+					"$(SRCROOT)/../../../node_modules/react-native/React/**",
+				);
 				IPHONEOS_DEPLOYMENT_TARGET = 10.1;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -221,6 +217,10 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/../../../node_modules/React/**",
+					"$(SRCROOT)/../../../node_modules/react-native/React/**",
+				);
 				IPHONEOS_DEPLOYMENT_TARGET = 10.1;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;

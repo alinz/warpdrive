@@ -8,6 +8,14 @@
 
 #import <Foundation/Foundation.h>
 
+#import "RCTBridgeModule.h"
+
 @interface Warpdrive : NSObject
 
++ (instancetype)shared;
+
+- (NSString*)sourceBundle;
+- (void) call;
+
 @end
+
