@@ -36,6 +36,9 @@ clean:
 build: clean
 	GOGC=off go build -i -gcflags="-e" -ldflags "$(LDFLAGS)" -o ./bin/warpdrive ./cmd/warpdrive
 
+build-ios:
+	@cd cmd/react-native && gomobile bind -target=ios .
+
 ##
 ## Database
 ##
