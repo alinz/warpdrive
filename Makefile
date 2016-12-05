@@ -41,13 +41,13 @@ build: clean
 ## Building Clients, ios and android
 ##
 clean-ios:
-	@rm -rf bin/Warpdrive.framework
+	@rm -rf client/ios/Warpdrive.framework
 
 build-ios: clean-ios
 	@cd cmd/client && gomobile bind -target=ios . && mv -f Warpdrive.framework ../../client/ios
 
 clean-android:
-	@rm -rf bin/warpdrive.aar
+	@rm -rf client/android/warpdrive.aar
 
 build-android: clean-android
 	@cd cmd/client && gomobile bind -target=android . && mv -f warpdrive.aar ../../client/android
