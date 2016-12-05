@@ -11,6 +11,7 @@ tools:
 	go get -u github.com/kardianos/govendor
 	go get -u github.com/jstemmer/gotags
 	go get -u golang.org/x/tools/cmd/goimports
+	go get -u golang.org/x/mobile/cmd/gomobile
 
 ##
 ## Dependency mgmt
@@ -27,7 +28,7 @@ vendor-sync:
 install: vendor-list vendor-update vendor-sync
 
 ##
-## Building
+## Building Server
 ##
 clean:
 	@rm -rf ./bin
@@ -36,8 +37,23 @@ clean:
 build: clean
 	GOGC=off go build -i -gcflags="-e" -ldflags "$(LDFLAGS)" -o ./bin/warpdrive ./cmd/warpdrive
 
-build-ios:
-	@cd cmd/react-native && gomobile bind -target=ios . && mv Warpdrive.framework ../../bin
+##
+## Building Clients, ios and android
+##
+clean-ios:
+	@rm -rf bin/Warpdrive.framework
+
+build-ios: clean-ios
+	@cd cmd/client && gomobile bind -target=ios . && mv -f Warpdrive.framework ../../bin
+
+clean-android:
+	@rm -rf bin/warpdrive.aar
+
+build-android: clean-android
+	@cd cmd/client && gomobile bind -target=android . && mv -f warpdrive.aar ../../bin
+
+build-client: build-ios build-android
+
 
 ##
 ## Database
