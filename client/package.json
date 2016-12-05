@@ -3,12 +3,13 @@
   "version": "2.0.0",
   "description": "In-App upgrade service for React-Native! Supporting iOS and Android apps",
   "main": "lib",
-  "directories": {
-    "examples": "examples",
-    "ios": "ios",
-    "android": "android",
-    "lib": "lib"
-  },
+  "files": [
+    "ios/",
+    "android/",
+    "lib/",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
