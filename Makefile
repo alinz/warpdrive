@@ -54,6 +54,15 @@ build-android: clean-android
 
 build-client: build-ios build-android
 
+##
+## build for example, don't use this
+##
+
+clean-ios-example:
+	@rm -rf client/examples/Sample1/node_modules/react-native-warpdrive/ios/Warpdrive.framework
+
+build-ios-example: clean-ios-example
+	@cd cmd/client && gomobile bind -target=ios . && mv -f Warpdrive.framework ../../client/examples/Sample1/node_modules/react-native-warpdrive/ios
 
 ##
 ## Database
