@@ -24,6 +24,7 @@
 		146834051AC3E58100842450 /* libReact.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 146834041AC3E56700842450 /* libReact.a */; };
 		41DE18091DF5F16600D2F615 /* libWarpdrive.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 41DE18081DF5F15C00D2F615 /* libWarpdrive.a */; };
 		41DE180E1DF6007800D2F615 /* Warpdrive.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 41DE180D1DF6007800D2F615 /* Warpdrive.framework */; };
+		41DE181B1DF6192E00D2F615 /* WarpFile in Resources */ = {isa = PBXBuildFile; fileRef = 41DE181A1DF6192E00D2F615 /* WarpFile */; };
 		832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 832341B51AAA6A8300B99B32 /* libRCTText.a */; };
 /* End PBXBuildFile section */
 
@@ -185,6 +186,7 @@
 		146833FF1AC3E56700842450 /* React.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = React.xcodeproj; path = "../node_modules/react-native/React/React.xcodeproj"; sourceTree = "<group>"; };
 		41DE18031DF5F15C00D2F615 /* Warpdrive.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Warpdrive.xcodeproj; path = "../node_modules/react-native-warpdrive/ios/Warpdrive.xcodeproj"; sourceTree = "<group>"; };
 		41DE180D1DF6007800D2F615 /* Warpdrive.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Warpdrive.framework; path = "../node_modules/react-native-warpdrive/ios/Warpdrive.framework"; sourceTree = "<group>"; };
+		41DE181A1DF6192E00D2F615 /* WarpFile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = WarpFile; sourceTree = "<group>"; };
 		78C398B01ACF4ADC00677621 /* RCTLinking.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTLinking.xcodeproj; path = "../node_modules/react-native/Libraries/LinkingIOS/RCTLinking.xcodeproj"; sourceTree = "<group>"; };
 		832341B01AAA6A8300B99B32 /* RCTText.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTText.xcodeproj; path = "../node_modules/react-native/Libraries/Text/RCTText.xcodeproj"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -307,6 +309,7 @@
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				13B07FB11A68108700A75B9A /* LaunchScreen.xib */,
 				13B07FB71A68108700A75B9A /* main.m */,
+				41DE181A1DF6192E00D2F615 /* WarpFile */,
 			);
 			name = Sample1;
 			sourceTree = "<group>";
@@ -655,6 +658,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
+				41DE181B1DF6192E00D2F615 /* WarpFile in Resources */,
 				13B07FBD1A68108700A75B9A /* LaunchScreen.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
