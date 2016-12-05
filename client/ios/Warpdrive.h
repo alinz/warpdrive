@@ -14,7 +14,7 @@
 
 + (instancetype)shared;
 
-- (NSString*)sourceBundle;
+- (NSURL *)sourceBundle;
 - (void) call;
 
 @end

@@ -24,7 +24,7 @@
   return sharedInstance;
 }
 
-- (NSString *)sourceBundle {
+- (NSURL *)sourceBundle {
   return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index.ios" fallbackResource:nil];
 }
 
