@@ -1,0 +1,31 @@
+{
+  "name": "react-native-warpdrive",
+  "version": "2.0.0",
+  "description": "In-App upgrade service for React-Native! Supporting iOS and Android apps",
+  "main": "lib",
+  "directories": {
+    "examples": "examples",
+    "ios": "ios",
+    "android": "android",
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:pressly/react-native-warpdrive.git"
+  },
+  "keywords": [
+    "react-native",
+    "react-component",
+    "ios",
+    "auto-updater"
+  ],
+  "author": "Ali Najafizadeh",
+  "license": "BSD",
+  "bugs": {
+    "url": "https://github.com/pressly/react-native-warpdrive/issues"
+  },
+  "homepage": "https://github.com/pressly/react-native-warpdrive"
+}

@@ -11,4 +11,9 @@ temp
 etc/warpdrive.conf
 WarpFile
 .warp
+
+##
+## client build
+##
 Warpdrive.framework
+warpdrive.aar
