@@ -255,15 +255,19 @@ func DownloadRelease(appID, cycleID, releaseID int64, encryptedKey []byte) (io.R
 		return nil, err
 	}
 
+	// TODO: we need to implement stream AES so we don't have to
+	// use `buffer`. The ideal case is we simply wap io.Writer with
+	// AES encryption and pass it to Compress as a writer.
+
 	// creates buffer for warpFile.
 	var buffer bytes.Buffer
-	warpFile := warp.NewWriter(&buffer)
-
-	// goes over all bundles and add them to warpFile
+	files := make(map[string]string)
 	for _, bundle := range bundles {
 		path := filepath.Join(warpdrive.Conf.Server.BundlesFolder, bundle.Hash)
-		warpFile.AddFile(bundle.Name, path)
+		files[path] = bundle.Name
 	}
+
+	warp.Compress(files, &buffer)
 
 	// we are encrypting the warpFile with key that we got from client
 	encrypted, err := crypto.AESEncrypt(buffer.Bytes(), key)
