@@ -88,7 +88,7 @@ func AESDecrypt(ciphertext, key []byte) ([]byte, error) {
 	return unpadding(ciphertext), nil
 }
 
-func AESEncryptStream(key []byte, input io.Reader, output io.Writer) error {
+func AESEncryptStream2(key []byte, input io.Reader, output io.Writer) error {
 	aes, err := aes.NewCipher(key)
 	if err != nil {
 		return err
@@ -117,7 +117,7 @@ func AESEncryptStream(key []byte, input io.Reader, output io.Writer) error {
 	return nil
 }
 
-func AESDecryptStream(key []byte, input io.Reader, output io.Writer) error {
+func AESDecryptStream2(key []byte, input io.Reader, output io.Writer) error {
 	aes, err := aes.NewCipher(key)
 	if err != nil {
 		return err
@@ -141,6 +141,46 @@ func AESDecryptStream(key []byte, input io.Reader, output io.Writer) error {
 			return err
 		}
 	}
-	
+
+	return nil
+}
+
+func AESEncryptStream(key []byte, input io.Reader, output io.Writer) error {
+	block, err := aes.NewCipher(key)
+
+	if err != nil {
+		return err
+	}
+
+	// beacuse every bundle in this packge uses different key, then this is
+	// going to be ok if we use zero IV.
+	var iv [aes.BlockSize]byte
+	stream := cipher.NewOFB(block, iv[:])
+
+	writer := &cipher.StreamWriter{S: stream, W: output}
+	if _, err := io.Copy(writer, input); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func AESDecryptStream(key []byte, input io.Reader, output io.Writer) error {
+	block, err := aes.NewCipher(key)
+
+	if err != nil {
+		return err
+	}
+
+	// beacuse every bundle in this packge uses different key, then this is
+	// going to be ok if we use zero IV.
+	var iv [aes.BlockSize]byte
+	stream := cipher.NewOFB(block, iv[:])
+
+	reader := &cipher.StreamReader{S: stream, R: input}
+	if _, err := io.Copy(output, reader); err != nil {
+		return err
+	}
+
 	return nil
 }

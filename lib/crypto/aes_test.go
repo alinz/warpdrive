@@ -55,7 +55,7 @@ func TestAESStream(t *testing.T) {
 	var output bytes.Buffer
 	var final bytes.Buffer
 
-	message := "1"
+	message := "Hello"
 
 	given.WriteString(message)
 	input.WriteString(message)
@@ -75,7 +75,7 @@ func TestAESStream(t *testing.T) {
 		t.Error(err.Error())
 	}
 
-	if !bytes.Equal(input.Bytes(), final.Bytes()) {
+	if !bytes.Equal(given.Bytes(), final.Bytes()) {
 		t.Log("given:", given.Len(), given.String())
 		t.Log("result:", final.Len(), final.String())
 		t.Error(fmt.Errorf("final decrypted message is not the same as given input"))
