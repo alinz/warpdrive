@@ -87,3 +87,60 @@ func AESDecrypt(ciphertext, key []byte) ([]byte, error) {
 
 	return unpadding(ciphertext), nil
 }
+
+func AESEncryptStream(key []byte, input io.Reader, output io.Writer) error {
+	aes, err := aes.NewCipher(key)
+	if err != nil {
+		return err
+	}
+
+	enc := cipher.NewCBCEncrypter(aes, iv)
+	buf := make([]byte, enc.BlockSize())
+
+	for {
+		_, err = io.ReadFull(input, buf)
+		if err != nil {
+			if err == io.EOF {
+				break
+			} else if err == io.ErrUnexpectedEOF {
+				// nothing
+			} else {
+				return err
+			}
+		}
+		enc.CryptBlocks(buf, buf)
+		if _, err = output.Write(buf); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func AESDecryptStream(key []byte, input io.Reader, output io.Writer) error {
+	aes, err := aes.NewCipher(key)
+	if err != nil {
+		return err
+	}
+
+	dec := cipher.NewCBCDecrypter(aes, iv)
+	buf := make([]byte, dec.BlockSize())
+
+	for {
+		_, err := io.ReadFull(input, buf)
+		if err != nil {
+			if err == io.EOF {
+				break
+			} else {
+				return err
+			}
+		}
+
+		dec.CryptBlocks(buf, buf)
+		if _, err = output.Write(buf); err != nil {
+			return err
+		}
+	}
+	
+	return nil
+}

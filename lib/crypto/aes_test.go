@@ -1,6 +1,8 @@
 package crypto_test
 
 import (
+	"bytes"
+	"fmt"
 	"os"
 	"testing"
 
@@ -45,4 +47,38 @@ func TestAESAsFile(t *testing.T) {
 
 	out.Write(encrypted)
 	out.Close()
+}
+
+func TestAESStream(t *testing.T) {
+	var given bytes.Buffer
+	var input bytes.Buffer
+	var output bytes.Buffer
+	var final bytes.Buffer
+
+	message := "1"
+
+	given.WriteString(message)
+	input.WriteString(message)
+
+	key, err := crypto.MakeAESKey(32)
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	err = crypto.AESEncryptStream(key, &input, &output)
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	err = crypto.AESDecryptStream(key, &output, &final)
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	if !bytes.Equal(input.Bytes(), final.Bytes()) {
+		t.Log("given:", given.Len(), given.String())
+		t.Log("result:", final.Len(), final.String())
+		t.Error(fmt.Errorf("final decrypted message is not the same as given input"))
+
+	}
 }
