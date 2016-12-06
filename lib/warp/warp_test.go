@@ -28,5 +28,12 @@ func TestWarpEncoding(t *testing.T) {
 	defer f.Close()
 	f.Write(buff.Bytes())
 
+	f.Seek(0, 0)
+	w = warp.NewReader(f)
+	err = w.Extract("./ali")
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
 	fmt.Println(buff.Len())
 }

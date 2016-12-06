@@ -2,9 +2,15 @@ package warpdrive
 
 import "fmt"
 import "path"
+import "time"
 
 type Callback interface {
 	Do(value string, err error)
+}
+
+type Event struct {
+	Type string
+	Date time.Time
 }
 
 var (
@@ -12,11 +18,30 @@ var (
 	targetDocumentPath string
 	targetPlatform     string
 	targetCallback     Callback
+	queue              chan *Event
 )
+
+func processEvent(event *Event) {
+	switch event.Type {
+	case "":
+	}
+}
 
 // Setup sets couple of variables which will be used internally
 // to save and load bundles
 func Setup(bundle, document, platform string) {
+	queue = make(chan *Event, 10)
+	go func() {
+		for {
+			event, ok := <-queue
+			if !ok {
+				return
+			}
+
+			processEvent(event)
+		}
+	}()
+
 	targetBundlePath = bundle
 	targetDocumentPath = document
 	targetPlatform = platform

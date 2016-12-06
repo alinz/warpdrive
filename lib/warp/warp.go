@@ -6,6 +6,12 @@ import (
 	"io"
 	"os"
 
+	"path/filepath"
+
+	"fmt"
+
+	"bytes"
+
 	"github.com/pressly/warpdrive/lib/crypto"
 )
 
@@ -15,9 +21,15 @@ type fileHeader struct {
 	Name     [996]byte // 996 bytes -> total is 1024bytes or 1kb
 }
 
+func (fh *fileHeader) read(r io.Reader) error {
+	headerReader := io.LimitReader(r, 1024)
+	return binary.Read(headerReader, binary.LittleEndian, fh)
+}
+
 // Warp is a type to support new file encoding
 type Warp struct {
 	w io.Writer
+	r io.Reader
 }
 
 // AddFile adds a new filw inside warp file
@@ -61,7 +73,68 @@ func (w *Warp) AddFile(name, path string) error {
 	return nil
 }
 
-// NewWriter creates a new Warp
+func (w *Warp) Extract(path string) error {
+	header := &fileHeader{}
+
+	err := header.read(w.r)
+	for {
+		if err != nil {
+			return err
+		}
+
+		targetPath := filepath.Join(path, string(header.Name[:]))
+		fmt.Println(len(string(header.Name[:])))
+		// we read the header so now we need to create a folder and file under the
+		// path + fileName and write the content of the file into it
+		dir := filepath.Dir(targetPath)
+		// filename := filepath.Base(targetPath)
+
+		err = os.MkdirAll(dir, os.ModePerm)
+		if err != nil {
+			return err
+		}
+
+		fmt.Println(targetPath, len(targetPath))
+
+		file, err1 := os.Create(targetPath)
+		if err1 != nil {
+			return err1
+		}
+
+		defer file.Close()
+
+		fileContentReader := io.LimitReader(w.r, header.FileSize)
+		bytesWritten, err := io.Copy(file, fileContentReader)
+		if err != nil {
+			return err
+		}
+
+		if bytesWritten != header.FileSize {
+			return fmt.Errorf("file size is mismatched in header for %s", targetPath)
+		}
+
+		file.Seek(0, 0)
+		hash, err := crypto.Hash(file)
+		if err != nil {
+			return err
+		}
+
+		if !bytes.Equal(hash, header.Hash[:]) {
+			return fmt.Errorf("hash mismatched for %s", targetPath)
+		}
+
+		err = header.read(w.r)
+	}
+
+	return nil
+}
+
+// NewWriter creates a new Warp for write to
 func NewWriter(w io.Writer) *Warp {
 	return &Warp{w: w}
+}
+
+// NewReader creates a new Warp for read from
+func NewReader(r io.Reader) *Warp {
+	return &Warp{r: r}
 }
