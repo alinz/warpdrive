@@ -1,140 +1,120 @@
 package warp
 
 import (
-	"encoding/binary"
-	"errors"
+	"archive/tar"
+	"compress/gzip"
+	"fmt"
 	"io"
 	"os"
-
 	"path/filepath"
-
-	"fmt"
-
-	"bytes"
-
-	"github.com/pressly/warpdrive/lib/crypto"
 )
 
-type fileHeader struct {
-	FileSize int64     // 8 bytes
-	Hash     [20]byte  // 20 bytes
-	Name     [996]byte // 996 bytes -> total is 1024bytes or 1kb
-}
+// Compress gets a map of <Target>:Source values. Target is the actual name and src is
+// hash name path. So we need to load the src first and change the name of the file to target
+func Compress(paths map[string]string, output io.Writer) error {
+	fileWriter := gzip.NewWriter(output)
+	defer fileWriter.Close()
 
-func (fh *fileHeader) read(r io.Reader) error {
-	headerReader := io.LimitReader(r, 1024)
-	return binary.Read(headerReader, binary.LittleEndian, fh)
-}
+	tarfileWriter := tar.NewWriter(fileWriter)
+	defer tarfileWriter.Close()
 
-// Warp is a type to support new file encoding
-type Warp struct {
-	w io.Writer
-	r io.Reader
-}
-
-// AddFile adds a new filw inside warp file
-func (w *Warp) AddFile(name, path string) error {
-	file, err := os.Open(path)
-	if err != nil {
-		return err
-	}
-
-	fileInfo, _ := file.Stat()
-	defer file.Close()
-
-	//calculate hash
-	hash, err := crypto.Hash(file)
-	if err != nil {
-		return err
-	}
-
-	// we need to reset the file to 0, 0, so copy io can performe.
-	file.Seek(0, 0)
-
-	fh := fileHeader{
-		FileSize: fileInfo.Size(),
-	}
-
-	nameLength := len(name)
-	if nameLength > 996 {
-		return errors.New("name of the file is too big")
-	}
-
-	copy(fh.Name[:], []byte(name)[:nameLength])
-	copy(fh.Hash[:], hash[:20])
-	err = binary.Write(w.w, binary.LittleEndian, &fh)
-
-	if err != nil {
-		return err
-	}
-
-	io.Copy(w.w, file)
-
-	return nil
-}
-
-func (w *Warp) Extract(path string) error {
-	header := &fileHeader{}
-
-	err := header.read(w.r)
-	for {
+	for target, src := range paths {
+		file, err := os.Open(src)
 		if err != nil {
 			return err
-		}
-
-		targetPath := filepath.Join(path, string(header.Name[:]))
-		fmt.Println(len(string(header.Name[:])))
-		// we read the header so now we need to create a folder and file under the
-		// path + fileName and write the content of the file into it
-		dir := filepath.Dir(targetPath)
-		// filename := filepath.Base(targetPath)
-
-		err = os.MkdirAll(dir, os.ModePerm)
-		if err != nil {
-			return err
-		}
-
-		fmt.Println(targetPath, len(targetPath))
-
-		file, err1 := os.Create(targetPath)
-		if err1 != nil {
-			return err1
 		}
 
 		defer file.Close()
 
-		fileContentReader := io.LimitReader(w.r, header.FileSize)
-		bytesWritten, err := io.Copy(file, fileContentReader)
+		fileInfo, err := file.Stat()
 		if err != nil {
 			return err
 		}
 
-		if bytesWritten != header.FileSize {
-			return fmt.Errorf("file size is mismatched in header for %s", targetPath)
+		if fileInfo.IsDir() {
+			continue
 		}
 
-		file.Seek(0, 0)
-		hash, err := crypto.Hash(file)
+		header := new(tar.Header)
+		header.Name = target
+		header.Size = fileInfo.Size()
+		header.Mode = int64(fileInfo.Mode())
+		header.ModTime = fileInfo.ModTime()
+
+		err = tarfileWriter.WriteHeader(header)
 		if err != nil {
 			return err
 		}
 
-		if !bytes.Equal(hash, header.Hash[:]) {
-			return fmt.Errorf("hash mismatched for %s", targetPath)
+		_, err = io.Copy(tarfileWriter, file)
+		if err != nil {
+			return err
 		}
-
-		err = header.read(w.r)
 	}
 
 	return nil
 }
 
-// NewWriter creates a new Warp for write to
-func NewWriter(w io.Writer) *Warp {
-	return &Warp{w: w}
-}
+// Extract extracts input stream into targetPath
+func Extract(input io.ReadCloser, targetPath string) error {
+	fileReader, err := gzip.NewReader(input)
+	if err != nil {
+		return nil
+	}
 
-// NewReader creates a new Warp for read from
-func NewReader(r io.Reader) *Warp {
-	return &Warp{r: r}
+	defer fileReader.Close()
+
+	tarBallReader := tar.NewReader(fileReader)
+
+	for {
+		header, err := tarBallReader.Next()
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			return err
+		}
+
+		// get the individual filename and extract to the current directory
+		// and join it with targetPath
+		filename := filepath.Join(targetPath, header.Name)
+
+		switch header.Typeflag {
+		case tar.TypeDir:
+			// handle directory
+			err = os.MkdirAll(filename, os.ModePerm)
+			if err != nil {
+				return err
+			}
+
+		case tar.TypeReg:
+		case tar.TypeRegA:
+			// we need to make sure the folder exists
+			dir := filepath.Dir(filename)
+			err = os.MkdirAll(dir, os.ModePerm)
+			if err != nil {
+				return err
+			}
+
+			// handle normal file
+			writer, err := os.Create(filename)
+			if err != nil {
+				return err
+			}
+
+			io.Copy(writer, tarBallReader)
+
+			err = os.Chmod(filename, os.ModePerm)
+			if err != nil {
+				return err
+			}
+
+			writer.Close()
+
+		default:
+			return fmt.Errorf("Unable to untar type : %c in file %s", header.Typeflag, filename)
+		}
+	}
+
+	return nil
 }

@@ -1,39 +1,39 @@
 package warp_test
 
 import (
-	"bytes"
-	"fmt"
 	"os"
 	"testing"
 
 	"github.com/pressly/warpdrive/lib/warp"
 )
 
-func TestWarpEncoding(t *testing.T) {
-	var buff bytes.Buffer
-
-	w := warp.NewWriter(&buff)
-
-	err := w.AddFile("file1", "file1")
+func TestWarpEncodingDecoding(t *testing.T) {
+	output, err := os.Create("./output")
 	if err != nil {
-		t.Error(err)
+		t.Errorf(err.Error())
 	}
 
-	err = w.AddFile("file2", "file2")
+	defer output.Close()
+
+	files := make(map[string]string)
+	files["./file1"] = "./file1"
+	files["./file2"] = "./file2"
+	files["./file3"] = "./file3"
+
+	err = warp.Compress(files, output)
 	if err != nil {
-		t.Error(err)
+		t.Errorf(err.Error())
 	}
 
-	f, _ := os.Create("./output")
-	defer f.Close()
-	f.Write(buff.Bytes())
-
-	f.Seek(0, 0)
-	w = warp.NewReader(f)
-	err = w.Extract("./ali")
+	input, err := os.Open("./output")
 	if err != nil {
-		fmt.Println(err.Error())
+		t.Errorf(err.Error())
 	}
 
-	fmt.Println(buff.Len())
+	defer input.Close()
+
+	err = warp.Extract(input, "./extract")
+	if err != nil {
+		t.Errorf(err.Error())
+	}
 }
