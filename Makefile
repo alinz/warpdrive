@@ -4,6 +4,7 @@ LDFLAGS+=-X github.com/pressly/warpdrive.LONGVERSION=$$(git describe --tags --lo
 ##
 ## Tools
 ##
+
 tools:
 	go get -u github.com/pressly/fresh
 	go get -u github.com/pressly/goose
@@ -16,6 +17,7 @@ tools:
 ##
 ## Dependency mgmt
 ##
+
 vendor-list:
 	@govendor list
 
@@ -30,6 +32,7 @@ install: vendor-list vendor-update vendor-sync
 ##
 ## Building Server
 ##
+
 clean-server:
 	@rm -rf ./bin/warpdrive-server
 	@mkdir -p ./bin
@@ -50,6 +53,7 @@ build-cli: clean-cli
 ##
 ## Building WarpDrive's Clients, ios and android
 ##
+
 clean-ios:
 	@rm -rf client/ios/Warpdrive.framework
 
@@ -65,23 +69,15 @@ build-android: clean-android
 build-clients: build-ios build-android
 
 ##
-## build for example, don't use this, this is meant for development only
-##
-
-clean-ios-example:
-	@rm -rf client/examples/Sample1/node_modules/react-native-warpdrive/ios/Warpdrive.framework
-
-build-ios-example: clean-ios-example
-	@cd cmd/client && gomobile bind -target=ios . && mv -f Warpdrive.framework ../../client/examples/Sample1/node_modules/react-native-warpdrive/ios
-
-##
 ## Building everything
 ##
+
 build: build-server build-cli build-clients
 
 ##
 ## Database
 ##
+
 db-create:
 	@goose up
 
@@ -93,6 +89,7 @@ db-reset: db-destroy db-create
 ##
 ## Development
 ##
+
 build-dev-folder:
 	@rm -rf ./bin
 	@mkdir -p ./bin/tmp/warpdrive
@@ -102,3 +99,9 @@ run: build-dev-folder
 
 kill:
 	@lsof -t -i:8221 | xargs kill
+
+clean-ios-example:
+	@rm -rf client/examples/Sample1/node_modules/react-native-warpdrive/ios/Warpdrive.framework
+
+build-ios-example: clean-ios-example
+	@cd cmd/client && gomobile bind -target=ios . && mv -f Warpdrive.framework ../../client/examples/Sample1/node_modules/react-native-warpdrive/ios
