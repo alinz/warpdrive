@@ -12,7 +12,7 @@ type Cycle struct {
 	ID         int64     `db:"id,omitempty,pk" json:"id"`
 	AppID      int64     `db:"app_id" json:"-"`
 	Name       string    `db:"name,omitempty" json:"name"`
-	PublicKey  string    `db:"public_key,omitempty" json:"-"`
+	PublicKey  string    `db:"public_key,omitempty" json:"public_key"`
 	PrivateKey string    `db:"private_key,omitempty" json:"-"`
 	UpdatedAt  time.Time `db:"updated_at" json:"updated_at"`
 	CreatedAt  time.Time `db:"created_at" json:"created_at"`
