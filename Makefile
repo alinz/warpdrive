@@ -105,3 +105,9 @@ clean-ios-example:
 
 build-ios-example: clean-ios-example
 	@cd cmd/client && gomobile bind -target=ios . && mv -f Warpdrive.framework ../../client/examples/Sample1/node_modules/react-native-warpdrive/ios
+
+clean-cli-dev:
+	@rm -rf ./client/examples/Sample1/warp
+
+build-cli-dev: clean-cli-dev
+	GOGC=off go build -i -gcflags="-e" -ldflags "$(LDFLAGS)" -o ./client/examples/Sample1/warp ./cmd/warp
