@@ -27,6 +27,12 @@ var loginCmd = &cobra.Command{
 		if err != nil {
 			fmt.Println(err.Error())
 			serverAddr := terminalInput("Server Address:", false)
+
+			_, err = globalConfig.getSessionFor(serverAddr)
+			if err == nil {
+				return
+			}
+
 			email := terminalInput("Email:", false)
 			password := terminalInput("Password:", true)
 

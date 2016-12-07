@@ -6,9 +6,25 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
+	"path"
 	"strings"
 	"time"
 )
+
+func joinURL(base, target string) (string, error) {
+	u, err := url.Parse(base)
+	if err != nil {
+		return "", err
+	}
+
+	if u.Scheme == "" {
+		u.Scheme = "http"
+	}
+
+	u.Path = path.Join(u.Path, target)
+	return u.String(), nil
+}
 
 func httpRequest(method, url string, data interface{}, jwt string) (*http.Response, error) {
 	const defaultTimeout = 10 * time.Second

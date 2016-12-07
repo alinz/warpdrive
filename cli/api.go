@@ -2,7 +2,6 @@ package cli
 
 import (
 	"fmt"
-	"path"
 
 	"encoding/json"
 
@@ -23,7 +22,12 @@ func (a *api) login(email, password string) error {
 		Password: password,
 	}
 
-	resp, err := httpRequest("POST", path.Join(a.serverAddr, "/session/start"), reqBody, "")
+	path, err := joinURL(a.serverAddr, "/session/start")
+	if err != nil {
+		return fmt.Errorf("Server Address '%s' is invalid", a.serverAddr)
+	}
+
+	resp, err := httpRequest("POST", path, reqBody, "")
 	if err != nil {
 		return err
 	}
@@ -40,9 +44,12 @@ func (a *api) login(email, password string) error {
 }
 
 func (a *api) getCycle(appID, cycleID int64) (*data.Cycle, error) {
-	apiPath := fmt.Sprintf("/apps/%d/cycles/%d", appID, cycleID)
+	path, err := joinURL(a.serverAddr, fmt.Sprintf("/apps/%d/cycles/%d", appID, cycleID))
+	if err != nil {
+		return nil, fmt.Errorf("Server Address '%s' is invalid", a.serverAddr)
+	}
 
-	resp, err := httpRequest("POST", path.Join(a.serverAddr, apiPath), nil, a.session)
+	resp, err := httpRequest("POST", path, nil, a.session)
 	if err != nil {
 		return nil, err
 	}
