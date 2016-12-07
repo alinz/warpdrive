@@ -30,12 +30,22 @@ install: vendor-list vendor-update vendor-sync
 ##
 ## Building Server
 ##
-clean:
-	@rm -rf ./bin
+clean-server:
+	@rm -rf ./bin/warpdrive-server
 	@mkdir -p ./bin
 
-build: clean
+build-server: clean-server
 	GOGC=off go build -i -gcflags="-e" -ldflags "$(LDFLAGS)" -o ./bin/warpdrive-server ./cmd/server
+
+##
+## Building cli
+##
+clean-cli:
+	@rm -rf ./bin/warp
+	@mkdir -p ./bin
+
+build-cli: clean-cli
+	GOGC=off go build -i -gcflags="-e" -ldflags "$(LDFLAGS)" -o ./bin/warp ./cmd/warp
 
 ##
 ## Building WarpDrive's Clients, ios and android
@@ -63,6 +73,11 @@ clean-ios-example:
 
 build-ios-example: clean-ios-example
 	@cd cmd/client && gomobile bind -target=ios . && mv -f Warpdrive.framework ../../client/examples/Sample1/node_modules/react-native-warpdrive/ios
+
+##
+## Building everything
+##
+build: build-server build-cli build-clients
 
 ##
 ## Database

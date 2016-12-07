@@ -14,8 +14,16 @@
 
 package main
 
-import "github.com/pressly/warpdrive/cli"
+import (
+	"fmt"
+	"os"
+
+	"github.com/pressly/warpdrive/cli"
+)
 
 func main() {
-	cli.Execute()
+	if err := cli.RootCmd.Execute(); err != nil {
+		fmt.Println(err)
+		os.Exit(-1)
+	}
 }
