@@ -59,12 +59,9 @@ func downloadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	encryptedWarpFileReader, err := services.DownloadRelease(appID, cycleID, releaseID, encryptedKey)
+	err = services.DownloadRelease(appID, cycleID, releaseID, encryptedKey, w)
 	if err != nil {
 		web.Respond(w, http.StatusBadRequest, err)
 		return
 	}
-
-	w.Header().Set("Content-Type", "application/zip")
-	io.Copy(w, encryptedWarpFileReader)
 }

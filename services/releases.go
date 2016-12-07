@@ -1,7 +1,6 @@
 package services
 
 import (
-	"bytes"
 	"io"
 	"path/filepath"
 
@@ -229,51 +228,37 @@ func LatestRelease(appID, cycleID int64, version string, platform string) (map[s
 	return releases, nil
 }
 
-func DownloadRelease(appID, cycleID, releaseID int64, encryptedKey []byte) (io.Reader, error) {
+func DownloadRelease(appID, cycleID, releaseID int64, encryptedKey []byte, output io.Writer) error {
 	// checks if cycle id belongs to app id and also we need cycle object
 	// for PrivateKey
 	cycle, err := FindCycleByAppIdCycleId(appID, cycleID)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// checks if release id belongs to cycle if
 	_, err = FindLockedRelease(cycleID, releaseID)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// gets all bundles for a specific release id
 	bundles, err := FindAllBundlesByReleaseID(releaseID)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// decrypts the key by using private key
 	key, err := crypto.DecryptByPrivateRSA(encryptedKey, cycle.PrivateKey, "sha1")
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	// TODO: we need to implement stream AES so we don't have to
-	// use `buffer`. The ideal case is we simply wap io.Writer with
-	// AES encryption and pass it to Compress as a writer.
-
-	// creates buffer for warpFile.
-	var buffer bytes.Buffer
 	files := make(map[string]string)
 	for _, bundle := range bundles {
 		path := filepath.Join(warpdrive.Conf.Server.BundlesFolder, bundle.Hash)
 		files[path] = bundle.Name
 	}
 
-	warp.Compress(files, &buffer)
-
-	// we are encrypting the warpFile with key that we got from client
-	encrypted, err := crypto.AESEncrypt(buffer.Bytes(), key)
-	if err != nil {
-		return nil, err
-	}
-
-	return bytes.NewReader(encrypted), nil
+	return warp.Compress(files, crypto.NewAESEncryptWriter(key, output))
 }

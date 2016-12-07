@@ -184,3 +184,25 @@ func AESDecryptStream(key []byte, input io.Reader, output io.Writer) error {
 
 	return nil
 }
+
+func NewAESEncryptWriter(key []byte, output io.Writer) io.Writer {
+	// whatever I write into `w`, will be avilable in `r`
+	r, w := io.Pipe()
+
+	go func() {
+		AESEncryptStream(key, r, output)
+	}()
+
+	return w
+}
+
+func NewAESDecryptWriter(key []byte, output io.Writer) io.Writer {
+	// whatever I write into `w`, will be avilable in `r`
+	r, w := io.Pipe()
+
+	go func() {
+		AESDecryptStream(key, r, output)
+	}()
+
+	return w
+}
