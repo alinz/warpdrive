@@ -35,27 +35,27 @@ clean:
 	@mkdir -p ./bin
 
 build: clean
-	GOGC=off go build -i -gcflags="-e" -ldflags "$(LDFLAGS)" -o ./bin/warpdrive ./cmd/warpdrive
+	GOGC=off go build -i -gcflags="-e" -ldflags "$(LDFLAGS)" -o ./bin/warpdrive-server ./cmd/server
 
 ##
-## Building Clients, ios and android
+## Building WarpDrive's Clients, ios and android
 ##
 clean-ios:
 	@rm -rf client/ios/Warpdrive.framework
 
 build-ios: clean-ios
-	@cd cmd/client && gomobile bind -target=ios . && mv -f Warpdrive.framework ../../client/ios
+	@cd cmd/warpdrive && gomobile bind -target=ios . && mv -f Warpdrive.framework ../../client/ios
 
 clean-android:
 	@rm -rf client/android/warpdrive.aar
 
 build-android: clean-android
-	@cd cmd/client && gomobile bind -target=android . && mv -f warpdrive.aar ../../client/android
+	@cd cmd/warpdrive && gomobile bind -target=android . && mv -f warpdrive.aar ../../client/android
 
-build-client: build-ios build-android
+build-clients: build-ios build-android
 
 ##
-## build for example, don't use this
+## build for example, don't use this, this is meant for development only
 ##
 
 clean-ios-example:
@@ -83,7 +83,7 @@ build-dev-folder:
 	@mkdir -p ./bin/tmp/warpdrive
 
 run: build-dev-folder
-	fresh -c ./etc/fresh-runner.conf -p ./cmd/warpdrive -r '-config=./etc/warpdrive.conf' -o ./bin/warpdrive
+	fresh -c ./etc/fresh-runner.conf -p ./cmd/server -r '-config=./etc/warpdrive.conf' -o ./bin/warpdrive-server
 
 kill:
 	@lsof -t -i:8221 | xargs kill
