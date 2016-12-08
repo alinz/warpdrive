@@ -27,9 +27,7 @@ vendor-clean:
 
 vendor-rebuild:
 	@govendor add +e
-	@govendor update +external 
-
-# install:
+	@govendor update +external
 
 ##
 ## Building Server
