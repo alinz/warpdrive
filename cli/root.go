@@ -84,8 +84,10 @@ func (l *localConfig) paths() []string {
 }
 
 func (l *localConfig) Save() error {
-	for _, path := range l.paths() {
-		err := configSave(path, l)
+	for _, loc := range l.paths() {
+		// make sure the folder exists before creating a file.
+		os.MkdirAll(path.Dir(loc), os.ModePerm)
+		err := configSave(loc, l)
 		if err != nil {
 			return err
 		}
@@ -94,10 +96,11 @@ func (l *localConfig) Save() error {
 }
 
 func (l *localConfig) Load() error {
+	var err error
 	loaded := false
 
 	for _, path := range l.paths() {
-		err := configLoad(path, l)
+		err = configLoad(path, l)
 		if err == nil {
 			loaded = true
 			break
@@ -105,7 +108,7 @@ func (l *localConfig) Load() error {
 	}
 
 	if !loaded {
-		return fmt.Errorf("couldn't find 'WarpFile' in the current path")
+		return fmt.Errorf("'WarpFile' not found in '%s'", err.Error())
 	}
 
 	return nil
@@ -122,7 +125,7 @@ func (l *localConfig) isRequiredSetup() bool {
 func configLoad(path string, conf config) error {
 	file, err := os.Open(path)
 	if err != nil {
-		return err
+		return fmt.Errorf(path)
 	}
 
 	defer file.Close()

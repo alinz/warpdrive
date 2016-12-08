@@ -3,6 +3,7 @@ package cli
 import (
 	"fmt"
 
+	"github.com/goware/urlx"
 	"github.com/spf13/cobra"
 )
 
@@ -72,6 +73,10 @@ func intractiveLogin(serverAddr string) (string, string, error) {
 		serverAddr = terminalInput("Server Address:", false)
 	}
 
+	// normalize the serverAddr, for example, convert localhost:8000 to http://localhost:8000
+	url, _ := urlx.Parse(serverAddr)
+	serverAddr, _ = urlx.Normalize(url)
+
 	fmt.Printf("Login to %s\n", serverAddr)
 	email := terminalInput("Email:", false)
 	password := terminalInput("Password:", true)
@@ -92,30 +97,39 @@ func validateSession(serverAddr, session string) error {
 	return api.validate()
 }
 
-func getActiveAPI() (*api, error) {
-	var globalConfig globalConfig
-	var localConfig localConfig
+func getActiveAPI(global *globalConfig, local *localConfig) (*api, error) {
 	var session string
 	var serverAddr string
 	var err error
 	var api api
 
-	globalConfig.Load()
+	if global == nil {
+		global = &globalConfig{}
+	}
 
-	err = localConfig.Load()
-	if err != nil {
-		serverAddr = terminalInput("Server Address:", false)
-		session, err = globalConfig.getSessionFor(serverAddr)
+	if local == nil {
+		local = &localConfig{}
+	}
+
+	global.Load()
+
+	err = local.Load()
+	if err == nil {
+		// the local config is located so we know the server address
+		serverAddr = local.ServerAddr
+	}
+
+	// in here we either know the server address or not
+	session, err = global.getSessionFor(serverAddr)
+	if err == nil {
+		// we need to check whether the session is valid or not and if it is not,
+		// we need to login the user
+		err = validateSession(serverAddr, session)
 		if err == nil {
-			// we need to check whether the session is valid or not and if it is not,
-			// we need to login the user
-			err = validateSession(serverAddr, session)
-			if err == nil {
-				api.serverAddr = serverAddr
-				api.session = session
+			api.serverAddr = serverAddr
+			api.session = session
 
-				return &api, nil
-			}
+			return &api, nil
 		}
 	}
 
@@ -124,9 +138,11 @@ func getActiveAPI() (*api, error) {
 		return nil, err
 	}
 
-	globalConfig.setSessionFor(serverAddr, session)
-	globalConfig.Save()
+	// save the session for future call
+	global.setSessionFor(serverAddr, session)
+	global.Save()
 
+	// setup the api with proper address and session
 	api.serverAddr = serverAddr
 	api.session = session
 

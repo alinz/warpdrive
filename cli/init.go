@@ -21,13 +21,14 @@ func pathExists(path string) (bool, error) {
 func isReactNativeProject() bool {
 	paths := []string{
 		"./android/app/src/main",
-		"./android/app/src/main/assets",
+		//"./android/app/src/main/assets",
 		"./ios",
 		"./package.json",
 	}
 
 	for _, path := range paths {
 		if exists, _ := pathExists(path); !exists {
+			fmt.Println(path)
 			return false
 		}
 	}
@@ -38,13 +39,18 @@ func isReactNativeProject() bool {
 var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "creates a temporary WarpFile",
-	Long:  `check if the project is react-native and creates proper WarpFile`,
+	Long: `
+check if the project is react-native and creates temporary WarpFile in correct locations.
+once this operation is done, 'warp release configure' needs to be called to properly setup the WarpFile.
+also make sure you have already created an app and cycle.
+`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// check if the current path is a react-native project
 		// can be done very quickly by checking if the following path exists in current
 		// directory
-		if isReactNativeProject() {
+		if !isReactNativeProject() {
 			fmt.Println("The current path is not a react-native project")
+			return
 		}
 
 		// need to check if WarpFile already exists in this project

@@ -21,7 +21,7 @@ var appCreateCmd = &cobra.Command{
 			return
 		}
 
-		api, err := getActiveAPI()
+		api, err := getActiveAPI(nil, nil)
 		if err != nil {
 			fmt.Println(err.Error())
 			return

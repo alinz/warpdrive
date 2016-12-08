@@ -86,6 +86,31 @@ func (a *api) getCycle(appID, cycleID int64) (*data.Cycle, error) {
 	return &cycle, nil
 }
 
+func (a *api) getCycleByName(appID int64, cycleName string) (*data.Cycle, error) {
+	path, err := a.makePath("/apps/%d/cycles?name=%s", appID, cycleName)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := httpRequest("GET", path, nil, a.session)
+	if err != nil {
+		return nil, err
+	}
+
+	var cycles []*data.Cycle
+
+	err = json.NewDecoder(resp.Body).Decode(&cycles)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(cycles) == 0 {
+		return nil, fmt.Errorf("app not found")
+	}
+
+	return cycles[0], nil
+}
+
 func (a *api) createApp(name string) (*data.App, error) {
 	path, err := a.makePath("/apps")
 	if err != nil {
