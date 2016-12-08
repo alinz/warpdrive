@@ -47,9 +47,8 @@ var (
 
 // QueryStatus represents the status of a query after being executed.
 type QueryStatus struct {
-	SessID  uint64
-	TxID    uint64
-	QueryID uint64
+	SessID uint64
+	TxID   uint64
 
 	RowsAffected *int64
 	LastInsertID *int64

@@ -35,7 +35,7 @@ type selector struct {
 	groupBy     *exql.GroupBy
 	groupByArgs []interface{}
 
-	orderBy     *exql.OrderBy
+	orderBy     exql.OrderBy
 	orderByArgs []interface{}
 
 	limit  exql.Limit
@@ -161,7 +161,7 @@ func (qs *selector) OrderBy(columns ...interface{}) Selector {
 				Column: exql.RawValue(col),
 			}
 			qs.mu.Lock()
-			qs.orderByArgs = append(qs.orderByArgs, args...)
+			qs.orderByArgs = args
 			qs.mu.Unlock()
 		case db.Function:
 			fnName, fnArgs := value.Name(), value.Arguments()
@@ -175,7 +175,7 @@ func (qs *selector) OrderBy(columns ...interface{}) Selector {
 				Column: exql.RawValue(expanded),
 			}
 			qs.mu.Lock()
-			qs.orderByArgs = append(qs.orderByArgs, fnArgs...)
+			qs.orderByArgs = fnArgs
 			qs.mu.Unlock()
 		case string:
 			if strings.HasPrefix(value, "-") {
@@ -204,9 +204,7 @@ func (qs *selector) OrderBy(columns ...interface{}) Selector {
 	}
 
 	qs.mu.Lock()
-	qs.orderBy = &exql.OrderBy{
-		SortColumns: &sortColumns,
-	}
+	qs.orderBy.SortColumns = &sortColumns
 	qs.mu.Unlock()
 
 	return qs
@@ -334,7 +332,7 @@ func (qs *selector) statement() *exql.Statement {
 		Offset:  qs.offset,
 		Joins:   exql.JoinConditions(qs.joins...),
 		Where:   qs.where,
-		OrderBy: qs.orderBy,
+		OrderBy: &qs.orderBy,
 		GroupBy: qs.groupBy,
 	}
 }

@@ -81,9 +81,6 @@ func fetchRow(rows *sql.Rows, dst interface{}) error {
 // slice of structs given by the pointer `dst`.
 func fetchRows(rows *sql.Rows, dst interface{}) error {
 	var err error
-	if rows == nil {
-		panic("rows cannot be nil")
-	}
 
 	defer rows.Close()
 
