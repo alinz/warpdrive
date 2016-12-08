@@ -11,21 +11,25 @@ type task interface {
 }
 
 func taskRunner(tasks ...task) (ok bool, errors []error) {
+	internal := make(chan struct{})
 	wg := new(sync.WaitGroup)
 	errors = make([]error, len(tasks))
 	ok = true
 
 	messageChann := make(chan string, 10)
 	go func() {
-		for {
+		loop := true
+		for loop {
 			select {
 			case message, ok := <-messageChann:
 				if !ok {
-					return
+					loop = false
+					continue
 				}
 				fmt.Print(message)
 			}
 		}
+		close(internal)
 	}()
 
 	log := func(message string) {
@@ -47,6 +51,8 @@ func taskRunner(tasks ...task) (ok bool, errors []error) {
 	wg.Wait()
 	close(messageChann)
 
+	<-internal
+
 	return
 }
 
@@ -60,7 +66,6 @@ func (c *cmdTask) RunIt(log func(string)) error {
 	log(fmt.Sprintf("%s started\n", c.label))
 
 	cmd := exec.Command(c.command, c.args...)
-	//cmd.Dir = "/Users/ali/go/src/github.com/pressly/warpdrive/client/examples/Sample1"
 	_, err := cmd.Output()
 
 	log(fmt.Sprintf("%s finished\n", c.label))

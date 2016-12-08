@@ -9,8 +9,8 @@ import (
 
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "Print the version number of warp",
-	Long:  `Display the current version of warpdrive cli`,
+	Short: "print the version number of warp",
+	Long:  `display the current version of warpdrive cli`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Printf("Warp %s\n", warpdrive.VERSION)
 	},
