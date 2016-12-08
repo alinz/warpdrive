@@ -21,13 +21,13 @@ tools:
 ## and add `appengine` into `ignore` field. for example: `"ignore": "test appengine",` 
 ##
 
-
-vendor-rebuild:
+vendor-clean:
 	@rm -rf vendor
 	@govendor init
 
-#@govendor add +e
-#@govendor update +external 
+vendor-rebuild:
+	@govendor add +e
+	@govendor update +external 
 
 # install:
 
