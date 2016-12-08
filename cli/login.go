@@ -92,6 +92,48 @@ func validateSession(serverAddr, session string) error {
 	return api.validate()
 }
 
+func getActiveAPI() (*api, error) {
+	var globalConfig globalConfig
+	var localConfig localConfig
+	var session string
+	var serverAddr string
+	var err error
+	var api api
+
+	globalConfig.Load()
+
+	err = localConfig.Load()
+	if err != nil {
+		serverAddr = terminalInput("Server Address:", false)
+		session, err = globalConfig.getSessionFor(serverAddr)
+		if err == nil {
+			// we need to check whether the session is valid or not and if it is not,
+			// we need to login the user
+			err = validateSession(serverAddr, session)
+			if err == nil {
+				api.serverAddr = serverAddr
+				api.session = session
+
+				return &api, nil
+			}
+		}
+	}
+
+	serverAddr, session, err = intractiveLogin(serverAddr)
+	if err != nil {
+		return nil, err
+	}
+
+	globalConfig.setSessionFor(serverAddr, session)
+	globalConfig.Save()
+
+	api.serverAddr = serverAddr
+	api.session = session
+
+	return &api, nil
+
+}
+
 var loginCmd = &cobra.Command{
 	Use:   "login",
 	Short: "login into server",

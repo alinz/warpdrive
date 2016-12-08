@@ -59,7 +59,7 @@ func (a *api) getCycle(appID, cycleID int64) (*data.Cycle, error) {
 		return nil, fmt.Errorf("Server Address '%s' is invalid", a.serverAddr)
 	}
 
-	resp, err := httpRequest("POST", path, nil, a.session)
+	resp, err := httpRequest("GET", path, nil, a.session)
 	if err != nil {
 		return nil, err
 	}
@@ -76,6 +76,37 @@ func (a *api) getCycle(appID, cycleID int64) (*data.Cycle, error) {
 	}
 
 	return &cycle, nil
+}
+
+func (a *api) createApp(name string) (*data.App, error) {
+	path, err := joinURL(a.serverAddr, "/apps")
+	if err != nil {
+		return nil, fmt.Errorf("Server Address '%s' is invalid", a.serverAddr)
+	}
+
+	reqBody := struct {
+		Name string `json:"name"`
+	}{
+		Name: name,
+	}
+
+	resp, err := httpRequest("POST", path, reqBody, a.session)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("duplicate name")
+	}
+
+	var app data.App
+
+	err = json.NewDecoder(resp.Body).Decode(&app)
+	if err != nil {
+		return nil, err
+	}
+
+	return &app, nil
 }
 
 func newAPI(serverAddr string) *api {
