@@ -7,22 +7,25 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"path"
 	"strings"
 	"time"
+
+	"github.com/goware/urlx"
 )
 
-func joinURL(base, target string) (string, error) {
-	u, err := url.Parse(base)
+func joinURL(base, path string) (string, error) {
+	u, err := urlx.Parse(base)
 	if err != nil {
 		return "", err
 	}
 
-	if u.Scheme == "" {
-		u.Scheme = "http"
+	splits := strings.Split(path, "?")
+
+	u.Path = splits[0]
+	if len(splits) > 1 {
+		u.RawQuery = url.QueryEscape(strings.Join(splits[1:], ""))
 	}
 
-	u.Path = path.Join(u.Path, target)
 	return u.String(), nil
 }
 
