@@ -150,7 +150,7 @@ var RootCmd = &cobra.Command{
 	Short: "In-App upgrade service for React-Native! Supporting iOS and Android apps",
 	Long: `
 A Fast and Flexible upgrade service for React-Native apps!
-love by alinz and Pressly Inc.
+loved by alinz and Pressly Inc.
 
 Complete documentation is available at https://pressly.github.io/warpdrive
 `,

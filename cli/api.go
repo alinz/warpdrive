@@ -13,6 +13,16 @@ type api struct {
 	session    string
 }
 
+func (a *api) validate() error {
+	path, err := joinURL(a.serverAddr, "/session/start")
+	if err != nil {
+		return fmt.Errorf("Server Address '%s' is invalid", a.serverAddr)
+	}
+
+	_, err = httpRequest("GET", path, nil, a.session)
+	return err
+}
+
 func (a *api) login(email, password string) error {
 	reqBody := struct {
 		Email    string `json:"email"`
