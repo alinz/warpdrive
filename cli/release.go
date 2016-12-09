@@ -36,8 +36,9 @@ this needs to be called once per project, unless the app or cycle or both have b
 			return
 		}
 
-		// check if localConfig is new
-		if !local.isRequiredSetup() {
+		// check if localConfig is new and it will override and skip it if
+		// releaseConfigureSwitch is being set
+		if !local.isRequiredSetup() && !releaseConfigureSwitch {
 			fmt.Println("the current project has already been setup, if you want to change, use --switch flag")
 			return
 		}
