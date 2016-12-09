@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	"path"
+
 	"github.com/spf13/cobra"
 )
 
@@ -19,6 +21,9 @@ node --max-old-space-size=8192                                                 \
   --assets-dest ./.release                                                     \
   --dev false
 */
+
+const iosBundlePath = "./.bundles/ios"
+const androidBundlePath = "./.bundles/android"
 
 var bundlePlatform string
 
@@ -45,9 +50,9 @@ var bundleCmd = &cobra.Command{
 			`--entry-file`,
 			`index.ios.js`,
 			`--bundle-output`,
-			`./.bundles/ios/main.jsbundle`,
+			path.Join(iosBundlePath, "main.jsbundle"),
 			`--assets-dest`,
-			`./.bundles/ios`,
+			iosBundlePath,
 			`--dev`,
 			`false`,
 		)
@@ -65,9 +70,9 @@ var bundleCmd = &cobra.Command{
 			`--entry-file`,
 			`index.android.js`,
 			`--bundle-output`,
-			`./.bundles/android/main.jsbundle`,
+			path.Join(androidBundlePath, "main.jsbundle"),
 			`--assets-dest`,
-			`./.bundles/android`,
+			androidBundlePath,
 			`--dev`,
 			`false`,
 		)
@@ -76,17 +81,17 @@ var bundleCmd = &cobra.Command{
 
 		switch bundlePlatform {
 		case "ios":
-			os.RemoveAll("./.bundles/ios")
-			os.MkdirAll("./.bundles/ios", os.ModePerm)
+			os.RemoveAll(iosBundlePath)
+			os.MkdirAll(iosBundlePath, os.ModePerm)
 			tasks = append(tasks, iosBundleTask)
 		case "android":
-			os.RemoveAll("./.bundles/android")
-			os.MkdirAll("./.bundles/android", os.ModePerm)
+			os.RemoveAll(androidBundlePath)
+			os.MkdirAll(androidBundlePath, os.ModePerm)
 			tasks = append(tasks, androidBundleTask)
 		case "all":
 			os.RemoveAll("./.bundles")
-			os.MkdirAll("./.bundles/ios", os.ModePerm)
-			os.MkdirAll("./.bundles/android", os.ModePerm)
+			os.MkdirAll(iosBundlePath, os.ModePerm)
+			os.MkdirAll(androidBundlePath, os.ModePerm)
 			tasks = append(tasks, iosBundleTask, androidBundleTask)
 		default:
 			fmt.Println("platfrom is not recongnized")

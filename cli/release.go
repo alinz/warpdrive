@@ -105,6 +105,10 @@ func allFilesForPath(path string) ([]string, error) {
 	return files, err
 }
 
+func checkBundleIsReady(platform string) bool {
+	return true
+}
+
 var releasePublishCmd = &cobra.Command{
 	Use:   "publish",
 	Short: "publish the project",
@@ -112,7 +116,11 @@ var releasePublishCmd = &cobra.Command{
 publish the current bundle projects, ios and android, to warpdrive server
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-		//
+		if !isReactNativeProject() {
+			fmt.Println("current path is not react-native project")
+			return
+		}
+
 	},
 }
 
