@@ -80,7 +80,22 @@ func initReleaseConfigureFlags(cmd *cobra.Command) {
 	cmd.Flags().BoolVarP(&releaseConfigureSwitch, "switch", "s", false, "request configure switch")
 }
 
-// app ...
+// release publish
+
+var releasePublishCmd = &cobra.Command{
+	Use:   "publish",
+	Short: "publish the project",
+	Long: `
+publish the current bundle projects, ios and android, to warpdrive server
+`,
+	Run: func(cmd *cobra.Command, args []string) {
+	},
+}
+
+func initReleasePublishFlags(cmd *cobra.Command) {
+}
+
+// release ...
 
 var releaseCmd = &cobra.Command{
 	Use:   "release",
@@ -99,8 +114,12 @@ func init() {
 	initReleaseFlags(releaseCmd)
 
 	// commands under release
+	// configure
 	initReleaseConfigureFlags(releaseConfigureCmd)
 	releaseCmd.AddCommand(releaseConfigureCmd)
+	// publish
+	initReleasePublishFlags(releasePublishCmd)
+	releaseCmd.AddCommand(releasePublishCmd)
 
 	// adding release command to Root
 	RootCmd.AddCommand(releaseCmd)
