@@ -32,7 +32,7 @@ var bundleCmd = &cobra.Command{
 	Short: "bundles react-native project",
 	Long:  `bundles react-native project for both ios and android`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if isReactNativeProject() {
+		if !isReactNativeProject() {
 			fmt.Println("The current path is not a react-native project")
 			return
 		}
