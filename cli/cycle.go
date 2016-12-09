@@ -6,7 +6,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// cycle create ...
+// cycle create command ...
+//////////////////////////
 
 var cycleName string
 
@@ -44,7 +45,8 @@ func initCycleCreateFlags(cmd *cobra.Command) {
 	cmd.Flags().StringVarP(&cycleName, "name", "n", "", "new cycle's name")
 }
 
-// cycle ...
+// cycle command ...
+//////////////////////////
 
 var cycleCmd = &cobra.Command{
 	Use:   "cycle",

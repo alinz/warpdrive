@@ -7,6 +7,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// bundle command ...
+//////////////////////////
+
 /*
 node --max-old-space-size=8192                                                 \
   node_modules/react-native/local-cli/cli.js bundle                            \

@@ -7,6 +7,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// version command ...
+//////////////////////////
+
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "print the version number of warp",

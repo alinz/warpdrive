@@ -7,6 +7,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// login command ...
+//////////////////////////
+
 /*
 	login logic
 

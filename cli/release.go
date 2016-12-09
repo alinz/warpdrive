@@ -2,11 +2,15 @@ package cli
 
 import (
 	"fmt"
+	"os"
+
+	"path/filepath"
 
 	"github.com/spf13/cobra"
 )
 
 // release configure ...
+//////////////////////////
 
 var releaseConfigureSwitch bool
 
@@ -80,7 +84,26 @@ func initReleaseConfigureFlags(cmd *cobra.Command) {
 	cmd.Flags().BoolVarP(&releaseConfigureSwitch, "switch", "s", false, "request configure switch")
 }
 
-// release publish
+// release publish ...
+//////////////////////////
+
+var publishPlatform string
+var publishVersion string
+var publishNote string
+
+// grab all the files from given path, included nested folder as well
+func allFilesForPath(path string) ([]string, error) {
+	var files []string
+
+	err := filepath.Walk(path, func(path string, fi os.FileInfo, err error) error {
+		if err != nil {
+			files = append(files, path)
+		}
+		return err
+	})
+
+	return files, err
+}
 
 var releasePublishCmd = &cobra.Command{
 	Use:   "publish",
@@ -89,13 +112,18 @@ var releasePublishCmd = &cobra.Command{
 publish the current bundle projects, ios and android, to warpdrive server
 `,
 	Run: func(cmd *cobra.Command, args []string) {
+		//
 	},
 }
 
 func initReleasePublishFlags(cmd *cobra.Command) {
+	cmd.Flags().StringVarP(&publishPlatform, "platform", "p", "all", "publish specific platform, [ios, android]")
+	cmd.Flags().StringVarP(&publishVersion, "version", "v", "auto", "publish version. use semantic versioning x.y.z")
+	cmd.Flags().StringVarP(&publishNote, "note", "n", "", "add release note to new version")
 }
 
 // release ...
+//////////////////////////
 
 var releaseCmd = &cobra.Command{
 	Use:   "release",

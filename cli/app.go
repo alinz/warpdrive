@@ -7,7 +7,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// app create ...
+// app create command ...
+//////////////////////////
 
 var appName string
 
@@ -39,7 +40,8 @@ func initAppCreateFlags(cmd *cobra.Command) {
 	cmd.Flags().StringVarP(&appName, "name", "n", "", "app's name")
 }
 
-// app ...
+// app command ...
+//////////////////////////
 
 var appCmd = &cobra.Command{
 	Use:   "app",
