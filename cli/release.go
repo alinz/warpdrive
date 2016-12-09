@@ -91,6 +91,10 @@ var publishPlatform string
 var publishVersion string
 var publishNote string
 
+var errIosBundleNotFound = fmt.Errorf("ios bundle not found")
+var errAndroidBundleNotFound = fmt.Errorf("android bundle not found")
+var errPlatformBundleNotRecognized = fmt.Errorf("platform not recognized")
+
 // grab all the files from given path, included nested folder as well
 func allFilesForPath(path string) ([]string, error) {
 	var files []string
@@ -105,8 +109,45 @@ func allFilesForPath(path string) ([]string, error) {
 	return files, err
 }
 
-func checkBundleIsReady(platform string) bool {
+func isBundleReady(platform string) bool {
 	return true
+}
+
+func uploadBundleFor(platform string) error {
+	var err error
+
+	var path string
+
+	// setup the path for given platform
+	switch platform {
+	case "ios":
+		if !isBundleReady("ios") {
+			err = errIosBundleNotFound
+		} else {
+			path = iosBundlePath
+		}
+	case "android":
+		if !isBundleReady("android") {
+			err = errAndroidBundleNotFound
+		} else {
+			path = androidBundlePath
+		}
+	default:
+		err = errPlatformBundleNotRecognized
+	}
+
+	if err != nil {
+		return err
+	}
+
+	bundleFiles, err := allFilesForPath(path)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(bundleFiles)
+
+	return nil
 }
 
 var releasePublishCmd = &cobra.Command{
@@ -121,6 +162,25 @@ publish the current bundle projects, ios and android, to warpdrive server
 			return
 		}
 
+		var err error
+
+		switch publishPlatform {
+		case "ios", "android":
+			err = uploadBundleFor(publishPlatform)
+		case "all":
+			err = uploadBundleFor("ios")
+			if err != nil {
+				break
+			}
+			err = uploadBundleFor("android")
+		default:
+			err = errPlatformBundleNotRecognized
+		}
+
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
 	},
 }
 
