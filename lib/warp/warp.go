@@ -24,6 +24,8 @@ func Compress(paths map[string]string, output io.Writer) error {
 			return err
 		}
 
+		// we need to refactor this code,
+		// look into http://stackoverflow.com/questions/24720097/golang-defer-behavior for more info
 		defer file.Close()
 
 		fileInfo, err := file.Stat()
