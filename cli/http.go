@@ -39,12 +39,19 @@ func httpRequest(method, url string, data interface{}, jwt string) (*http.Respon
 	case nil:
 		body = nil
 		contentType = ""
+
 	case string:
 		contentType = "plain/text"
 		body = strings.NewReader(data.(string))
+
 	case []byte:
 		contentType = "application/octet-stream"
 		body = bytes.NewReader(data.([]byte))
+
+	case io.Reader:
+		contentType = "application/octet-stream"
+		body = data.(io.Reader)
+
 	default:
 		contentType = "application/json"
 
