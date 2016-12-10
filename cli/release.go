@@ -3,7 +3,6 @@ package cli
 import (
 	"fmt"
 	"os"
-
 	"path/filepath"
 
 	"github.com/spf13/cobra"
@@ -94,17 +93,49 @@ var publishNote string
 var errIosBundleNotFound = fmt.Errorf("ios bundle not found")
 var errAndroidBundleNotFound = fmt.Errorf("android bundle not found")
 var errPlatformBundleNotRecognized = fmt.Errorf("platform not recognized")
+var errPathIsNotDir = fmt.Errorf("path is not a directory")
 
 // grab all the files from given path, included nested folder as well
 func allFilesForPath(path string) ([]string, error) {
 	var files []string
 
-	err := filepath.Walk(path, func(path string, fi os.FileInfo, err error) error {
+	// we need to define this loop to make it available inside loop itself
+	var loop func(string, *[]string) error
+
+	loop = func(path string, files *[]string) error {
+		dir, err := os.Open(path)
 		if err != nil {
-			files = append(files, path)
+			return err
 		}
-		return err
-	})
+
+		defer dir.Close()
+
+		dirStat, err := dir.Stat()
+		if err != nil {
+			return err
+		}
+
+		if !dirStat.IsDir() {
+			*files = append(*files, path)
+			return nil
+		}
+
+		fileInfos, err := dir.Readdir(-1)
+		if err != nil {
+			return err
+		}
+
+		for _, fileInfo := range fileInfos {
+			err = loop(filepath.Join(path, fileInfo.Name()), files)
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
+	}
+
+	err := loop(path, &files)
 
 	return files, err
 }
