@@ -2,9 +2,12 @@ package cli
 
 import (
 	"fmt"
+	"io"
+	"mime/multipart"
 	"os"
 	"path/filepath"
 
+	"github.com/pressly/warpdrive/lib/warp"
 	"github.com/spf13/cobra"
 )
 
@@ -144,9 +147,11 @@ func isBundleReady(platform string) bool {
 	return true
 }
 
-func uploadBundleFor(platform string) error {
+// bundleReader will tar and gzip the entire bundle as stream
+// and returns an io.Reader. This is an optimization to
+// reduce the memory usgae during sending the large bundle
+func bundleReader(platform string) (io.Reader, error) {
 	var err error
-
 	var path string
 
 	// setup the path for given platform
@@ -168,17 +173,42 @@ func uploadBundleFor(platform string) error {
 	}
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	bundleFiles, err := allFilesForPath(path)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	fmt.Println(bundleFiles)
+	bundleFilesMap := make(map[string]string)
+	for _, file := range bundleFiles {
+		bundleFilesMap[file] = file
+	}
 
-	return nil
+	r, w := io.Pipe()
+
+	go func() {
+		writer := multipart.NewWriter(w)
+		defer writer.Close()
+
+		partWriter, err := writer.CreateFormFile("file", "bundle.tar.gz")
+		if err != nil {
+			return
+		}
+
+		err = warp.Compress(bundleFilesMap, partWriter)
+
+		// we need to close the pipe's writer to
+		// signal the reader that there won't be any more bytes coming
+		if err != nil {
+			w.CloseWithError(err)
+		} else {
+			w.Close()
+		}
+	}()
+
+	return r, nil
 }
 
 var releasePublishCmd = &cobra.Command{
@@ -194,16 +224,26 @@ publish the current bundle projects, ios and android, to warpdrive server
 		}
 
 		var err error
+		var r io.Reader
+
+		// creating an api to make sure the information about
+		// account in current react-native project is correct
+		// before doing long process of bundling.
+		api, err := getActiveAPI(nil, nil)
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
 
 		switch publishPlatform {
 		case "ios", "android":
-			err = uploadBundleFor(publishPlatform)
+			r, err = bundleReader(publishPlatform)
 		case "all":
-			err = uploadBundleFor("ios")
+			r, err = bundleReader("ios")
 			if err != nil {
 				break
 			}
-			err = uploadBundleFor("android")
+			r, err = bundleReader("android")
 		default:
 			err = errPlatformBundleNotRecognized
 		}
@@ -212,6 +252,14 @@ publish the current bundle projects, ios and android, to warpdrive server
 			fmt.Println(err.Error())
 			return
 		}
+
+		bundles, err := api.bundleUpload(0, 0, 0, r)
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+
+		fmt.Println(bundles)
 	},
 }
 
