@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"io"
 	"mime/multipart"
-	"os"
-	"path/filepath"
+	"regexp"
 
+	"github.com/pressly/warpdrive/lib/folder"
 	"github.com/pressly/warpdrive/lib/warp"
 	"github.com/spf13/cobra"
 )
@@ -97,50 +97,13 @@ var errIosBundleNotFound = fmt.Errorf("ios bundle not found")
 var errAndroidBundleNotFound = fmt.Errorf("android bundle not found")
 var errPlatformBundleNotRecognized = fmt.Errorf("platform not recognized")
 var errPathIsNotDir = fmt.Errorf("path is not a directory")
+var errVersionBundleNotSet = fmt.Errorf("version need to be set for bundle")
+var errVersionBundleFormatInvalid = fmt.Errorf("verssion bundle format is invalid")
 
-// grab all the files from given path, included nested folder as well
-func allFilesForPath(path string) ([]string, error) {
-	var files []string
-
-	// we need to define this loop to make it available inside loop itself
-	var loop func(string, *[]string) error
-
-	loop = func(path string, files *[]string) error {
-		dir, err := os.Open(path)
-		if err != nil {
-			return err
-		}
-
-		defer dir.Close()
-
-		dirStat, err := dir.Stat()
-		if err != nil {
-			return err
-		}
-
-		if !dirStat.IsDir() {
-			*files = append(*files, path)
-			return nil
-		}
-
-		fileInfos, err := dir.Readdir(-1)
-		if err != nil {
-			return err
-		}
-
-		for _, fileInfo := range fileInfos {
-			err = loop(filepath.Join(path, fileInfo.Name()), files)
-			if err != nil {
-				return err
-			}
-		}
-
-		return nil
-	}
-
-	err := loop(path, &files)
-
-	return files, err
+// this is a very simple regex checker. Ideally I need to use semantic-versioning
+func isBundleVersionValid(version string) bool {
+	matched, _ := regexp.MatchString("^\\d+\\.\\d+\\.\\d+$", version)
+	return matched
 }
 
 func isBundleReady(platform string) bool {
@@ -176,7 +139,7 @@ func bundleReader(platform string) (io.Reader, error) {
 		return nil, err
 	}
 
-	bundleFiles, err := allFilesForPath(path)
+	bundleFiles, err := folder.ListFilePaths(path)
 	if err != nil {
 		return nil, err
 	}
@@ -220,12 +183,12 @@ func createRelease(api *api, appID, cycleID int64, publishPlatform, publishVersi
 }
 
 func prepareRelease(api *api, appID, cycleID int64, platform, version, note string) (io.Reader, int64, error) {
-	releaseID, err := createRelease(api, appID, cycleID, publishPlatform, publishVersion, publishNote)
+	reader, err := bundleReader(platform)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	reader, err := bundleReader(platform)
+	releaseID, err := createRelease(api, appID, cycleID, publishPlatform, publishVersion, publishNote)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -242,6 +205,18 @@ publish the current bundle projects, ios and android, to warpdrive server
 	Run: func(cmd *cobra.Command, args []string) {
 		if !isReactNativeProject() {
 			fmt.Println("current path is not react-native project")
+			return
+		}
+
+		// check if version passed as an argument
+		if publishVersion == "" {
+			fmt.Println(errVersionBundleNotSet.Error())
+			return
+		}
+
+		// check if version is correctly formated.
+		if isBundleVersionValid(publishVersion) {
+			fmt.Println(errVersionBundleFormatInvalid.Error())
 			return
 		}
 
@@ -295,6 +270,8 @@ publish the current bundle projects, ios and android, to warpdrive server
 				fmt.Println(err.Error())
 				return
 			}
+
+			fmt.Println("upload ios bundle is completed")
 		}
 
 		if androidBundle != nil {
@@ -303,6 +280,8 @@ publish the current bundle projects, ios and android, to warpdrive server
 				fmt.Println(err.Error())
 				return
 			}
+
+			fmt.Println("upload android bundle is completed")
 		}
 
 		// we just need to lock the release for any releases with correct id
@@ -318,7 +297,7 @@ publish the current bundle projects, ios and android, to warpdrive server
 
 func initReleasePublishFlags(cmd *cobra.Command) {
 	cmd.Flags().StringVarP(&publishPlatform, "platform", "p", "all", "publish specific platform, [ios, android]")
-	cmd.Flags().StringVarP(&publishVersion, "version", "v", "auto", "publish version. use semantic versioning x.y.z")
+	cmd.Flags().StringVarP(&publishVersion, "version", "v", "", "publish version. use semantic versioning x.y.z")
 	cmd.Flags().StringVarP(&publishNote, "note", "n", "", "add release note to new version")
 }
 

@@ -52,7 +52,7 @@ func (a *api) login(email, password string) error {
 	}
 
 	if resp.StatusCode != 200 {
-		return fmt.Errorf("login failed, status code: %d", resp.StatusCode)
+		return parseErrorMessage(resp.Body)
 	}
 
 	// grab the jwt from resceived cookie from server and assign it to api's session
@@ -74,7 +74,7 @@ func (a *api) getCycle(appID, cycleID int64) (*data.Cycle, error) {
 	}
 
 	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("don't access to this app")
+		return nil, parseErrorMessage(resp.Body)
 	}
 
 	var cycle data.Cycle
@@ -96,6 +96,10 @@ func (a *api) getCycleByName(appID int64, cycleName string) (*data.Cycle, error)
 	resp, err := httpRequest("GET", path, nil, a.session)
 	if err != nil {
 		return nil, err
+	}
+
+	if resp.StatusCode != 200 {
+		return nil, parseErrorMessage(resp.Body)
 	}
 
 	var cycles []*data.Cycle
@@ -130,7 +134,7 @@ func (a *api) createApp(name string) (*data.App, error) {
 	}
 
 	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("app duplicate name")
+		return nil, parseErrorMessage(resp.Body)
 	}
 
 	var app data.App
@@ -152,6 +156,10 @@ func (a *api) getAppByName(name string) (*data.App, error) {
 	resp, err := httpRequest("GET", path, nil, a.session)
 	if err != nil {
 		return nil, err
+	}
+
+	if resp.StatusCode != 200 {
+		return nil, parseErrorMessage(resp.Body)
 	}
 
 	var apps []*data.App
@@ -195,7 +203,7 @@ func (a *api) createCycle(appName, cycleName string) (*data.Cycle, error) {
 	}
 
 	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("cycle duplicate name")
+		return nil, parseErrorMessage(resp.Body)
 	}
 
 	var cycle *data.Cycle
@@ -206,6 +214,41 @@ func (a *api) createCycle(appName, cycleName string) (*data.Cycle, error) {
 	}
 
 	return cycle, nil
+}
+
+func (a *api) createRelease(appID, cycleID int64, platform, version, note string) (*data.Release, error) {
+	path, err := a.makePath("apps/%d/cycles/%d/releases", appID, cycleID)
+	if err != nil {
+		return nil, err
+	}
+
+	reqBody := struct {
+		Platform string `json:"platform"`
+		Version  string `json:"version"`
+		Note     string `json:"note"`
+	}{
+		Platform: platform,
+		Version:  version,
+		Note:     note,
+	}
+
+	resp, err := httpRequest("POST", path, reqBody, a.session)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode != 200 {
+		return nil, parseErrorMessage(resp.Body)
+	}
+
+	var release data.Release
+
+	err = json.NewDecoder(resp.Body).Decode(&release)
+	if err != nil {
+		return nil, err
+	}
+
+	return &release, nil
 }
 
 func (a *api) bundleUpload(appID, cycleID, releaseID int64, dataReader io.Reader) ([]*data.Bundle, error) {
@@ -220,7 +263,7 @@ func (a *api) bundleUpload(appID, cycleID, releaseID int64, dataReader io.Reader
 	}
 
 	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("somethign went wrong during upload")
+		return nil, parseErrorMessage(resp.Body)
 	}
 
 	var bundles []*data.Bundle

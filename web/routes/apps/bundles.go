@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 
 	"github.com/pressly/warpdrive"
+	"github.com/pressly/warpdrive/lib/folder"
+	"github.com/pressly/warpdrive/lib/warp"
 	"github.com/pressly/warpdrive/services"
 	"github.com/pressly/warpdrive/web"
 )
@@ -24,13 +26,25 @@ func saveFilesAsTemporary(files map[string][]*multipart.FileHeader) (map[string]
 				file, _ := header.Open()
 				defer file.Close()
 
-				// save the file in temporary folder
+				// create a temporary folder
 				path := filepath.Join(warpdrive.Conf.Server.TempFolder, web.UUID())
-				if err := web.CopyDataToFile(file, path); err != nil {
+				// extract tar.gz file to the newly created teamporary file
+				if err := warp.Extract(file, path); err != nil {
 					return err
 				}
 
-				mapFiles[header.Filename] = path
+				// grab all the files under the newly created temporary folder
+				// which contains the extracted received tar.gz file
+				filePaths, err := folder.ListFilePaths(path)
+				if err != nil {
+					return err
+				}
+
+				// need to build a map <filename> -> file path
+				for _, filePath := range filePaths {
+					mapFiles[filepath.Base(filePath)] = filepath.Join(path, filePath)
+				}
+
 				return nil
 			}(header)
 
