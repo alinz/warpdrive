@@ -211,6 +211,28 @@ func bundleReader(platform string) (io.Reader, error) {
 	return r, nil
 }
 
+// publishPlatform must be ios, android
+// publishVersion must be auto or x.y.z format
+// publishNote is optional and describe the release note for this version
+func createRelease(api *api, appID, cycleID int64, publishPlatform, publishVersion, publishNote string) (int64, error) {
+
+	return 0, nil
+}
+
+func prepareRelease(api *api, appID, cycleID int64, platform, version, note string) (io.Reader, int64, error) {
+	releaseID, err := createRelease(api, appID, cycleID, publishPlatform, publishVersion, publishNote)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	reader, err := bundleReader(platform)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return reader, releaseID, nil
+}
+
 var releasePublishCmd = &cobra.Command{
 	Use:   "publish",
 	Short: "publish the project",
@@ -224,26 +246,40 @@ publish the current bundle projects, ios and android, to warpdrive server
 		}
 
 		var err error
-		var r io.Reader
+		var iosBundle io.Reader
+		var androidBundle io.Reader
+		var iosReleaseID int64
+		var androidReleaseID int64
+
+		var global globalConfig
+		var local localConfig
 
 		// creating an api to make sure the information about
 		// account in current react-native project is correct
 		// before doing long process of bundling.
-		api, err := getActiveAPI(nil, nil)
+		api, err := getActiveAPI(&global, &local)
 		if err != nil {
 			fmt.Println(err.Error())
 			return
 		}
 
+		// if we get here then, we can use global and local varibales
+		// those are fully loaded when being passed to `getActiveAPI`
+		// so now, we need to get the `app.id`, `cycle.id` from local config
+		appID := local.AppID
+		cycleID := local.CycleID
+
 		switch publishPlatform {
-		case "ios", "android":
-			r, err = bundleReader(publishPlatform)
+		case "ios":
+			iosBundle, iosReleaseID, err = prepareRelease(api, appID, cycleID, "ios", publishVersion, publishNote)
+		case "android":
+			androidBundle, androidReleaseID, err = prepareRelease(api, appID, cycleID, "android", publishVersion, publishNote)
 		case "all":
-			r, err = bundleReader("ios")
+			iosBundle, iosReleaseID, err = prepareRelease(api, appID, cycleID, "ios", publishVersion, publishNote)
 			if err != nil {
 				break
 			}
-			r, err = bundleReader("android")
+			androidBundle, androidReleaseID, err = prepareRelease(api, appID, cycleID, "android", publishVersion, publishNote)
 		default:
 			err = errPlatformBundleNotRecognized
 		}
@@ -253,13 +289,30 @@ publish the current bundle projects, ios and android, to warpdrive server
 			return
 		}
 
-		bundles, err := api.bundleUpload(0, 0, 0, r)
-		if err != nil {
-			fmt.Println(err.Error())
-			return
+		if iosBundle != nil {
+			_, err = api.bundleUpload(appID, cycleID, iosReleaseID, iosBundle)
+			if err != nil {
+				fmt.Println(err.Error())
+				return
+			}
 		}
 
-		fmt.Println(bundles)
+		if androidBundle != nil {
+			_, err = api.bundleUpload(appID, cycleID, androidReleaseID, androidBundle)
+			if err != nil {
+				fmt.Println(err.Error())
+				return
+			}
+		}
+
+		// we just need to lock the release for any releases with correct id
+		if iosReleaseID != 0 {
+
+		}
+
+		if androidReleaseID != 0 {
+
+		}
 	},
 }
 

@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"io"
 
 	"encoding/json"
 
@@ -205,6 +206,31 @@ func (a *api) createCycle(appName, cycleName string) (*data.Cycle, error) {
 	}
 
 	return cycle, nil
+}
+
+func (a *api) bundleUpload(appID, cycleID, releaseID int64, dataReader io.Reader) ([]*data.Bundle, error) {
+	path, err := a.makePath("apps/%d/cycles/%d/releases/%d/bundles", appID, cycleID, releaseID)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := httpRequest("POST", path, dataReader, a.session)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("somethign went wrong during upload")
+	}
+
+	var bundles []*data.Bundle
+
+	err = json.NewDecoder(resp.Body).Decode(bundles)
+	if err != nil {
+		return nil, err
+	}
+
+	return bundles, nil
 }
 
 func newAPI(serverAddr string) *api {
