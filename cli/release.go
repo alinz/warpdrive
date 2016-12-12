@@ -173,7 +173,7 @@ func prepareRelease(api *api, appID, cycleID int64, platform, version, note stri
 		return nil, 0, err
 	}
 
-	release, err := api.createRelease(appID, cycleID, publishPlatform, publishVersion, publishNote)
+	release, err := api.createRelease(appID, cycleID, platform, version, note)
 	if err != nil {
 		return nil, 0, err
 	}
