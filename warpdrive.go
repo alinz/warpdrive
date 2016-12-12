@@ -1,6 +1,8 @@
 package warpdrive
 
-// The following two variables will be set during the build
+import "github.com/pressly/warpdrive/config"
+
+// The following two VERSION and LONGVERSION will be set during the build
 
 var (
 	// VERSION describes the version number - either dev or hash value
@@ -8,6 +10,9 @@ var (
 
 	// LONGVERSION describes the version number - either dev or hash value
 	LONGVERSION string
+
+	// Conf Server Conf as global config variable.
+	Conf *config.ServerConfig
 )
 
 func init() {

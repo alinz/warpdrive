@@ -7,7 +7,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/pressly/warpdrive"
+	"github.com/pressly/warpdrive/config"
 	"github.com/pressly/warpdrive/data"
 	"github.com/pressly/warpdrive/web/routes"
 	"github.com/zenazn/goji/graceful"
@@ -19,7 +19,7 @@ func main() {
 	flags.Parse(os.Args[1:])
 
 	// Config
-	conf, err := warpdrive.NewConfig(*confFile)
+	conf, err := config.NewConfig(*confFile)
 	if err != nil {
 		log.Fatal(err)
 	}
