@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/blang/semver"
+
 	"upper.io/db.v2"
 	"upper.io/db.v2/lib/sqlbuilder"
 )
@@ -12,7 +14,11 @@ type Release struct {
 	ID        int64     `db:"id,omitempty,pk" json:"id"`
 	CycleID   int64     `db:"cycle_id,omitempty" json:"-"`
 	Platform  Platform  `db:"platform,omitempty" json:"platform"`
-	Version   Version   `db:"version,omitempty" json:"version"`
+	Version   string    `db:"version,omitempty" json:"version"`
+	Major     int64     `db:"major,omitempty"`
+	Minor     int64     `db:"minor,omitempty"`
+	Patch     int64     `db:"patch,omitempty"`
+	Build     string    `db:"build,omitempty"`
 	Note      string    `db:"note,omitempty" json:"note"`
 	Locked    bool      `db:"locked" json:"locked"`
 	UpdatedAt time.Time `db:"updated_at" json:"updated_at"`
@@ -79,11 +85,11 @@ func FindAllReleases(session db.Database, query db.Cond) ([]*Release, error) {
 	return releases, nil
 }
 
-func FindReleases(cycleID int64, platform Platform, version Version, note string) ([]*Release, error) {
+func FindReleases(cycleID int64, platform Platform, version string, note string) ([]*Release, error) {
 	sql := fmt.Sprintf(`
 		SELECT * FROM releases 
-		WHERE cycle_id=%d AND version=%d AND platform=%d AND note like '%%%s%%'
-	`, cycleID, VersionToInt(version), PlatformToInt(platform), note)
+		WHERE cycle_id=%d AND version='%s' AND platform=%d AND note like '%%%s%%'
+	`, cycleID, version, PlatformToInt(platform), note)
 	rows, err := dbSession.Query(sql)
 
 	if err != nil {
@@ -119,14 +125,12 @@ func FindLockedReleaseByID(cycleID, releaseID int64) (*Release, error) {
 	return &release, nil
 }
 
-func FindLatestSoftRelease(cycleID int64, platform Platform, version Version) (*Release, error) {
-	nextMajorVersion := VersionAdd(version, 1, 0, 0)
-
+func FindLatestSoftRelease(cycleID int64, platform Platform, version semver.Version) (*Release, error) {
 	sql := fmt.Sprintf(`
-		SELECT * FROM releases
-		WHERE cycle_id=%d AND platform=%d AND locked=TRUE AND version < %d
-		ORDER BY version DESC					
-	`, cycleID, platform.ValueAsInt(), nextMajorVersion.ValueAsInt())
+		SELECT * FROM releases 
+		WHERE cycle_id=%d AND platform=%d AND locked=TRUE AND major=%d
+		ORDER BY major, minor, patch DESC, build DESC NULLS FIRST					
+	`, cycleID, platform.ValueAsInt(), version.Major)
 
 	rows, err := dbSession.Query(sql)
 
@@ -145,16 +149,12 @@ func FindLatestSoftRelease(cycleID int64, platform Platform, version Version) (*
 	return &release, nil
 }
 
-func FindLatestHardRelease(cycleID int64, platform Platform, version Version) (*Release, error) {
-	// here what I did was max minor and patch value so I can easily find the next
-	// hard release.
-	versionMasked := version.ValueAsInt() | MaxMinor | MaxPatch
-
+func FindLatestHardRelease(cycleID int64, platform Platform, version semver.Version) (*Release, error) {
 	sql := fmt.Sprintf(`
 		SELECT * FROM releases
-		WHERE cycle_id=%d AND platform=%d AND locked=TRUE AND version > %d
-		ORDER BY version DESC					
-	`, cycleID, platform.ValueAsInt(), versionMasked)
+		WHERE cycle_id=%d AND platform=%d AND locked=TRUE AND major > %d
+		ORDER BY major, minor, patch DESC, build DESC NULLS FIRST				
+	`, cycleID, platform.ValueAsInt(), version.Major)
 
 	rows, err := dbSession.Query(sql)
 

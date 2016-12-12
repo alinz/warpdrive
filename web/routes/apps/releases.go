@@ -10,13 +10,13 @@ import (
 
 type createRelease struct {
 	Platform *data.Platform `json:"platform,required"`
-	Version  *data.Version  `json:"version,required"`
+	Version  *string        `json:"version,required"`
 	Note     *string        `json:"note"`
 }
 
 type updateRelease struct {
 	Platform *data.Platform `json:"platform"`
-	Version  *data.Version  `json:"version"`
+	Version  *string        `json:"version"`
 	Note     *string        `json:"note"`
 }
 

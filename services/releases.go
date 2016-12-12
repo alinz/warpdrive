@@ -4,6 +4,9 @@ import (
 	"io"
 	"path/filepath"
 
+	"strings"
+
+	"github.com/blang/semver"
 	"github.com/pressly/warpdrive"
 	"github.com/pressly/warpdrive/data"
 	"github.com/pressly/warpdrive/lib/crypto"
@@ -17,7 +20,7 @@ func SearchReleases(userID, appID, cycleID int64, platform, version, note string
 		return nil, err
 	}
 
-	vers, err := data.ParseVersion(version)
+	_, err = semver.Make(version)
 	if err != nil {
 		return nil, err
 	}
@@ -27,7 +30,7 @@ func SearchReleases(userID, appID, cycleID int64, platform, version, note string
 		return nil, err
 	}
 
-	releases, err := data.FindReleases(cycleID, plat, vers, note)
+	releases, err := data.FindReleases(cycleID, plat, version, note)
 	if err != nil {
 		return nil, err
 	}
@@ -52,8 +55,13 @@ func FindLockedRelease(cycleID, releaseID int64) (*data.Release, error) {
 	return data.FindLockedReleaseByID(cycleID, releaseID)
 }
 
-func CreateRelease(userID, appID, cycleID int64, platform data.Platform, version data.Version, note string) (*data.Release, error) {
-	_, err := FindCycleByID(userID, appID, cycleID)
+func CreateRelease(userID, appID, cycleID int64, platform data.Platform, rawVersion, note string) (*data.Release, error) {
+	version, err := semver.Make(rawVersion)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = FindCycleByID(userID, appID, cycleID)
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +69,11 @@ func CreateRelease(userID, appID, cycleID int64, platform data.Platform, version
 	release := &data.Release{
 		CycleID:  cycleID,
 		Platform: platform,
-		Version:  version,
+		Version:  rawVersion,
+		Major:    int64(version.Major),
+		Minor:    int64(version.Minor),
+		Patch:    int64(version.Patch),
+		Build:    strings.Join(version.Build, "."),
 		Note:     note,
 	}
 
@@ -76,8 +88,13 @@ func CreateRelease(userID, appID, cycleID int64, platform data.Platform, version
 	return release, nil
 }
 
-func UpdateRelease(userID, appID, cycleID, releaseID int64, platfrom *data.Platform, version *data.Version, note *string) (*data.Release, error) {
-	_, err := FindCycleByID(userID, appID, cycleID)
+func UpdateRelease(userID, appID, cycleID, releaseID int64, platfrom *data.Platform, rawVersion *string, note *string) (*data.Release, error) {
+	version, err := semver.Make(*rawVersion)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = FindCycleByID(userID, appID, cycleID)
 	if err != nil {
 		return nil, err
 	}
@@ -99,8 +116,12 @@ func UpdateRelease(userID, appID, cycleID, releaseID int64, platfrom *data.Platf
 			release.Platform = *platfrom
 		}
 
-		if version != nil {
-			release.Version = *version
+		if rawVersion != nil {
+			release.Version = *rawVersion
+			release.Major = int64(version.Major)
+			release.Minor = int64(version.Minor)
+			release.Patch = int64(version.Patch)
+			release.Build = strings.Join(version.Build, ".")
 		}
 
 		if note != nil {
@@ -196,14 +217,14 @@ func UnlockRelease(userID, appID, cycleID, releaseID int64) error {
 	return nil
 }
 
-func LatestRelease(appID, cycleID int64, version string, platform string) (map[string]*data.Release, error) {
+func LatestRelease(appID, cycleID int64, rawVersion string, platform string) (map[string]*data.Release, error) {
 	// check if cycle id belongs to app id
 	_, err := FindCycleByAppIdCycleId(appID, cycleID)
 	if err != nil {
 		return nil, err
 	}
 
-	vers, err := data.ParseVersion(version)
+	version, err := semver.Make(rawVersion)
 	if err != nil {
 		return nil, err
 	}
@@ -215,12 +236,12 @@ func LatestRelease(appID, cycleID int64, version string, platform string) (map[s
 
 	releases := make(map[string]*data.Release)
 
-	softRelease, err := data.FindLatestSoftRelease(cycleID, plat, vers)
+	softRelease, err := data.FindLatestSoftRelease(cycleID, plat, version)
 	if err != nil {
 		releases["soft"] = softRelease
 	}
 
-	hardRelease, err := data.FindLatestHardRelease(cycleID, plat, vers)
+	hardRelease, err := data.FindLatestHardRelease(cycleID, plat, version)
 	if err != nil {
 		releases["hard"] = hardRelease
 	}
