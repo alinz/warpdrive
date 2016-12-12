@@ -22,10 +22,8 @@ func New() chi.Router {
 
 	r.Mount("/session", session.Routes())
 
-	r.Route("/apps/:appId/cycles/:cycleId/releases", func(r chi.Router) {
-		r.Get("/latest/version/:version/platform/:platform", checkVersionHandler)
-		r.Post("/:releaseId/download", downloadHandler)
-	})
+	r.Get("/apps/:appId/cycles/:cycleId/releases/latest/version/:version/platform/:platform", checkVersionHandler)
+	r.Post("/apps/:appId/cycles/:cycleId/releases/:releaseId/download", downloadHandler)
 
 	// Private routes
 	r.Group(func(r chi.Router) {
