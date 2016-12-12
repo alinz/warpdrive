@@ -1,7 +1,7 @@
 package apps
 
 import (
-	"mime/multipart"
+	"io"
 	"net/http"
 
 	"path/filepath"
@@ -13,45 +13,27 @@ import (
 	"github.com/pressly/warpdrive/web"
 )
 
-func saveFilesAsTemporary(files map[string][]*multipart.FileHeader) (map[string]string, error) {
+func saveFilesAsTemporary(reader io.ReadCloser) (map[string]string, error) {
+	// create a temporary folder
+	path := filepath.Join(warpdrive.Conf.Server.TempFolder, web.UUID())
+	if err := warp.Extract(reader, path); err != nil {
+		return nil, err
+	}
+
+	// grab all the files under the newly created temporary folder
+	// which contains the extracted received tar.gz file
+	filePaths, err := folder.ListFilePaths(path)
+	if err != nil {
+		return nil, err
+	}
+
 	//mapFiles is a map which key represents the real filename and the value
 	//represents the temporary location of the file
 	mapFiles := make(map[string]string)
 
-	for _, headers := range files {
-		for _, header := range headers {
-			//we create a clouser here so we can use defer to close the file
-			//in case of any errors.
-			err := func(header *multipart.FileHeader) error {
-				file, _ := header.Open()
-				defer file.Close()
-
-				// create a temporary folder
-				path := filepath.Join(warpdrive.Conf.Server.TempFolder, web.UUID())
-				// extract tar.gz file to the newly created teamporary file
-				if err := warp.Extract(file, path); err != nil {
-					return err
-				}
-
-				// grab all the files under the newly created temporary folder
-				// which contains the extracted received tar.gz file
-				filePaths, err := folder.ListFilePaths(path)
-				if err != nil {
-					return err
-				}
-
-				// need to build a map <filename> -> file path
-				for _, filePath := range filePaths {
-					mapFiles[filepath.Base(filePath)] = filepath.Join(path, filePath)
-				}
-
-				return nil
-			}(header)
-
-			if err != nil {
-				return nil, err
-			}
-		}
+	// need to build a map <filename> -> file path
+	for _, filePath := range filePaths {
+		mapFiles[filepath.Base(filePath)] = filePath
 	}
 
 	return mapFiles, nil
@@ -79,13 +61,7 @@ func uploadBundlesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = r.ParseMultipartForm(warpdrive.Conf.FileUpload.FileMaxSize)
-	if err != nil {
-		web.Respond(w, http.StatusBadRequest, err)
-		return
-	}
-
-	mapFiles, err := saveFilesAsTemporary(r.MultipartForm.File)
+	mapFiles, err := saveFilesAsTemporary(r.Body)
 	if err != nil {
 		web.Respond(w, http.StatusBadRequest, err)
 		return
@@ -93,7 +69,7 @@ func uploadBundlesHandler(w http.ResponseWriter, r *http.Request) {
 
 	bundles, err := services.CreateBundles(userID, appID, cycleID, releaseID, mapFiles)
 	if err != nil {
-		web.Respond(w, http.StatusOK, err)
+		web.Respond(w, http.StatusBadRequest, err)
 		return
 	}
 
