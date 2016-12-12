@@ -100,7 +100,7 @@ func FindReleases(cycleID int64, platform Platform, version Version, note string
 func FindReleaseByID(cycleID, releaseID int64) (*Release, error) {
 	var release Release
 
-	err := release.Find(dbSession, db.Cond{"id": releaseID, "cycle_id": releaseID})
+	err := release.Find(dbSession, db.Cond{"id": releaseID, "cycle_id": cycleID})
 	if err != nil {
 		return nil, err
 	}
