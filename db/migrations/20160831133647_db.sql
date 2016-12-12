@@ -98,7 +98,7 @@ CREATE TABLE bundles (
     id bigint DEFAULT nextval('bundle_id_seq'::regclass) NOT NULL PRIMARY KEY,
     release_id bigint NOT NULL,
     hash varchar(128) NOT NULL,
-    name varchar(2048) NOT NULL,
+    name text NOT NULL,
     created_at timestamp DEFAULT now() NOT NULL
 );
 
