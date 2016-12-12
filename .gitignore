@@ -18,4 +18,5 @@ WarpFile
 Warpdrive.framework
 warpdrive.aar
 .bundles
+.test
 warp
