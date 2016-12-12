@@ -29,10 +29,8 @@ func joinURL(base, path string) (string, error) {
 	return u.String(), nil
 }
 
-func httpRequest(method, url string, data interface{}, jwt string) (*http.Response, error) {
+func httpRequest(method, url string, data interface{}, jwt, contentType string) (*http.Response, error) {
 	const defaultTimeout = 10 * time.Second
-
-	var contentType string
 	var body io.Reader
 
 	switch data.(type) {
@@ -41,19 +39,27 @@ func httpRequest(method, url string, data interface{}, jwt string) (*http.Respon
 		contentType = ""
 
 	case string:
-		contentType = "plain/text"
+		if contentType == "" {
+			contentType = "plain/text"
+		}
 		body = strings.NewReader(data.(string))
 
 	case []byte:
-		contentType = "application/octet-stream"
+		if contentType == "" {
+			contentType = "application/octet-stream"
+		}
 		body = bytes.NewReader(data.([]byte))
 
 	case io.Reader:
-		contentType = "application/octet-stream"
+		if contentType == "" {
+			contentType = "multipart/octet-stream"
+		}
 		body = data.(io.Reader)
 
 	default:
-		contentType = "application/json"
+		if contentType == "" {
+			contentType = "application/json"
+		}
 
 		bodyRead, bodyWrite := io.Pipe()
 		go func() {

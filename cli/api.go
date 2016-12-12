@@ -28,7 +28,7 @@ func (a *api) validate() error {
 		return err
 	}
 
-	_, err = httpRequest("GET", path, nil, a.session)
+	_, err = httpRequest("GET", path, nil, a.session, "")
 	return err
 }
 
@@ -46,7 +46,7 @@ func (a *api) login(email, password string) error {
 		return err
 	}
 
-	resp, err := httpRequest("POST", path, reqBody, "")
+	resp, err := httpRequest("POST", path, reqBody, "", "")
 	if err != nil {
 		return err
 	}
@@ -68,7 +68,7 @@ func (a *api) getCycle(appID, cycleID int64) (*data.Cycle, error) {
 		return nil, err
 	}
 
-	resp, err := httpRequest("GET", path, nil, a.session)
+	resp, err := httpRequest("GET", path, nil, a.session, "")
 	if err != nil {
 		return nil, err
 	}
@@ -93,7 +93,7 @@ func (a *api) getCycleByName(appID int64, cycleName string) (*data.Cycle, error)
 		return nil, err
 	}
 
-	resp, err := httpRequest("GET", path, nil, a.session)
+	resp, err := httpRequest("GET", path, nil, a.session, "")
 	if err != nil {
 		return nil, err
 	}
@@ -128,7 +128,7 @@ func (a *api) createApp(name string) (*data.App, error) {
 		Name: name,
 	}
 
-	resp, err := httpRequest("POST", path, reqBody, a.session)
+	resp, err := httpRequest("POST", path, reqBody, a.session, "")
 	if err != nil {
 		return nil, err
 	}
@@ -153,7 +153,7 @@ func (a *api) getAppByName(name string) (*data.App, error) {
 		return nil, err
 	}
 
-	resp, err := httpRequest("GET", path, nil, a.session)
+	resp, err := httpRequest("GET", path, nil, a.session, "")
 	if err != nil {
 		return nil, err
 	}
@@ -197,7 +197,7 @@ func (a *api) createCycle(appName, cycleName string) (*data.Cycle, error) {
 		Name: cycleName,
 	}
 
-	resp, err := httpRequest("POST", path, reqBody, a.session)
+	resp, err := httpRequest("POST", path, reqBody, a.session, "")
 	if err != nil {
 		return nil, err
 	}
@@ -232,7 +232,7 @@ func (a *api) createRelease(appID, cycleID int64, platform, version, note string
 		Note:     note,
 	}
 
-	resp, err := httpRequest("POST", path, reqBody, a.session)
+	resp, err := httpRequest("POST", path, reqBody, a.session, "")
 	if err != nil {
 		return nil, err
 	}
@@ -257,7 +257,7 @@ func (a *api) bundleUpload(appID, cycleID, releaseID int64, dataReader io.Reader
 		return nil, err
 	}
 
-	resp, err := httpRequest("POST", path, dataReader, a.session)
+	resp, err := httpRequest("POST", path, dataReader, a.session, "")
 	if err != nil {
 		return nil, err
 	}
@@ -268,7 +268,7 @@ func (a *api) bundleUpload(appID, cycleID, releaseID int64, dataReader io.Reader
 
 	var bundles []*data.Bundle
 
-	err = json.NewDecoder(resp.Body).Decode(bundles)
+	err = json.NewDecoder(resp.Body).Decode(&bundles)
 	if err != nil {
 		return nil, err
 	}

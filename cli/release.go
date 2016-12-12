@@ -3,7 +3,6 @@ package cli
 import (
 	"fmt"
 	"io"
-	"mime/multipart"
 	"regexp"
 
 	"github.com/pressly/warpdrive/lib/folder"
@@ -152,16 +151,7 @@ func bundleReader(platform string) (io.Reader, error) {
 	r, w := io.Pipe()
 
 	go func() {
-		writer := multipart.NewWriter(w)
-		defer writer.Close()
-
-		partWriter, err := writer.CreateFormFile("file", "bundle.tar.gz")
-		if err != nil {
-			return
-		}
-
-		err = warp.Compress(bundleFilesMap, partWriter)
-
+		err = warp.Compress(bundleFilesMap, w)
 		// we need to close the pipe's writer to
 		// signal the reader that there won't be any more bytes coming
 		if err != nil {
@@ -177,23 +167,18 @@ func bundleReader(platform string) (io.Reader, error) {
 // publishPlatform must be ios, android
 // publishVersion must be auto or x.y.z format
 // publishNote is optional and describe the release note for this version
-func createRelease(api *api, appID, cycleID int64, publishPlatform, publishVersion, publishNote string) (int64, error) {
-
-	return 0, nil
-}
-
 func prepareRelease(api *api, appID, cycleID int64, platform, version, note string) (io.Reader, int64, error) {
 	reader, err := bundleReader(platform)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	releaseID, err := createRelease(api, appID, cycleID, publishPlatform, publishVersion, publishNote)
+	release, err := api.createRelease(appID, cycleID, publishPlatform, publishVersion, publishNote)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	return reader, releaseID, nil
+	return reader, release.ID, nil
 }
 
 var releasePublishCmd = &cobra.Command{
@@ -215,7 +200,7 @@ publish the current bundle projects, ios and android, to warpdrive server
 		}
 
 		// check if version is correctly formated.
-		if isBundleVersionValid(publishVersion) {
+		if !isBundleVersionValid(publishVersion) {
 			fmt.Println(errVersionBundleFormatInvalid.Error())
 			return
 		}
