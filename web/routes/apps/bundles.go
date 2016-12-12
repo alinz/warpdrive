@@ -1,6 +1,7 @@
 package apps
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 
@@ -27,13 +28,17 @@ func saveFilesAsTemporary(reader io.ReadCloser) (map[string]string, error) {
 		return nil, err
 	}
 
+	//cleanBundlePathIOS := filepath.Clean(constants.BundlePathIOS)
+	//cleanBundlePathAndroid := filepath.Clean(constants.BundlePathAndroid)
+
 	//mapFiles is a map which key represents the real filename and the value
 	//represents the temporary location of the file
 	mapFiles := make(map[string]string)
 
 	// need to build a map <filename> -> file path
 	for _, filePath := range filePaths {
-		mapFiles[filepath.Base(filePath)] = filePath
+		fmt.Println(filePath)
+		mapFiles[filePath] = filePath
 	}
 
 	return mapFiles, nil

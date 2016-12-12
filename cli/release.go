@@ -4,7 +4,11 @@ import (
 	"fmt"
 	"io"
 	"regexp"
+	"strings"
 
+	"path/filepath"
+
+	"github.com/pressly/warpdrive/constants"
 	"github.com/pressly/warpdrive/lib/folder"
 	"github.com/pressly/warpdrive/lib/warp"
 	"github.com/spf13/cobra"
@@ -122,13 +126,13 @@ func bundleReader(platform string) (io.Reader, error) {
 		if !isBundleReady("ios") {
 			err = errIosBundleNotFound
 		} else {
-			path = iosBundlePath
+			path = constants.BundlePathIOS
 		}
 	case "android":
 		if !isBundleReady("android") {
 			err = errAndroidBundleNotFound
 		} else {
-			path = androidBundlePath
+			path = constants.BundlePathAndroid
 		}
 	default:
 		err = errPlatformBundleNotRecognized
@@ -143,9 +147,11 @@ func bundleReader(platform string) (io.Reader, error) {
 		return nil, err
 	}
 
+	cleanedPath := filepath.Clean(path) + "/"
+
 	bundleFilesMap := make(map[string]string)
 	for _, file := range bundleFiles {
-		bundleFilesMap[file] = file
+		bundleFilesMap[strings.Replace(file, cleanedPath, "", 1)] = file
 	}
 
 	r, w := io.Pipe()
