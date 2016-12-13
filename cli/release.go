@@ -3,11 +3,11 @@ package cli
 import (
 	"fmt"
 	"io"
-	"regexp"
 	"strings"
 
 	"path/filepath"
 
+	"github.com/blang/semver"
 	"github.com/pressly/warpdrive/constants"
 	"github.com/pressly/warpdrive/lib/folder"
 	"github.com/pressly/warpdrive/lib/warp"
@@ -102,12 +102,6 @@ var errPlatformBundleNotRecognized = fmt.Errorf("platform not recognized")
 var errPathIsNotDir = fmt.Errorf("path is not a directory")
 var errVersionBundleNotSet = fmt.Errorf("version need to be set for bundle")
 var errVersionBundleFormatInvalid = fmt.Errorf("verssion bundle format is invalid")
-
-// this is a very simple regex checker. Ideally I need to use semantic-versioning
-func isBundleVersionValid(version string) bool {
-	matched, _ := regexp.MatchString("^\\d+\\.\\d+\\.\\d+$", version)
-	return matched
-}
 
 func isBundleReady(platform string) bool {
 	return true
@@ -205,13 +199,13 @@ publish the current bundle projects, ios and android, to warpdrive server
 			return
 		}
 
-		// check if version is correctly formated.
-		if !isBundleVersionValid(publishVersion) {
+		// just make sure that version is corectly formated before sending it to server
+		_, err := semver.Make(publishVersion)
+		if err != nil {
 			fmt.Println(errVersionBundleFormatInvalid.Error())
 			return
 		}
 
-		var err error
 		var iosBundle io.Reader
 		var androidBundle io.Reader
 		var iosReleaseID int64
