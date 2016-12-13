@@ -6,7 +6,7 @@ import (
 
 	"path"
 
-	"github.com/pressly/warpdrive/constants"
+	"github.com/pressly/warpdrive/config"
 	"github.com/spf13/cobra"
 )
 
@@ -31,7 +31,6 @@ var bundleCmd = &cobra.Command{
 	Long:  `bundles react-native project for both ios and android`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if !isReactNativeProject() {
-			fmt.Println("The current path is not a react-native project")
 			return
 		}
 
@@ -48,9 +47,9 @@ var bundleCmd = &cobra.Command{
 			`--entry-file`,
 			`index.ios.js`,
 			`--bundle-output`,
-			path.Join(constants.BundlePathIOS, "main.jsbundle"),
+			path.Join(config.BundlePathIOS, "main.jsbundle"),
 			`--assets-dest`,
-			constants.BundlePathIOS,
+			config.BundlePathIOS,
 			`--dev`,
 			`false`,
 		)
@@ -68,9 +67,9 @@ var bundleCmd = &cobra.Command{
 			`--entry-file`,
 			`index.android.js`,
 			`--bundle-output`,
-			path.Join(constants.BundlePathAndroid, "main.jsbundle"),
+			path.Join(config.BundlePathAndroid, "main.jsbundle"),
 			`--assets-dest`,
-			constants.BundlePathAndroid,
+			config.BundlePathAndroid,
 			`--dev`,
 			`false`,
 		)
@@ -79,17 +78,17 @@ var bundleCmd = &cobra.Command{
 
 		switch bundlePlatform {
 		case "ios":
-			os.RemoveAll(constants.BundlePathIOS)
-			os.MkdirAll(constants.BundlePathIOS, os.ModePerm)
+			os.RemoveAll(config.BundlePathIOS)
+			os.MkdirAll(config.BundlePathIOS, os.ModePerm)
 			tasks = append(tasks, iosBundleTask)
 		case "android":
-			os.RemoveAll(constants.BundlePathAndroid)
-			os.MkdirAll(constants.BundlePathAndroid, os.ModePerm)
+			os.RemoveAll(config.BundlePathAndroid)
+			os.MkdirAll(config.BundlePathAndroid, os.ModePerm)
 			tasks = append(tasks, androidBundleTask)
 		case "all":
 			os.RemoveAll("./.bundles")
-			os.MkdirAll(constants.BundlePathIOS, os.ModePerm)
-			os.MkdirAll(constants.BundlePathAndroid, os.ModePerm)
+			os.MkdirAll(config.BundlePathIOS, os.ModePerm)
+			os.MkdirAll(config.BundlePathAndroid, os.ModePerm)
 			tasks = append(tasks, iosBundleTask, androidBundleTask)
 		default:
 			fmt.Println("platfrom is not recongnized")

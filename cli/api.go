@@ -6,6 +6,7 @@ import (
 
 	"encoding/json"
 
+	"github.com/pressly/warpdrive/config"
 	"github.com/pressly/warpdrive/data"
 )
 
@@ -148,7 +149,7 @@ func (a *api) createApp(name string) (*data.App, error) {
 }
 
 func (a *api) getAppByName(name string) (*data.App, error) {
-	path, err := a.makePath("/apps?name=%s", appName)
+	path, err := a.makePath("/apps?name=%s", name)
 	if err != nil {
 		return nil, err
 	}
@@ -276,6 +277,31 @@ func (a *api) bundleUpload(appID, cycleID, releaseID int64, dataReader io.Reader
 	return bundles, nil
 }
 
-func newAPI(serverAddr string) *api {
-	return &api{serverAddr: serverAddr}
+func newAPI(serverAddr string, globalConf *config.GlobalConfig) (*api, error) {
+	session, _ := globalConf.GetSessionFor(serverAddr)
+
+	api := api{
+		serverAddr: serverAddr,
+		session:    session,
+	}
+
+	err := api.validate()
+	if err != nil {
+		email := terminalInput("Email:", false)
+		password := terminalInput("Password:", true)
+
+		err = api.login(email, password)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	globalConf.SetSessionFor(serverAddr, api.session)
+
+	err = globalConf.Save()
+	if err != nil {
+		return nil, err
+	}
+
+	return &api, nil
 }

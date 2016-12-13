@@ -9,7 +9,7 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
-// Config the configuration of warpdrive app
+// ServerConfig the configuration of warpdrive app
 type ServerConfig struct {
 	// [server]
 	Server struct {

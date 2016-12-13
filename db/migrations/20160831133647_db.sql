@@ -19,7 +19,7 @@ CREATE TABLE users (
     updated_at timestamp DEFAULT now() NOT NULL
 );
 
-ALTER TABLE users ADD UNIQUE ("email");
+ALTER TABLE users ADD UNIQUE (email);
 
 -- apps table
 
@@ -37,7 +37,7 @@ CREATE TABLE apps (
     updated_at timestamp DEFAULT now() NOT NULL
 );
 
-ALTER TABLE apps ADD UNIQUE ("name");
+ALTER TABLE apps ADD UNIQUE (name);
 
 -- cycles table
 
@@ -58,7 +58,7 @@ CREATE TABLE cycles (
     updated_at timestamp DEFAULT now() NOT NULL
 );
 
-ALTER TABLE cycles ADD UNIQUE ("name");
+ALTER TABLE cycles ADD UNIQUE (app_id, name);
 ALTER TABLE cycles ADD FOREIGN KEY (app_id) REFERENCES apps(id) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- releases table

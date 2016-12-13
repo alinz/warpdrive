@@ -14,17 +14,18 @@ import (
 )
 
 func joinURL(base, path string) (string, error) {
-	u, err := urlx.Parse(base)
+	u, err := url.Parse(path)
 	if err != nil {
 		return "", err
 	}
 
-	splits := strings.Split(path, "?")
-
-	u.Path = splits[0]
-	if len(splits) > 1 {
-		u.RawQuery = url.QueryEscape(strings.Join(splits[1:], ""))
+	baseU, err := urlx.Parse(base)
+	if err != nil {
+		return "", err
 	}
+
+	u.Scheme = baseU.Scheme
+	u.Host = baseU.Host
 
 	return u.String(), nil
 }

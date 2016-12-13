@@ -12,6 +12,34 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 )
 
+func terminalInputExpect(label string, expect []string, defaultValue string) string {
+	var cloneExpect []string
+	for _, value := range expect {
+		var target string
+		if value == defaultValue {
+			target = fmt.Sprintf("(%s)", value)
+		} else {
+			target = fmt.Sprintf("%s", value)
+		}
+		cloneExpect = append(cloneExpect, target)
+	}
+
+	label = fmt.Sprintf("%s %s ", label, cloneExpect)
+
+	for {
+		input := terminalInput(label, false)
+		if input == "" {
+			return defaultValue
+		}
+
+		for _, value := range expect {
+			if value == input {
+				return value
+			}
+		}
+	}
+}
+
 func terminalInput(label string, isPassword bool) string {
 	var value string
 
