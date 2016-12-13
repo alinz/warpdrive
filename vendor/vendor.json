@@ -21,6 +21,12 @@
 			"revisionTime": "2016-07-26T15:08:25Z"
 		},
 		{
+			"checksumSHA1": "EW7pCyyPlX6ClWTC2yOxagQbtRA=",
+			"path": "github.com/blang/semver",
+			"revision": "3a37c301dda64cbe17f16f661b4c976803c0e2d2",
+			"revisionTime": "2016-11-30T00:12:39Z"
+		},
+		{
 			"checksumSHA1": "CMfwCFcZRDJeIVVbIHa6t4Aewl8=",
 			"path": "github.com/dgrijalva/jwt-go",
 			"revision": "268038b363c7a8d7306b8e35bf77a1fde4b0c402",
