@@ -7,6 +7,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/pressly/warpdrive"
 	"github.com/pressly/warpdrive/config"
 	"github.com/pressly/warpdrive/data"
 	"github.com/pressly/warpdrive/web/routes"
@@ -23,6 +24,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// set the global conf
+	warpdrive.Conf = conf
 
 	// Database
 	_, err = data.NewDatabase()
