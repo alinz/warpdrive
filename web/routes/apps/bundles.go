@@ -8,6 +8,8 @@ import (
 
 	"strings"
 
+	"os"
+
 	"github.com/pressly/warpdrive"
 	"github.com/pressly/warpdrive/lib/folder"
 	"github.com/pressly/warpdrive/lib/warp"
@@ -15,18 +17,18 @@ import (
 	"github.com/pressly/warpdrive/web"
 )
 
-func saveFilesAsTemporary(reader io.ReadCloser) (map[string]string, error) {
+func saveFilesAsTemporary(reader io.ReadCloser) (map[string]string, string, error) {
 	// create a temporary folder
 	path := filepath.Join(warpdrive.Conf.Server.TempFolder, web.UUID())
 	if err := warp.Extract(reader, path); err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	// grab all the files under the newly created temporary folder
 	// which contains the extracted received tar.gz file
 	filePaths, err := folder.ListFilePaths(path)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	//mapFiles is a map which key represents the real filename and the value
@@ -43,7 +45,7 @@ func saveFilesAsTemporary(reader io.ReadCloser) (map[string]string, error) {
 		mapFiles[strings.Replace(filePath, path, "", 1)] = filePath
 	}
 
-	return mapFiles, nil
+	return mapFiles, path, nil
 }
 
 func uploadBundlesHandler(w http.ResponseWriter, r *http.Request) {
@@ -68,11 +70,17 @@ func uploadBundlesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	mapFiles, err := saveFilesAsTemporary(r.Body)
+	mapFiles, tempPath, err := saveFilesAsTemporary(r.Body)
 	if err != nil {
 		web.Respond(w, http.StatusBadRequest, err)
 		return
 	}
+
+	// we need to make sure to cleanup the temp folder upon
+	// exit of this function whether there is an error or not
+	defer func() {
+		os.RemoveAll(tempPath)
+	}()
 
 	bundles, err := services.CreateBundles(userID, appID, cycleID, releaseID, mapFiles)
 	if err != nil {
