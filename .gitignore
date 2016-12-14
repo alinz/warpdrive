@@ -15,8 +15,8 @@ WarpFile
 ##
 ## client build
 ##
-Warpdrive.framework
-warpdrive.aar
+warpify.framework
+warpify.aar
 .bundles
 .test
 warp
