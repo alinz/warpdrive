@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // AppConfig represents app basic information in config
@@ -22,6 +23,10 @@ type CycleConfig struct {
 	ID   int64  `json:"id"`
 	Name string `json:"name"`
 	Key  string `json:"key"`
+}
+
+func (c *CycleConfig) String() string {
+	return fmt.Sprintf("\nID: %d\nName: %s\nKey: %s", c.ID, c.Name, c.Key)
 }
 
 func (c *CycleConfig) equal(b *CycleConfig) bool {
@@ -161,6 +166,20 @@ func (c *ClientConfig) GetCycle(cycleName string) (*CycleConfig, error) {
 	}
 
 	return nil, fmt.Errorf("config not found")
+}
+
+func (c *ClientConfig) String() string {
+	var cycles []string
+	for _, cycleConfig := range c.Cycles {
+		cycles = append(cycles, cycleConfig.String())
+	}
+
+	return fmt.Sprintf("Server Address: %s\n\nApp's ID: %d\nApp's Name: %s\n\nCycles:\n%s",
+		c.ServerAddr,
+		c.App.ID,
+		c.App.Name,
+		strings.Join(cycles, ""),
+	)
 }
 
 // NewClientConfigsForCli creates a config for cli

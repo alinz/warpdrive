@@ -8,6 +8,7 @@ import (
 )
 
 var (
+	listSetup   bool
 	resetSetup  bool
 	addNewCycle bool
 )
@@ -23,13 +24,19 @@ var setupCmd = &cobra.Command{
 
 		globalConf := config.NewGlobalConfig()
 		localConf := config.NewClientConfigsForCli()
-		if resetSetup {
+
+		if !listSetup && resetSetup {
 			localConf.Save()
 		}
 
 		err := localConf.Load()
 		if err != nil {
 			addNewCycle = false
+		}
+
+		if listSetup {
+			fmt.Println(localConf)
+			return
 		}
 
 		if !localConf.IsSetupRequired() && !addNewCycle {
@@ -113,6 +120,7 @@ var setupCmd = &cobra.Command{
 }
 
 func initSetupFlags(cmd *cobra.Command) {
+	cmd.Flags().BoolVarP(&listSetup, "list", "l", false, "list the current setup configuration")
 	cmd.Flags().BoolVarP(&resetSetup, "reset", "r", false, "reset configuration of project")
 	cmd.Flags().BoolVarP(&addNewCycle, "cycle", "c", false, "add new cycle")
 }

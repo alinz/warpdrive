@@ -6,8 +6,8 @@ import (
 )
 
 const (
-	bundlePathIOS     = "./.bundles/ios"
-	bundlePathAndroid = "./.bundles/android"
+	bundlePathIOS     = ".bundles/ios"
+	bundlePathAndroid = ".bundles/android"
 )
 
 func pathExists(path string) (bool, error) {
