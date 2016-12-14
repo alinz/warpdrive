@@ -5,6 +5,11 @@ import (
 	"os"
 )
 
+const (
+	bundlePathIOS     = "./.bundles/ios"
+	bundlePathAndroid = "./.bundles/android"
+)
+
 func pathExists(path string) (bool, error) {
 	_, err := os.Stat(path)
 	if err == nil {
@@ -31,4 +36,24 @@ func isReactNativeProject() bool {
 	}
 
 	return true
+}
+
+func bundleReadyPath(platform string) (string, error) {
+	var path string
+
+	switch platform {
+	case "ios":
+		path = bundlePathIOS
+	case "android":
+		path = bundlePathAndroid
+	default:
+		return "", fmt.Errorf("platform '%s' unknown\n", platform)
+	}
+
+	exists, _ := pathExists(path)
+	if !exists {
+		return "", fmt.Errorf("%s bundle not found\n", platform)
+	}
+
+	return path, nil
 }

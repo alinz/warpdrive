@@ -7,12 +7,6 @@ import (
 	"path/filepath"
 )
 
-// BundlePathIOS path for ios
-const BundlePathIOS = "./.bundles/ios"
-
-// BundlePathAndroid path for android
-const BundlePathAndroid = "./.bundles/android"
-
 // AppConfig represents app basic information in config
 type AppConfig struct {
 	ID   int64  `json:"id"`

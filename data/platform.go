@@ -65,6 +65,11 @@ func (p Platform) ValueAsInt() int {
 	return int(p)
 }
 
+func (p Platform) String() string {
+	str, _ := platformValueToName[p]
+	return strings.ToLower(str)
+}
+
 func PlatformToInt(platfrom Platform) int {
 	return int(platfrom)
 }

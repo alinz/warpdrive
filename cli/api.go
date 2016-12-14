@@ -277,6 +277,60 @@ func (a *api) bundleUpload(appID, cycleID, releaseID int64, dataReader io.Reader
 	return bundles, nil
 }
 
+func (a *api) removeRelease(appID, cycleID, releaseID int64) error {
+	path, err := a.makePath("apps/%d/cycles/%d/releases/%d", appID, cycleID, releaseID)
+	if err != nil {
+		return err
+	}
+
+	resp, err := httpRequest("DELETE", path, nil, a.session, "")
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != 200 {
+		return parseErrorMessage(resp.Body)
+	}
+
+	return nil
+}
+
+func (a *api) lockRelease(appID, cycleID, releaseID int64) error {
+	path, err := a.makePath("/apps/%d/cycles/%d/releases/%d/lock", appID, cycleID, releaseID)
+	if err != nil {
+		return err
+	}
+
+	resp, err := httpRequest("POST", path, nil, a.session, "")
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != 200 {
+		return parseErrorMessage(resp.Body)
+	}
+
+	return nil
+}
+
+func (a *api) unlockRelease(appID, cycleID, releaseID int64) error {
+	path, err := a.makePath("/apps/%d/cycles/%d/releases/%d/lock", appID, cycleID, releaseID)
+	if err != nil {
+		return err
+	}
+
+	resp, err := httpRequest("DELETE", path, nil, a.session, "")
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != 200 {
+		return parseErrorMessage(resp.Body)
+	}
+
+	return nil
+}
+
 func newAPI(serverAddr string, globalConf *config.GlobalConfig) (*api, error) {
 	session, _ := globalConf.GetSessionFor(serverAddr)
 
