@@ -1,11 +1,12 @@
 package apps
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 
 	"path/filepath"
+
+	"strings"
 
 	"github.com/pressly/warpdrive"
 	"github.com/pressly/warpdrive/lib/folder"
@@ -28,17 +29,18 @@ func saveFilesAsTemporary(reader io.ReadCloser) (map[string]string, error) {
 		return nil, err
 	}
 
-	//cleanBundlePathIOS := filepath.Clean(constants.BundlePathIOS)
-	//cleanBundlePathAndroid := filepath.Clean(constants.BundlePathAndroid)
-
 	//mapFiles is a map which key represents the real filename and the value
 	//represents the temporary location of the file
 	mapFiles := make(map[string]string)
 
+	// we need to remove the temp folder from file path
+	// alos path is temporary folder but we need to add slash at the end of it
+	// so when we remove the path, we remove the / as well
+	path = path + "/"
+
 	// need to build a map <filename> -> file path
 	for _, filePath := range filePaths {
-		fmt.Println(filePath)
-		mapFiles[filePath] = filePath
+		mapFiles[strings.Replace(filePath, path, "", 1)] = filePath
 	}
 
 	return mapFiles, nil
