@@ -63,6 +63,106 @@ func (a *api) login(email, password string) error {
 	return nil
 }
 
+func (a *api) createUser(name, email, password string) (*data.User, error) {
+	path, err := a.makePath("/users")
+	if err != nil {
+		return nil, err
+	}
+
+	reqBody := struct {
+		Name     string `json:"name"`
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}{
+		Name:     name,
+		Email:    email,
+		Password: password,
+	}
+
+	resp, err := httpRequest("POST", path, reqBody, a.session, "")
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode != 200 {
+		return nil, parseErrorMessage(resp.Body)
+	}
+
+	var user data.User
+
+	err = json.NewDecoder(resp.Body).Decode(&user)
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func (a *api) getUserByEmail(email string) (*data.User, error) {
+	path, err := a.makePath("/users?email=%s", email)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := httpRequest("GET", path, nil, a.session, "")
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode != 200 {
+		return nil, parseErrorMessage(resp.Body)
+	}
+
+	var users []*data.User
+
+	err = json.NewDecoder(resp.Body).Decode(&users)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(users) != 0 {
+		return nil, fmt.Errorf("not found")
+	}
+
+	return users[0], nil
+}
+
+func (a *api) addUserToApp(userID, appID int64) error {
+	path, err := a.makePath("/apps/%d/users/%d", appID, userID)
+	if err != nil {
+		return err
+	}
+
+	resp, err := httpRequest("POST", path, nil, a.session, "")
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != 200 {
+		return parseErrorMessage(resp.Body)
+	}
+
+	return nil
+}
+
+func (a *api) removeUserFromApp(userID, appID int64) error {
+	path, err := a.makePath("/apps/%d/users/%d", appID, userID)
+	if err != nil {
+		return err
+	}
+
+	resp, err := httpRequest("DELETE", path, nil, a.session, "")
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != 200 {
+		return parseErrorMessage(resp.Body)
+	}
+
+	return nil
+}
+
 func (a *api) getCycle(appID, cycleID int64) (*data.Cycle, error) {
 	path, err := a.makePath("/apps/%d/cycles/%d", appID, cycleID)
 	if err != nil {
