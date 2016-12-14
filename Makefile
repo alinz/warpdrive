@@ -34,11 +34,11 @@ vendor-rebuild:
 ##
 
 clean-server:
-	@rm -rf ./bin/warpdrive-server
+	@rm -rf ./bin/warpdrive
 	@mkdir -p ./bin
 
 build-server: clean-server
-	GOGC=off go build -i -gcflags="-e" -ldflags "$(LDFLAGS)" -o ./bin/warpdrive-server ./cmd/server
+	GOGC=off go build -i -gcflags="-e" -ldflags "$(LDFLAGS)" -o ./bin/warpdrive ./cmd/warpdrive
 
 ##
 ## Building cli
@@ -55,16 +55,16 @@ build-cli: clean-cli
 ##
 
 clean-ios:
-	@rm -rf ./client/ios/Warpdrive.framework
+	@rm -rf ./client/ios/Warpify.framework
 
 build-ios: clean-ios
-	@cd ./cmd/warpdrive && gomobile bind -target=ios . && mv -f Warpdrive.framework ../../client/ios
+	@cd ./cmd/warpify && gomobile bind -target=ios . && mv -f Warpify.framework ../../client/ios
 
 clean-android:
-	@rm -rf client/android/warpdrive.aar
+	@rm -rf client/android/warpify.aar
 
 build-android: clean-android
-	@cd ./cmd/warpdrive && gomobile bind -target=android . && mv -f warpdrive.aar ../../client/android
+	@cd ./cmd/warpify && gomobile bind -target=android . && mv -f warpify.aar ../../client/android
 
 build-clients: build-ios build-android
 
@@ -95,16 +95,16 @@ build-dev-folder:
 	@mkdir -p ./bin/tmp/warpdrive
 
 run: build-dev-folder
-	fresh -c ./etc/fresh-runner.conf -p ./cmd/server -r '-config=./etc/warpdrive.conf' -o ./bin/warpdrive-server
+	fresh -c ./etc/fresh-runner.conf -p ./cmd/server -r '-config=./etc/warpdrive.conf' -o ./bin/warpdrive
 
 kill:
 	@lsof -t -i:8221 | xargs kill
 
 clean-ios-example:
-	@rm -rf ./client/examples/Sample1/node_modules/react-native-warpdrive/ios/Warpdrive.framework
+	@rm -rf ./client/examples/Sample1/node_modules/react-native-warpdrive/ios/Warpify.framework
 
 build-ios-example: clean-ios-example
-	@cd ./cmd/client && gomobile bind -target=ios . && mv -f Warpdrive.framework ../../client/examples/Sample1/node_modules/react-native-warpdrive/ios
+	@cd ./cmd/client && gomobile bind -target=ios . && mv -f Warpify.framework ../../client/examples/Sample1/node_modules/react-native-warpdrive/ios
 
 clean-cli-dev:
 	@rm -rf ./client/examples/Sample1/warp
