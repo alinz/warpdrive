@@ -10,7 +10,7 @@
 #import "AppDelegate.h"
 
 #import "RCTRootView.h"
-#import "Warpdrive.h"
+#import "Warpify.h"
 
 @implementation AppDelegate
 
@@ -18,7 +18,7 @@
 {
   NSURL *jsCodeLocation;
 
-  jsCodeLocation = [[Warpdrive shared] sourceBundle];
+  jsCodeLocation = [[Warpify shared] sourceBundle];
 
   RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:jsCodeLocation
                                                       moduleName:@"Sample1"
