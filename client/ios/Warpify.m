@@ -18,7 +18,7 @@
   static dispatch_once_t once_token;
   
   dispatch_once(&once_token, ^{
-    sharedInstance = [Warpdrive new];
+    sharedInstance = [Warpify new];
   });
   
   return sharedInstance;
@@ -29,7 +29,7 @@
 }
 
 - (void) call {
-  GoWarpdriveSetup(@"Hello", @"World");
+  
 }
 
 @end
