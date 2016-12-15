@@ -7,8 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		41DE17EF1DF5E8E800D2F615 /* Warpdrive.m in Sources */ = {isa = PBXBuildFile; fileRef = 41DE17EE1DF5E8E800D2F615 /* Warpdrive.m */; };
-		41DE180B1DF5FB2B00D2F615 /* WarpdriveManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 41DE180A1DF5FB2B00D2F615 /* WarpdriveManager.m */; };
+		41DE17EF1DF5E8E800D2F615 /* Warpify.m in Sources */ = {isa = PBXBuildFile; fileRef = 41DE17EE1DF5E8E800D2F615 /* Warpify.m */; };
+		41DE180B1DF5FB2B00D2F615 /* WarpifyManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 41DE180A1DF5FB2B00D2F615 /* WarpifyManager.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -24,10 +24,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		41DE17E01DF5E76D00D2F615 /* libWarpdrive.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libWarpdrive.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		41DE17ED1DF5E8E800D2F615 /* Warpdrive.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Warpdrive.h; sourceTree = SOURCE_ROOT; };
-		41DE17EE1DF5E8E800D2F615 /* Warpdrive.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Warpdrive.m; sourceTree = SOURCE_ROOT; };
-		41DE180A1DF5FB2B00D2F615 /* WarpdriveManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WarpdriveManager.m; sourceTree = SOURCE_ROOT; };
+		41DE17E01DF5E76D00D2F615 /* libWarpify.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libWarpify.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		41DE17ED1DF5E8E800D2F615 /* Warpify.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Warpify.h; sourceTree = SOURCE_ROOT; };
+		41DE17EE1DF5E8E800D2F615 /* Warpify.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Warpify.m; sourceTree = SOURCE_ROOT; };
+		41DE180A1DF5FB2B00D2F615 /* WarpifyManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WarpifyManager.m; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -44,7 +44,9 @@
 		41DE17D71DF5E76D00D2F615 = {
 			isa = PBXGroup;
 			children = (
-				41DE17E21DF5E76D00D2F615 /* Warpdrive */,
+				41DE17ED1DF5E8E800D2F615 /* Warpify.h */,
+				41DE17EE1DF5E8E800D2F615 /* Warpify.m */,
+				41DE180A1DF5FB2B00D2F615 /* WarpifyManager.m */,
 				41DE17E11DF5E76D00D2F615 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -52,27 +54,17 @@
 		41DE17E11DF5E76D00D2F615 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				41DE17E01DF5E76D00D2F615 /* libWarpdrive.a */,
+				41DE17E01DF5E76D00D2F615 /* libWarpify.a */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		41DE17E21DF5E76D00D2F615 /* Warpdrive */ = {
-			isa = PBXGroup;
-			children = (
-				41DE17ED1DF5E8E800D2F615 /* Warpdrive.h */,
-				41DE17EE1DF5E8E800D2F615 /* Warpdrive.m */,
-				41DE180A1DF5FB2B00D2F615 /* WarpdriveManager.m */,
-			);
-			path = Warpdrive;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		41DE17DF1DF5E76D00D2F615 /* Warpdrive */ = {
+		41DE17DF1DF5E76D00D2F615 /* Warpify */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 41DE17E91DF5E76D00D2F615 /* Build configuration list for PBXNativeTarget "Warpdrive" */;
+			buildConfigurationList = 41DE17E91DF5E76D00D2F615 /* Build configuration list for PBXNativeTarget "Warpify" */;
 			buildPhases = (
 				41DE17DC1DF5E76D00D2F615 /* Sources */,
 				41DE17DD1DF5E76D00D2F615 /* Frameworks */,
@@ -82,9 +74,9 @@
 			);
 			dependencies = (
 			);
-			name = Warpdrive;
+			name = Warpify;
 			productName = Warpdrive;
-			productReference = 41DE17E01DF5E76D00D2F615 /* libWarpdrive.a */;
+			productReference = 41DE17E01DF5E76D00D2F615 /* libWarpify.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
@@ -102,7 +94,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 41DE17DB1DF5E76D00D2F615 /* Build configuration list for PBXProject "Warpdrive" */;
+			buildConfigurationList = 41DE17DB1DF5E76D00D2F615 /* Build configuration list for PBXProject "Warpify" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -114,7 +106,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				41DE17DF1DF5E76D00D2F615 /* Warpdrive */,
+				41DE17DF1DF5E76D00D2F615 /* Warpify */,
 			);
 		};
 /* End PBXProject section */
@@ -124,8 +116,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				41DE180B1DF5FB2B00D2F615 /* WarpdriveManager.m in Sources */,
-				41DE17EF1DF5E8E800D2F615 /* Warpdrive.m in Sources */,
+				41DE180B1DF5FB2B00D2F615 /* WarpifyManager.m in Sources */,
+				41DE17EF1DF5E8E800D2F615 /* Warpify.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -257,7 +249,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		41DE17DB1DF5E76D00D2F615 /* Build configuration list for PBXProject "Warpdrive" */ = {
+		41DE17DB1DF5E76D00D2F615 /* Build configuration list for PBXProject "Warpify" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				41DE17E71DF5E76D00D2F615 /* Debug */,
@@ -266,7 +258,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		41DE17E91DF5E76D00D2F615 /* Build configuration list for PBXNativeTarget "Warpdrive" */ = {
+		41DE17E91DF5E76D00D2F615 /* Build configuration list for PBXNativeTarget "Warpify" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				41DE17EA1DF5E76D00D2F615 /* Debug */,

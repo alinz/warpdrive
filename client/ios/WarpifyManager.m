@@ -6,7 +6,7 @@
 //  Copyright © 2016 Ali Najafizadeh. All rights reserved.
 //
 
-#import "Warpdrive.h"
+#import "Warpify.h"
 
 @interface WarpdriveManager : NSObject <RCTBridgeModule>
 

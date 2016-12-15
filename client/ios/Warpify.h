@@ -10,7 +10,7 @@
 
 #import "RCTBridgeModule.h"
 
-@interface Warpdrive : NSObject
+@interface Warpify : NSObject
 
 + (instancetype)shared;
 

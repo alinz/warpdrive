@@ -2,6 +2,6 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "self:Warpdrive.xcodeproj">
+      location = "self:/Users/ali/go/src/github.com/pressly/warpdrive/client/ios/Warpify.xcodeproj">
    </FileRef>
 </Workspace>

@@ -6,15 +6,15 @@
 //  Copyright © 2016 Ali Najafizadeh. All rights reserved.
 //
 
-#import "Warpdrive.h"
-#import "Warpdrive.framework/Headers/Warpdrive.h"
+#import "Warpify.h"
+#import "Warpify.framework/Headers/Warpify.h"
 
 #import "RCTBundleURLProvider.h"
 
-@implementation Warpdrive
+@implementation Warpify
 
 + (instancetype)shared {
-  static Warpdrive *sharedInstance;
+  static Warpify *sharedInstance;
   static dispatch_once_t once_token;
   
   dispatch_once(&once_token, ^{

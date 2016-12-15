@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "41DE17DF1DF5E76D00D2F615"
-               BuildableName = "libWarpdrive.a"
-               BlueprintName = "Warpdrive"
-               ReferencedContainer = "container:Warpdrive.xcodeproj">
+               BuildableName = "libWarpify.a"
+               BlueprintName = "Warpify"
+               ReferencedContainer = "container:Warpify.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -46,9 +46,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "41DE17DF1DF5E76D00D2F615"
-            BuildableName = "libWarpdrive.a"
-            BlueprintName = "Warpdrive"
-            ReferencedContainer = "container:Warpdrive.xcodeproj">
+            BuildableName = "libWarpify.a"
+            BlueprintName = "Warpify"
+            ReferencedContainer = "container:Warpify.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>
@@ -64,9 +64,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "41DE17DF1DF5E76D00D2F615"
-            BuildableName = "libWarpdrive.a"
-            BlueprintName = "Warpdrive"
-            ReferencedContainer = "container:Warpdrive.xcodeproj">
+            BuildableName = "libWarpify.a"
+            BlueprintName = "Warpify"
+            ReferencedContainer = "container:Warpify.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
    </ProfileAction>
