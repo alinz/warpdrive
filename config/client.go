@@ -168,6 +168,21 @@ func (c *ClientConfig) GetCycle(cycleName string) (*CycleConfig, error) {
 	return nil, fmt.Errorf("config not found")
 }
 
+// GetCycleByID is being used in warpify to found cycle info which contains public key
+func (c *ClientConfig) GetCycleByID(appID, cycleID int64) (*CycleConfig, error) {
+	if c.App.ID != appID {
+		return nil, fmt.Errorf("app not found")
+	}
+
+	for _, cycle := range c.Cycles {
+		if cycle.ID == cycleID {
+			return cycle, nil
+		}
+	}
+
+	return nil, fmt.Errorf("cycle not found")
+}
+
 func (c *ClientConfig) String() string {
 	var cycles []string
 	for _, cycleConfig := range c.Cycles {
