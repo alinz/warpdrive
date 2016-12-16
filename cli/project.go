@@ -1,25 +1,12 @@
 package cli
 
-import (
-	"fmt"
-	"os"
-)
+import "fmt"
+import "github.com/pressly/warpdrive/lib/folder"
 
 const (
 	bundlePathIOS     = ".bundles/ios"
 	bundlePathAndroid = ".bundles/android"
 )
-
-func pathExists(path string) (bool, error) {
-	_, err := os.Stat(path)
-	if err == nil {
-		return true, nil
-	}
-	if os.IsNotExist(err) {
-		return false, nil
-	}
-	return true, err
-}
 
 func isReactNativeProject() bool {
 	paths := []string{
@@ -29,7 +16,7 @@ func isReactNativeProject() bool {
 	}
 
 	for _, path := range paths {
-		if exists, _ := pathExists(path); !exists {
+		if exists, _ := folder.PathExists(path); !exists {
 			fmt.Println("this is not react-native project")
 			return false
 		}
@@ -50,7 +37,7 @@ func bundleReadyPath(platform string) (string, error) {
 		return "", fmt.Errorf("platform '%s' unknown\n", platform)
 	}
 
-	exists, _ := pathExists(path)
+	exists, _ := folder.PathExists(path)
 	if !exists {
 		return "", fmt.Errorf("%s bundle not found\n", platform)
 	}
