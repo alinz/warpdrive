@@ -66,7 +66,11 @@ func Process() error {
 		return err
 	}
 
+	// we need to create api
+	api := makeApi(warpFile, versionMap)
+
 	// we need to check is there is a new version available for download or not
+	api.checkVersion(0, 0, "ios", versionMap.CurrentVersion(""))
 
 	return nil
 }
