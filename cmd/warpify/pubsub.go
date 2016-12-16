@@ -12,13 +12,13 @@ type Event struct {
 }
 
 type Callback interface {
-	Do(event Event)
+	Do(event *Event)
 }
 
 type pubSub interface {
 	Subscribe(EventKind, Callback)
 	Unsubscribe(EventKind)
-	Publish(Event)
+	Publish(*Event)
 }
 
 type simplePubSub struct {
@@ -38,7 +38,7 @@ func (s *simplePubSub) Unsubscribe(eventKind EventKind) {
 	delete(s.callbacks, eventKind)
 }
 
-func (s *simplePubSub) Publish(event Event) {
+func (s *simplePubSub) Publish(event *Event) {
 	s.ctx.Lock()
 	defer s.ctx.Unlock()
 
@@ -51,5 +51,12 @@ func (s *simplePubSub) Publish(event Event) {
 func newPubSub() pubSub {
 	return &simplePubSub{
 		callbacks: make(map[EventKind]Callback),
+	}
+}
+
+func createEvent(kind EventKind, value string) *Event {
+	return &Event{
+		Kind:  kind,
+		Value: value,
 	}
 }
