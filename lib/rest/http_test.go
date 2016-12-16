@@ -1,4 +1,4 @@
-package cli
+package rest
 
 import "testing"
 
@@ -16,7 +16,7 @@ func TestJoinPath(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
-		path, err := joinURL(testCase.base, testCase.target)
+		path, err := JoinURL(testCase.base, testCase.target)
 		if err != nil {
 			t.Error(err)
 		}

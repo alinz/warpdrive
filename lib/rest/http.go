@@ -1,4 +1,4 @@
-package cli
+package rest
 
 import (
 	"bytes"
@@ -13,7 +13,9 @@ import (
 	"github.com/goware/urlx"
 )
 
-func joinURL(base, path string) (string, error) {
+// JoinURL is a proper way of joining path to base if neither of them are normalized.
+// Because stdlib follows RFC, it is a little bit hard to creates a join url
+func JoinURL(base, path string) (string, error) {
 	u, err := url.Parse(path)
 	if err != nil {
 		return "", err
@@ -30,7 +32,8 @@ func joinURL(base, path string) (string, error) {
 	return u.String(), nil
 }
 
-func httpRequest(method, url string, data interface{}, jwt, contentType string) (*http.Response, error) {
+// Request creates a http request client
+func Request(method, url string, data interface{}, jwt, contentType string) (*http.Response, error) {
 	const defaultTimeout = 10 * time.Second
 	var body io.Reader
 
