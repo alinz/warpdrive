@@ -2,7 +2,9 @@ package config
 
 import (
 	"encoding/json"
+	"io"
 	"os"
+	"path/filepath"
 	"sort"
 )
 
@@ -52,7 +54,9 @@ type VersionMap struct {
 
 // Save saves the values of VersionMap to target path.
 // Path must ends with filename and must be `versions.warp`
-func (vm *VersionMap) Save(path string) error {
+func (vm *VersionMap) Save(documentPath string) error {
+	path := VersionPath(documentPath)
+
 	file, err := os.Create(path)
 	if err != nil {
 		return err
@@ -65,7 +69,9 @@ func (vm *VersionMap) Save(path string) error {
 
 // Load loads the values of VersionMap from target path.
 // Path must ends with filename and must be `versions.warp`
-func (vm *VersionMap) Load(path string) error {
+func (vm *VersionMap) Load(documentPath string) error {
+	path := VersionPath(documentPath)
+
 	file, err := os.Open(path)
 	if err != nil {
 		return err
@@ -111,6 +117,19 @@ func (vm *VersionMap) AddVersion(cycle, version string, isCurrent bool) {
 	} else {
 		value.Add(version)
 	}
+}
+
+// VersionPath returns the proper path for loading versions.warp
+func VersionPath(path string) string {
+	return filepath.Join(path, "versions.warp")
+}
+
+// NewVersionMapFromReader creates VersionMap from io.Reader
+// added this function to simplify the creation of versionMap
+func NewVersionMapFromReader(r io.Reader) (*VersionMap, error) {
+	versionMap := NewVersionMap()
+	err := json.NewDecoder(r).Decode(versionMap)
+	return versionMap, err
 }
 
 // NewVersionMap creates a new VersionMap
