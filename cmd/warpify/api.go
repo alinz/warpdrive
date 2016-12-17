@@ -39,7 +39,7 @@ func (a *api) makePath(path string, args ...interface{}) (string, error) {
 	return path, nil
 }
 
-func (a *api) checkVersion(appID, cycleID int64, platform, currentVersion string) ([]*data.Release, error) {
+func (a *api) checkVersion(appID, cycleID int64, platform, currentVersion string) (map[string]*data.Release, error) {
 	path, err := a.makePath("/apps/%d/cycles/%d/releases/latest/version/%s/platform/%s", appID, cycleID, currentVersion, platform)
 	if err != nil {
 		return nil, err
@@ -54,14 +54,16 @@ func (a *api) checkVersion(appID, cycleID int64, platform, currentVersion string
 		return nil, parseErrorMessage(resp.Body)
 	}
 
-	var releases []*data.Release
+	// releaseMap has 2 keys, soft and hard.
+	// soft means, you can update it, hard means update available via app store or play store
+	releaseMap := make(map[string]*data.Release)
 
-	err = json.NewDecoder(resp.Body).Decode(&releases)
+	err = json.NewDecoder(resp.Body).Decode(&releaseMap)
 	if err != nil {
 		return nil, err
 	}
 
-	return releases, nil
+	return releaseMap, nil
 }
 
 func (a *api) downloadVersion(appID, cycleID, releaseID int64) (io.Reader, error) {

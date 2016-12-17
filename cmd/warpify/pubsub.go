@@ -8,7 +8,7 @@ type EventKind int
 
 type Event struct {
 	Kind  EventKind
-	Value string
+	Value interface{}
 }
 
 type Callback interface {
@@ -44,7 +44,11 @@ func (s *simplePubSub) Publish(event *Event) {
 
 	callback, ok := s.callbacks[event.Kind]
 	if ok {
-		callback.Do(event)
+		// we are executing the callback inside a goroutine to
+		// make sure it does not block the main process
+		go func() {
+			callback.Do(event)
+		}()
 	}
 }
 
@@ -54,7 +58,7 @@ func newPubSub() pubSub {
 	}
 }
 
-func createEvent(kind EventKind, value string) *Event {
+func createEvent(kind EventKind, value interface{}) *Event {
 	return &Event{
 		Kind:  kind,
 		Value: value,

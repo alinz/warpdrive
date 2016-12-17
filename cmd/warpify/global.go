@@ -8,6 +8,7 @@ type warpConf struct {
 	bundleVersion   string
 	bundlePath      string
 	documentPath    string
+	platform        string
 	productionName  string
 	automaticUpdate bool
 	pubSub          pubSub

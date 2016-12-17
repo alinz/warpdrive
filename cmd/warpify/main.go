@@ -3,6 +3,7 @@ package warpify
 import "github.com/pressly/warpdrive/config"
 import "github.com/pressly/warpdrive/lib/folder"
 import "github.com/blang/semver"
+import "github.com/pressly/warpdrive/data"
 
 const (
 	_ EventKind = 0
@@ -18,15 +19,19 @@ const (
 	// UpdateDownloaded downlaoing has completed
 	// at this moment, a callback from objective c or java should restart the app
 	UpdateDownloaded
+	// HardUpdateAvailable will be called when production release
+	// has hard available and does not have soft update
+	HardUpdateAvailable
 )
 
 // Setup we need to setup the app
-func Setup(bundleVersion, bundlePath, documentPath, productionName string, automaticUpdate bool) {
+func Setup(bundleVersion, bundlePath, documentPath, platform, productionName string, automaticUpdate bool) {
 	conf.bundleVersion = bundleVersion
 	conf.bundlePath = bundlePath
 	conf.documentPath = bundlePath
 	conf.productionName = productionName
 	conf.automaticUpdate = automaticUpdate
+	conf.platform = platform
 
 	conf.pubSub = newPubSub()
 }
@@ -66,11 +71,46 @@ func Process() error {
 		return err
 	}
 
+	appID := warpFile.App.ID
+
 	// we need to create api
 	api := makeApi(warpFile, versionMap)
 
-	// we need to check is there is a new version available for download or not
-	api.checkVersion(0, 0, "ios", versionMap.CurrentVersion(""))
+	var autoUpdateRelease map[string]*data.Release
+	var releases []map[string]*data.Release
+	// we need to loop through all the available configs
+	for _, cycleConfig := range warpFile.Cycles {
+		release, err := api.checkVersion(appID, cycleConfig.ID, conf.platform, versionMap.CurrentVersion(cycleConfig.Name))
+		if err != nil {
+			conf.pubSub.Publish(createEvent(Err, err.Error()))
+		} else {
+			if conf.productionName == cycleConfig.Name {
+				autoUpdateRelease = release
+			} else {
+				releases = append(releases, release)
+			}
+		}
+	}
+
+	if autoUpdateRelease != nil {
+		//we need to check whether update has soft key
+		softRelease, ok := autoUpdateRelease["soft"]
+		if ok {
+			conf.pubSub.Publish(createEvent(UpdateDownloading, softRelease))
+			r, err := api.downloadVersion(appID, softRelease.CycleID, softRelease.ID)
+			if err != nil {
+				conf.pubSub.Publish(createEvent(Err, err.Error()))
+			} else {
+				if r != nil {
+
+				}
+			}
+		}
+	}
+
+	if len(releases) > 0 {
+		//conf.pubSub()
+	}
 
 	return nil
 }
