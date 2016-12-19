@@ -1,5 +1,5 @@
 //
-//  WarpdriveManager.m
+//  WarpifyManager.m
 //  Warpdrive
 //
 //  Created by Ali Najafizadeh on 2016-12-05.
@@ -8,11 +8,11 @@
 
 #import "Warpify.h"
 
-@interface WarpdriveManager : NSObject <RCTBridgeModule>
+@interface WarpifyManager : NSObject <RCTBridgeModule>
 
 @end
 
-@implementation WarpdriveManager
+@implementation WarpifyManager
 
 RCT_EXPORT_MODULE();
 
