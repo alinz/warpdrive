@@ -120,6 +120,9 @@ func (c *ClientConfig) Save() error {
 
 	for _, path := range c.paths {
 		err := func(path string) error {
+			// we need to create the folder, sometimes, asset is not inside android path
+			os.MkdirAll(filepath.Dir(path), os.ModePerm)
+
 			file, err := os.Create(path)
 			if err != nil {
 				return err
