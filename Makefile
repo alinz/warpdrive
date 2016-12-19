@@ -104,7 +104,7 @@ clean-ios-example:
 	@rm -rf ./client/examples/Sample1/node_modules/react-native-warpdrive/ios/Warpify.framework
 
 build-ios-example: clean-ios-example
-	@cd ./cmd/client && gomobile bind -target=ios . && mv -f Warpify.framework ../../client/examples/Sample1/node_modules/react-native-warpdrive/ios
+	@cd ./cmd/warpify && gomobile bind -target=ios . && mv -f Warpify.framework ../../client/examples/Sample1/node_modules/react-native-warpdrive/ios
 
 clean-cli-dev:
 	@rm -rf ./client/examples/Sample1/warp
