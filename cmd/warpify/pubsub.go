@@ -4,13 +4,16 @@ import (
 	"sync"
 )
 
+// EventKind is a type to define Event types
 type EventKind int
 
+// Event is a struct for passing to callback
 type Event struct {
 	Kind  EventKind
 	Value interface{}
 }
 
+// Callback is an interface for calling back the event
 type Callback interface {
 	Do(event *Event)
 }
