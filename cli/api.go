@@ -8,7 +8,7 @@ import (
 
 	"github.com/pressly/warpdrive/config"
 	"github.com/pressly/warpdrive/data"
-	"github.com/pressly/warpdrive/lib/rest"
+	"github.com/pressly/warpdrive/lib/httpclient"
 )
 
 type api struct {
@@ -17,7 +17,7 @@ type api struct {
 }
 
 func (a *api) makePath(path string, args ...interface{}) (string, error) {
-	path, err := rest.JoinURL(a.serverAddr, fmt.Sprintf(path, args...))
+	path, err := httpclient.JoinURL(a.serverAddr, fmt.Sprintf(path, args...))
 	if err != nil {
 		return "", fmt.Errorf("Server Address '%s' is invalid", a.serverAddr)
 	}
@@ -30,7 +30,7 @@ func (a *api) validate() error {
 		return err
 	}
 
-	_, err = rest.Request("GET", path, nil, a.session, "")
+	_, err = httpclient.Request("GET", path, nil, a.session, "")
 	return err
 }
 
@@ -48,7 +48,7 @@ func (a *api) login(email, password string) error {
 		return err
 	}
 
-	resp, err := rest.Request("POST", path, reqBody, "", "")
+	resp, err := httpclient.Request("POST", path, reqBody, "", "")
 	if err != nil {
 		return err
 	}
@@ -80,7 +80,7 @@ func (a *api) createUser(name, email, password string) (*data.User, error) {
 		Password: password,
 	}
 
-	resp, err := rest.Request("POST", path, reqBody, a.session, "")
+	resp, err := httpclient.Request("POST", path, reqBody, a.session, "")
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +105,7 @@ func (a *api) getUserByEmail(email string) (*data.User, error) {
 		return nil, err
 	}
 
-	resp, err := rest.Request("GET", path, nil, a.session, "")
+	resp, err := httpclient.Request("GET", path, nil, a.session, "")
 	if err != nil {
 		return nil, err
 	}
@@ -134,7 +134,7 @@ func (a *api) addUserToApp(userID, appID int64) error {
 		return err
 	}
 
-	resp, err := rest.Request("POST", path, nil, a.session, "")
+	resp, err := httpclient.Request("POST", path, nil, a.session, "")
 	if err != nil {
 		return err
 	}
@@ -152,7 +152,7 @@ func (a *api) removeUserFromApp(userID, appID int64) error {
 		return err
 	}
 
-	resp, err := rest.Request("DELETE", path, nil, a.session, "")
+	resp, err := httpclient.Request("DELETE", path, nil, a.session, "")
 	if err != nil {
 		return err
 	}
@@ -170,7 +170,7 @@ func (a *api) getCycle(appID, cycleID int64) (*data.Cycle, error) {
 		return nil, err
 	}
 
-	resp, err := rest.Request("GET", path, nil, a.session, "")
+	resp, err := httpclient.Request("GET", path, nil, a.session, "")
 	if err != nil {
 		return nil, err
 	}
@@ -195,7 +195,7 @@ func (a *api) getCycleByName(appID int64, cycleName string) (*data.Cycle, error)
 		return nil, err
 	}
 
-	resp, err := rest.Request("GET", path, nil, a.session, "")
+	resp, err := httpclient.Request("GET", path, nil, a.session, "")
 	if err != nil {
 		return nil, err
 	}
@@ -230,7 +230,7 @@ func (a *api) createApp(name string) (*data.App, error) {
 		Name: name,
 	}
 
-	resp, err := rest.Request("POST", path, reqBody, a.session, "")
+	resp, err := httpclient.Request("POST", path, reqBody, a.session, "")
 	if err != nil {
 		return nil, err
 	}
@@ -255,7 +255,7 @@ func (a *api) getAppByName(name string) (*data.App, error) {
 		return nil, err
 	}
 
-	resp, err := rest.Request("GET", path, nil, a.session, "")
+	resp, err := httpclient.Request("GET", path, nil, a.session, "")
 	if err != nil {
 		return nil, err
 	}
@@ -299,7 +299,7 @@ func (a *api) createCycle(appName, cycleName string) (*data.Cycle, error) {
 		Name: cycleName,
 	}
 
-	resp, err := rest.Request("POST", path, reqBody, a.session, "")
+	resp, err := httpclient.Request("POST", path, reqBody, a.session, "")
 	if err != nil {
 		return nil, err
 	}
@@ -334,7 +334,7 @@ func (a *api) createRelease(appID, cycleID int64, platform, version, note string
 		Note:     note,
 	}
 
-	resp, err := rest.Request("POST", path, reqBody, a.session, "")
+	resp, err := httpclient.Request("POST", path, reqBody, a.session, "")
 	if err != nil {
 		return nil, err
 	}
@@ -359,7 +359,7 @@ func (a *api) bundleUpload(appID, cycleID, releaseID int64, dataReader io.Reader
 		return nil, err
 	}
 
-	resp, err := rest.Request("POST", path, dataReader, a.session, "")
+	resp, err := httpclient.Request("POST", path, dataReader, a.session, "")
 	if err != nil {
 		return nil, err
 	}
@@ -384,7 +384,7 @@ func (a *api) removeRelease(appID, cycleID, releaseID int64) error {
 		return err
 	}
 
-	resp, err := rest.Request("DELETE", path, nil, a.session, "")
+	resp, err := httpclient.Request("DELETE", path, nil, a.session, "")
 	if err != nil {
 		return err
 	}
@@ -402,7 +402,7 @@ func (a *api) lockRelease(appID, cycleID, releaseID int64) error {
 		return err
 	}
 
-	resp, err := rest.Request("POST", path, nil, a.session, "")
+	resp, err := httpclient.Request("POST", path, nil, a.session, "")
 	if err != nil {
 		return err
 	}
@@ -420,7 +420,7 @@ func (a *api) unlockRelease(appID, cycleID, releaseID int64) error {
 		return err
 	}
 
-	resp, err := rest.Request("DELETE", path, nil, a.session, "")
+	resp, err := httpclient.Request("DELETE", path, nil, a.session, "")
 	if err != nil {
 		return err
 	}

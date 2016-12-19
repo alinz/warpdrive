@@ -8,7 +8,7 @@ import (
 	"github.com/pressly/warpdrive/config"
 	"github.com/pressly/warpdrive/data"
 	"github.com/pressly/warpdrive/lib/crypto"
-	"github.com/pressly/warpdrive/lib/rest"
+	"github.com/pressly/warpdrive/lib/httpclient"
 )
 
 func parseErrorMessage(body io.Reader) error {
@@ -27,12 +27,11 @@ func parseErrorMessage(body io.Reader) error {
 }
 
 type api struct {
-	warpFile   *config.ClientConfig
-	versionMap *config.VersionMap
+	warpFile *config.ClientConfig
 }
 
 func (a *api) makePath(path string, args ...interface{}) (string, error) {
-	path, err := rest.JoinURL(a.warpFile.ServerAddr, fmt.Sprintf(path, args...))
+	path, err := httpclient.JoinURL(a.warpFile.ServerAddr, fmt.Sprintf(path, args...))
 	if err != nil {
 		return "", fmt.Errorf("Server Address '%s' is invalid", a.warpFile.ServerAddr)
 	}
@@ -45,7 +44,7 @@ func (a *api) checkVersion(appID, cycleID int64, platform, currentVersion string
 		return nil, err
 	}
 
-	resp, err := rest.Request("GET", path, nil, "", "")
+	resp, err := httpclient.Request("GET", path, nil, "", "")
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +65,7 @@ func (a *api) checkVersion(appID, cycleID int64, platform, currentVersion string
 	return releaseMap, nil
 }
 
-func (a *api) downloadVersion(appID, cycleID, releaseID int64) (io.Reader, error) {
+func (a *api) downloadVersion(appID, cycleID, releaseID int64) (io.ReadCloser, error) {
 	// check if appID and cycleID exists in warpFile
 	// we need cycle to grab ke public key so we can encrypt the session key
 	cycleConfig, err := a.warpFile.GetCycleByID(appID, cycleID)
@@ -93,7 +92,7 @@ func (a *api) downloadVersion(appID, cycleID, releaseID int64) (io.Reader, error
 		return nil, err
 	}
 
-	resp, err := rest.Request("POST", path, encryptedKey, "", "")
+	resp, err := httpclient.Request("POST", path, encryptedKey, "", "")
 	if err != nil {
 		return nil, err
 	}
@@ -105,16 +104,23 @@ func (a *api) downloadVersion(appID, cycleID, releaseID int64) (io.Reader, error
 	// by now we have the stream of encrypted data which we need to decrypt by
 	// session key that we have
 	r, w := io.Pipe()
+
 	go func() {
-		crypto.AESDecryptStream(key, resp.Body, w)
+		// if any errors happen, we need to close the
+		// the writer
+		err := crypto.AESDecryptStream(key, resp.Body, w)
+		if err != nil {
+			w.CloseWithError(err)
+		} else {
+			w.Close()
+		}
 	}()
 
 	return r, nil
 }
 
-func makeApi(warpFile *config.ClientConfig, versionMap *config.VersionMap) *api {
+func makeAPI(warpFile *config.ClientConfig) *api {
 	return &api{
-		warpFile:   warpFile,
-		versionMap: versionMap,
+		warpFile: warpFile,
 	}
 }
