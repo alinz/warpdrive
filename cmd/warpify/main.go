@@ -4,6 +4,10 @@ import "github.com/pressly/warpdrive/config"
 import "github.com/pressly/warpdrive/lib/folder"
 import "github.com/blang/semver"
 import "github.com/pressly/warpdrive/data"
+import "github.com/pressly/warpdrive/lib/warp"
+import "fmt"
+import "path/filepath"
+import "os"
 
 const (
 	_ EventKind = 0
@@ -19,21 +23,47 @@ const (
 	// UpdateDownloaded downlaoing has completed
 	// at this moment, a callback from objective c or java should restart the app
 	UpdateDownloaded
-	// HardUpdateAvailable will be called when production release
-	// has hard available and does not have soft update
-	HardUpdateAvailable
 )
 
 // Setup we need to setup the app
-func Setup(bundleVersion, bundlePath, documentPath, platform, productionName string, automaticUpdate bool) {
+func Setup(bundleVersion, bundlePath, documentPath, platform, defaultCycle string, forceUpdate bool) {
 	conf.bundleVersion = bundleVersion
 	conf.bundlePath = bundlePath
 	conf.documentPath = bundlePath
-	conf.productionName = productionName
-	conf.automaticUpdate = automaticUpdate
+	conf.defaultCycle = defaultCycle
+	conf.forceUpdate = forceUpdate
 	conf.platform = platform
 
 	conf.pubSub = newPubSub()
+}
+
+func warpBundlePath(appID, cycleID, releaseID int64) string {
+	path := fmt.Sprintf("warpdrive/warp.%d.%d.%d", appID, cycleID, releaseID)
+	return filepath.Join(conf.documentPath, path)
+}
+
+// DownloadRelease it starts download and save the bundle inside path
+func DownloadRelease(api *api, appID, cycleID, releaseID int64) error {
+	r, err := api.downloadVersion(appID, cycleID, releaseID)
+	if err != nil {
+		return err
+	}
+
+	path := warpBundlePath(appID, cycleID, releaseID)
+
+	// need to make fodler
+	err = os.MkdirAll(path, os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	// extract the files inside that path
+	err = warp.Extract(r, path)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // SourcePath returns the proper path for react-native app to start the process
@@ -74,17 +104,18 @@ func Process() error {
 	appID := warpFile.App.ID
 
 	// we need to create api
-	api := makeApi(warpFile, versionMap)
+	api := makeAPI(warpFile)
 
 	var autoUpdateRelease map[string]*data.Release
 	var releases []map[string]*data.Release
-	// we need to loop through all the available configs
+
+	// we need to loop through all available configs
 	for _, cycleConfig := range warpFile.Cycles {
 		release, err := api.checkVersion(appID, cycleConfig.ID, conf.platform, versionMap.CurrentVersion(cycleConfig.Name))
 		if err != nil {
 			conf.pubSub.Publish(createEvent(Err, err.Error()))
 		} else {
-			if conf.productionName == cycleConfig.Name {
+			if conf.defaultCycle == cycleConfig.Name {
 				autoUpdateRelease = release
 			} else {
 				releases = append(releases, release)
@@ -149,7 +180,7 @@ func getVersionMap() (*config.VersionMap, error) {
 		if len(version.Pre) > 0 {
 			cycleName = version.Pre[0].String()
 		} else {
-			cycleName = conf.productionName
+			cycleName = conf.defaultCycle
 		}
 
 		versionMap.SetCurrentVersion(cycleName, conf.bundleVersion, false)

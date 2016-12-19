@@ -5,13 +5,13 @@ import (
 )
 
 type warpConf struct {
-	bundleVersion   string
-	bundlePath      string
-	documentPath    string
-	platform        string
-	productionName  string
-	automaticUpdate bool
-	pubSub          pubSub
+	bundleVersion string
+	bundlePath    string
+	documentPath  string
+	platform      string
+	defaultCycle  string
+	forceUpdate   bool
+	pubSub        pubSub
 }
 
 func (c *warpConf) getDocumentPath(path string) string {
