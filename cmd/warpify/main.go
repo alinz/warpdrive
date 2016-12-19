@@ -1,29 +1,44 @@
 package warpify
 
-import "github.com/pressly/warpdrive/config"
-import "github.com/pressly/warpdrive/lib/folder"
-import "github.com/blang/semver"
-import "github.com/pressly/warpdrive/data"
-import "github.com/pressly/warpdrive/lib/warp"
-import "fmt"
-import "path/filepath"
-import "os"
+import (
+	"fmt"
+	"os"
+	"path/filepath"
+
+	"github.com/blang/semver"
+	"github.com/pressly/warpdrive/config"
+	"github.com/pressly/warpdrive/data"
+	"github.com/pressly/warpdrive/lib/folder"
+	"github.com/pressly/warpdrive/lib/warp"
+)
 
 const (
 	_ EventKind = 0
 
 	// Err if something goes wrong, Err event will be sent
 	Err
-	// NoUpdate means there is no update available at the moment
+	// NoUpdate happens when there is no update avaiable to download
 	NoUpdate
-	// UpdateAvailable there is an update available for download
-	UpdateAvailable
-	// UpdateDownloading downloading has started
-	UpdateDownloading
-	// UpdateDownloaded downlaoing has completed
-	// at this moment, a callback from objective c or java should restart the app
-	UpdateDownloaded
+	// Available means an update is avaliable but has not been downlaoded
+	// it requires user request for downloading the update
+	Available
+	// Downloading means update is being downloaded
+	Downloading
+	// Downloaded means requested update has been downloaded
+	Downloaded
 )
+
+func createErrEvent(err error) *Event {
+	return createEvent(Err, err.Error())
+}
+
+func createAvailableEvent(releases []map[string]*data.Release) *Event {
+	return createEvent(Available, releases)
+}
+
+func createNoUpdateEvent() *Event {
+	return createEvent(NoUpdate, nil)
+}
 
 // Setup we need to setup the app
 func Setup(bundleVersion, bundlePath, documentPath, platform, defaultCycle string, forceUpdate bool) {
@@ -74,21 +89,29 @@ func SourcePath() string {
 // Start accepts a callback and start the process of checking the version
 // and download and restart the
 func Start(callback Callback) {
+	// we are going to detach all calbacks first
+	unsubscribe(Err)
+	unsubscribe(NoUpdate)
+	unsubscribe(Available)
+	unsubscribe(Downloading)
+	unsubscribe(Downloaded)
+
 	// attach the following events to given callback
 	subscribe(Err, callback)
 	subscribe(NoUpdate, callback)
-	subscribe(UpdateAvailable, callback)
-	subscribe(UpdateDownloading, callback)
-	subscribe(UpdateDownloaded, callback)
+	subscribe(Available, callback)
+	subscribe(Downloading, callback)
+	subscribe(Downloaded, callback)
 
 	go func() {
 		err := Process()
 		if err != nil {
-			conf.pubSub.Publish(createEvent(Err, err.Error()))
+			conf.pubSub.Publish(createErrEvent(err))
 		}
 	}()
 }
 
+// Process is the main logic to handle all the updates
 func Process() error {
 	// load versionMap and warpFile
 	warpFile, err := getWarpFile()
@@ -106,41 +129,59 @@ func Process() error {
 	// we need to create api
 	api := makeAPI(warpFile)
 
-	var autoUpdateRelease map[string]*data.Release
 	var releases []map[string]*data.Release
 
-	// we need to loop through all available configs
-	for _, cycleConfig := range warpFile.Cycles {
-		release, err := api.checkVersion(appID, cycleConfig.ID, conf.platform, versionMap.CurrentVersion(cycleConfig.Name))
-		if err != nil {
-			conf.pubSub.Publish(createEvent(Err, err.Error()))
-		} else {
-			if conf.defaultCycle == cycleConfig.Name {
-				autoUpdateRelease = release
-			} else {
-				releases = append(releases, release)
+	// first we need to see if there is a version for deafultCycle
+	// if there is one, then there is no reason to let app know about other version
+	defaultCycleConfig, err := warpFile.GetCycle(conf.defaultCycle)
+	if err != nil {
+		// we are terminating the process because defaultConfig is not found
+		return err
+	}
+
+	// lets check if default cycle has a new update
+	releaseMap, err := api.checkVersion(appID, defaultCycleConfig.ID, conf.platform, versionMap.CurrentVersion(defaultCycleConfig.Name))
+	if err != nil {
+		// at this point we are not terminate the process, we simple send an event
+		// to notify the default cycle has some issue
+		conf.pubSub.Publish(createErrEvent(err))
+	} else {
+		// we need to check if soft update is available
+		softRelease, ok := releaseMap["soft"]
+		if ok {
+			// we need to check if forceUpdate is enabled
+			// if forceUpdate is enable, then we simple download the update and update the version
+			// and we should call the objective-c and java part for restart the app
+			if conf.forceUpdate {
+				err = DownloadRelease(api, appID, defaultCycleConfig.ID, softRelease.ID)
+				if err != nil {
+					return err
+				}
+
+				// We need to call the native to restart the app
 			}
 		}
 	}
 
-	if autoUpdateRelease != nil {
-		//we need to check whether update has soft key
-		softRelease, ok := autoUpdateRelease["soft"]
-		if ok {
-			conf.pubSub.Publish(createEvent(UpdateDownloading, softRelease))
-			r, err := api.downloadVersion(appID, softRelease.CycleID, softRelease.ID)
-			if err != nil {
-				conf.pubSub.Publish(createEvent(Err, err.Error()))
-			} else {
-				if r != nil {
+	// we need to loop through all available configs
+	for _, cycleConfig := range warpFile.Cycles {
+		// we don't need to check the default cycle again
+		if cycleConfig.Name == conf.defaultCycle {
+			continue
+		}
 
-				}
-			}
+		releaseMap, err := api.checkVersion(appID, cycleConfig.ID, conf.platform, versionMap.CurrentVersion(cycleConfig.Name))
+		if err != nil {
+			conf.pubSub.Publish(createErrEvent(err))
+		} else {
+			releases = append(releases, releaseMap)
 		}
 	}
 
 	if len(releases) > 0 {
-		//conf.pubSub()
+		conf.pubSub.Publish(createAvailableEvent(releases))
+	} else {
+		conf.pubSub.Publish(createNoUpdateEvent())
 	}
 
 	return nil
