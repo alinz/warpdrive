@@ -54,7 +54,15 @@ static Warpify *sharedInstance;
     GoWarpifySetReload((EventCallbackWrapper*)sharedInstance->_reloadCallback);
     
     // Setup the basic requirements
-    GoWarpifySetup(bundleVersion, bundlePath, documentPath, platform, defaultCycle, forceUpdate);
+    NSError* err;
+    GoWarpifySetup(bundleVersion, bundlePath, documentPath, platform, defaultCycle, forceUpdate, &err);
+    
+    // if some error happends, we are forcefully set sharedInstance to nil
+    // to crash the app at the beginning.
+    if (err) {
+      NSLog(err);
+      sharedInstance = nil;
+    }
   });
   
   return sharedInstance;
@@ -69,7 +77,12 @@ static Warpify *sharedInstance;
 }
 
 - (NSURL *)sourceBundle {
-  return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index.ios" fallbackResource:nil];
+  NSString* path = GoWarpifySourcePath();
+  if (path == nil || [path isEqualToString:@""]) {
+    return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index.ios" fallbackResource:nil];
+  }
+  
+  return [NSURL URLWithString:path];
 }
 
 - (void) reloadFromPath:(NSString*)path {
