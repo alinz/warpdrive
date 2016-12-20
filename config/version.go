@@ -12,7 +12,7 @@ import (
 // about which cycle uses which version
 type Version struct {
 	Current   string          `json:"current"`
-	Available map[string]bool `jsong:"available"`
+	Available map[string]bool `json:"available"`
 }
 
 // Add adds a version to internal cache, it makes sure there are no duplicates
@@ -25,11 +25,9 @@ func (v *Version) Add(version string, isBundle bool) {
 // SetCurrent sets a version as current for Cycle, you have an option
 // to add it to cache. The reason you might not to set it to cache is
 // anything added to cache means download from warpdrive server
-func (v *Version) SetCurrent(version string, isBundle, cache bool) {
+func (v *Version) SetCurrent(version string, isBundle bool) {
 	v.Current = version
-	if cache {
-		v.Add(version, isBundle)
-	}
+	v.Add(version, isBundle)
 }
 
 // SortAvailable sort caches, it helps simplify the caller
@@ -47,7 +45,7 @@ func (v *Version) SortAvailable() []string {
 // each version in an easy way
 type VersionMap struct {
 	ActiveCycle string              `json:"active_cycle"`
-	Cycles      map[string]*Version `json:"Cycles"`
+	Cycles      map[string]*Version `json:"cycles"`
 }
 
 // Save saves the VersionMap to target path.
@@ -112,14 +110,14 @@ func (vm *VersionMap) CurrentVersion(cycle string) string {
 }
 
 // SetCurrentVersion assing a new version to cycle. You can add it to cache as well
-func (vm *VersionMap) SetCurrentVersion(cycle, version string, isBundle, cache bool) {
+func (vm *VersionMap) SetCurrentVersion(cycle, version string, isBundle bool) {
 	value := vm.Version(cycle)
-	value.SetCurrent(version, isBundle, cache)
+	value.SetCurrent(version, isBundle)
 }
 
 // VersionPath returns the proper path for loading versions.warp
-func VersionPath(path string) string {
-	return filepath.Join(path, "warpdrive/versions.warp")
+func VersionPath(documentPath string) string {
+	return filepath.Join(documentPath, "warpdrive/versions.warp")
 }
 
 // NewVersionMapFromReader creates VersionMap from io.Reader

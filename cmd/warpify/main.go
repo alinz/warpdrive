@@ -47,12 +47,15 @@ func Reload(path string) {
 func Setup(bundleVersion, bundlePath, documentPath, platform, defaultCycle string, forceUpdate bool) error {
 	conf.bundleVersion = bundleVersion
 	conf.bundlePath = bundlePath
-	conf.documentPath = bundlePath
+	conf.documentPath = documentPath
 	conf.defaultCycle = defaultCycle
 	conf.forceUpdate = forceUpdate
 	conf.platform = platform
 
 	conf.pubSub = newPubSub()
+
+	// we are making sure that warpdrive folder does exist in document path
+	os.MkdirAll(filepath.Join(documentPath, "warpdrive"), os.ModePerm)
 
 	// load versionMap and warpFile
 	warpFile, err := getWarpFile()
@@ -257,8 +260,7 @@ func getWarpFile() (*config.ClientConfig, error) {
 func getVersionMap() (*config.VersionMap, error) {
 	var versionMap config.VersionMap
 
-	path := config.VersionPath(conf.documentPath)
-	if exists, _ := folder.PathExists(path); exists {
+	if exists, _ := folder.PathExists(config.VersionPath(conf.documentPath)); exists {
 		err := versionMap.Load(conf.documentPath)
 		if err != nil {
 			return nil, err
@@ -286,10 +288,10 @@ func getVersionMap() (*config.VersionMap, error) {
 		// and because the first version points in bundle, then
 		// isBundle in `SetCurrentVersion` will be true
 		versionMap.ActiveCycle = cycleName
-		versionMap.SetCurrentVersion(cycleName, conf.bundleVersion, true, false)
+		versionMap.SetCurrentVersion(cycleName, conf.bundleVersion, true)
 
 		// save the file on disk
-		err = versionMap.Save(path)
+		err = versionMap.Save(conf.documentPath)
 		if err != nil {
 			return nil, err
 		}
