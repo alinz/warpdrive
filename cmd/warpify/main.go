@@ -14,12 +14,6 @@ import (
 	"github.com/pressly/warpdrive/lib/warp"
 )
 
-// Task is an interface to let the native register a function
-// in go. at the moment, this interface only being used for reload
-type Task interface {
-	Execute(path string)
-}
-
 const (
 	_ int = 0
 
@@ -36,22 +30,14 @@ const (
 	Downloaded
 )
 
-func createErrEvent(err error) *Event {
-	return createEvent(Err, err.Error())
-}
-
-func createAvailableEvent(releases []map[string]*data.Release) *Event {
+func releaseToString(releases []map[string]*data.Release) string {
 	str, _ := json.Marshal(releases)
-	return createEvent(Available, string(str))
-}
-
-func createNoUpdateEvent() *Event {
-	return createEvent(NoUpdate, "")
+	return string(str)
 }
 
 // SetReload assing an func call from native target for reloading
 // react-native
-func SetReload(reloadTask Task) {
+func SetReload(reloadTask Callback) {
 	conf.reloadTask = reloadTask
 }
 
@@ -59,7 +45,7 @@ func SetReload(reloadTask Task) {
 // Target native code must register a proepr function for rreloading the
 // react-native or this method returns an error
 func Reload(path string) {
-	conf.reloadTask.Execute(path)
+	conf.reloadTask.Do(0, path)
 }
 
 // Setup we need to setup the app
@@ -128,7 +114,7 @@ func Start(callback Callback) {
 	go func() {
 		err := Process()
 		if err != nil {
-			conf.pubSub.Publish(createErrEvent(err))
+			conf.pubSub.Publish(Err, err.Error())
 		}
 	}()
 }
@@ -166,7 +152,7 @@ func Process() error {
 	if err != nil {
 		// at this point we are not terminate the process, we simple send an event
 		// to notify the default cycle has some issue
-		conf.pubSub.Publish(createErrEvent(err))
+		conf.pubSub.Publish(Err, err.Error())
 	} else {
 		// we need to check if soft update is available
 		softRelease, ok := releaseMap["soft"]
@@ -196,16 +182,16 @@ func Process() error {
 
 		releaseMap, err := api.checkVersion(appID, cycleConfig.ID, conf.platform, versionMap.CurrentVersion(cycleConfig.Name))
 		if err != nil {
-			conf.pubSub.Publish(createErrEvent(err))
+			conf.pubSub.Publish(Err, err.Error())
 		} else {
 			releases = append(releases, releaseMap)
 		}
 	}
 
 	if len(releases) > 0 {
-		conf.pubSub.Publish(createAvailableEvent(releases))
+		conf.pubSub.Publish(Available, releaseToString(releases))
 	} else {
-		conf.pubSub.Publish(createNoUpdateEvent())
+		conf.pubSub.Publish(NoUpdate, "")
 	}
 
 	return nil

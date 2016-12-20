@@ -11,8 +11,8 @@ type warpConf struct {
 	platform      string
 	defaultCycle  string
 	forceUpdate   bool
+	reloadTask    Callback
 	pubSub        pubSub
-	reloadTask    Task
 }
 
 func (c *warpConf) getDocumentPath(path string) string {

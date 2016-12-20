@@ -11,14 +11,14 @@
 #import "Warpify.framework/Headers/Warpify.h"
 
 #import "Warpify.h"
-#import "ReloadTaskWrapper.h"
+#import "EventCallbackWrapper.h"
 
 static Warpify *sharedInstance;
 
 @implementation Warpify {
   // we are creating this variable to make sure it never
   // garbage collected
-  ReloadTaskWrapper* _reloadTask;
+  EventCallbackWrapper* _reloadCallback;
 }
 
 // this method returns the document path based on whether groupName given or not
@@ -47,11 +47,11 @@ static Warpify *sharedInstance;
     NSString* platform = @"ios";
 
     // set the reload path here
-    sharedInstance->_reloadTask = [ReloadTaskWrapper new];
-    [sharedInstance->_reloadTask setBlock:^(NSString* path) {
+    sharedInstance->_reloadCallback = [EventCallbackWrapper new];
+    [sharedInstance->_reloadCallback setBlock:^(long kind, NSString* path) {
       [sharedInstance reloadFromPath:path];
     }];
-    GoWarpifySetReload((GoWarpifyTask*)sharedInstance->_reloadTask);
+    GoWarpifySetReload((EventCallbackWrapper*)sharedInstance->_reloadCallback);
     
     // Setup the basic requirements
     GoWarpifySetup(bundleVersion, bundlePath, documentPath, platform, defaultCycle, forceUpdate);
