@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"encoding/json"
+
 	"github.com/blang/semver"
 	"github.com/pressly/warpdrive/config"
 	"github.com/pressly/warpdrive/data"
@@ -12,8 +14,14 @@ import (
 	"github.com/pressly/warpdrive/lib/warp"
 )
 
+// Task is an interface to let the native register a function
+// in go. at the moment, this interface only being used for reload
+type Task interface {
+	Execute(path string)
+}
+
 const (
-	_ EventKind = 0
+	_ int = 0
 
 	// Err if something goes wrong, Err event will be sent
 	Err
@@ -33,11 +41,25 @@ func createErrEvent(err error) *Event {
 }
 
 func createAvailableEvent(releases []map[string]*data.Release) *Event {
-	return createEvent(Available, releases)
+	str, _ := json.Marshal(releases)
+	return createEvent(Available, string(str))
 }
 
 func createNoUpdateEvent() *Event {
-	return createEvent(NoUpdate, nil)
+	return createEvent(NoUpdate, "")
+}
+
+// SetReload assing an func call from native target for reloading
+// react-native
+func SetReload(reloadTask Task) {
+	conf.reloadTask = reloadTask
+}
+
+// Reload passes path of assets and force the react-native to reload.
+// Target native code must register a proepr function for rreloading the
+// react-native or this method returns an error
+func Reload(path string) {
+	conf.reloadTask.Execute(path)
 }
 
 // Setup we need to setup the app
@@ -159,6 +181,8 @@ func Process() error {
 				}
 
 				// We need to call the native to restart the app
+				Reload(warpBundlePath(appID, defaultCycleConfig.ID, softRelease.ID))
+				return nil
 			}
 		}
 	}
@@ -236,12 +260,12 @@ func getVersionMap() (*config.VersionMap, error) {
 
 // subscribe this is a easy to use method to expose to objective-c and jave
 // so they can bind their callbacks to known EventKinds
-func subscribe(eventKind EventKind, callback Callback) {
+func subscribe(eventKind int, callback Callback) {
 	conf.pubSub.Subscribe(eventKind, callback)
 }
 
 // unsubscribe as it stands, it unsubscribes the any associate
 // callback to specific event type. Mainly it's being used for clean up
-func unsubscribe(eventKind EventKind) {
+func unsubscribe(eventKind int) {
 	conf.pubSub.Unsubscribe(eventKind)
 }

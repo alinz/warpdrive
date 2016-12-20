@@ -4,13 +4,10 @@ import (
 	"sync"
 )
 
-// EventKind is a type to define Event types
-type EventKind int
-
 // Event is a struct for passing to callback
 type Event struct {
-	Kind  EventKind
-	Value interface{}
+	Kind  int
+	Value string
 }
 
 // Callback is an interface for calling back the event
@@ -19,26 +16,26 @@ type Callback interface {
 }
 
 type pubSub interface {
-	Subscribe(EventKind, Callback)
-	Unsubscribe(EventKind)
+	Subscribe(int, Callback)
+	Unsubscribe(int)
 	Publish(*Event)
 }
 
 type simplePubSub struct {
 	ctx       sync.Mutex
-	callbacks map[EventKind]Callback
+	callbacks map[int]Callback
 }
 
-func (s *simplePubSub) Subscribe(eventKind EventKind, callback Callback) {
+func (s *simplePubSub) Subscribe(int int, callback Callback) {
 	s.ctx.Lock()
 	defer s.ctx.Unlock()
-	s.callbacks[eventKind] = callback
+	s.callbacks[int] = callback
 }
 
-func (s *simplePubSub) Unsubscribe(eventKind EventKind) {
+func (s *simplePubSub) Unsubscribe(int int) {
 	s.ctx.Lock()
 	defer s.ctx.Unlock()
-	delete(s.callbacks, eventKind)
+	delete(s.callbacks, int)
 }
 
 func (s *simplePubSub) Publish(event *Event) {
@@ -57,11 +54,11 @@ func (s *simplePubSub) Publish(event *Event) {
 
 func newPubSub() pubSub {
 	return &simplePubSub{
-		callbacks: make(map[EventKind]Callback),
+		callbacks: make(map[int]Callback),
 	}
 }
 
-func createEvent(kind EventKind, value interface{}) *Event {
+func createEvent(kind int, value string) *Event {
 	return &Event{
 		Kind:  kind,
 		Value: value,

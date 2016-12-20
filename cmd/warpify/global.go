@@ -12,6 +12,7 @@ type warpConf struct {
 	defaultCycle  string
 	forceUpdate   bool
 	pubSub        pubSub
+	reloadTask    Task
 }
 
 func (c *warpConf) getDocumentPath(path string) string {
