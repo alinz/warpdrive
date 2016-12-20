@@ -6,14 +6,20 @@
 //  Copyright © 2016 Ali Najafizadeh. All rights reserved.
 //
 
-#import "Warpify.h"
+#import "RCTBundleURLProvider.h"
+
 #import "Warpify.framework/Headers/Warpify.h"
 
-#import "RCTBundleURLProvider.h"
+#import "Warpify.h"
+#import "ReloadTaskWrapper.h"
 
 static Warpify *sharedInstance;
 
-@implementation Warpify
+@implementation Warpify {
+  // we are creating this variable to make sure it never
+  // garbage collected
+  ReloadTaskWrapper* _reloadTask;
+}
 
 // this method returns the document path based on whether groupName given or not
 + (NSString*)documentPathWithGroupName:(NSString*)groupName {
@@ -29,6 +35,8 @@ static Warpify *sharedInstance;
 + (instancetype)createWithDefaultCycle:(NSString*)defaultCycle forceUpdate:(BOOL)forceUpdate groupName:(NSString*)groupName {
   static dispatch_once_t once_token;
   
+  // we are going to call this method once so subsiqent call to `shared` and `createWithDefaultCycle`
+  // returns the same instance
   dispatch_once(&once_token, ^{
     sharedInstance = [Warpify new];
     
@@ -37,7 +45,15 @@ static Warpify *sharedInstance;
     NSString* bundlePath = [[NSBundle mainBundle] bundlePath];
     NSString* documentPath = [Warpify documentPathWithGroupName:groupName];
     NSString* platform = @"ios";
+
+    // set the reload path here
+    sharedInstance->_reloadTask = [ReloadTaskWrapper new];
+    [sharedInstance->_reloadTask setBlock:^(NSString* path) {
+      [sharedInstance reloadFromPath:path];
+    }];
+    GoWarpifySetReload((GoWarpifyTask*)sharedInstance->_reloadTask);
     
+    // Setup the basic requirements
     GoWarpifySetup(bundleVersion, bundlePath, documentPath, platform, defaultCycle, forceUpdate);
   });
   
@@ -54,6 +70,11 @@ static Warpify *sharedInstance;
 
 - (NSURL *)sourceBundle {
   return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index.ios" fallbackResource:nil];
+}
+
+- (void) reloadFromPath:(NSString*)path {
+  NSLog(@"reload...");
+  NSLog(path);
 }
 
 @end

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		417F52471E0990EA002B71F3 /* ReloadTaskWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 417F52461E0990EA002B71F3 /* ReloadTaskWrapper.m */; };
 		41DE17EF1DF5E8E800D2F615 /* Warpify.m in Sources */ = {isa = PBXBuildFile; fileRef = 41DE17EE1DF5E8E800D2F615 /* Warpify.m */; };
 		41DE180B1DF5FB2B00D2F615 /* WarpifyManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 41DE180A1DF5FB2B00D2F615 /* WarpifyManager.m */; };
 /* End PBXBuildFile section */
@@ -24,6 +25,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		417F52461E0990EA002B71F3 /* ReloadTaskWrapper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ReloadTaskWrapper.m; sourceTree = "<group>"; };
+		417F52491E099152002B71F3 /* ReloadTaskWrapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ReloadTaskWrapper.h; sourceTree = "<group>"; };
 		41DE17E01DF5E76D00D2F615 /* libWarpify.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libWarpify.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		41DE17ED1DF5E8E800D2F615 /* Warpify.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Warpify.h; sourceTree = SOURCE_ROOT; };
 		41DE17EE1DF5E8E800D2F615 /* Warpify.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Warpify.m; sourceTree = SOURCE_ROOT; };
@@ -44,6 +47,8 @@
 		41DE17D71DF5E76D00D2F615 = {
 			isa = PBXGroup;
 			children = (
+				417F52491E099152002B71F3 /* ReloadTaskWrapper.h */,
+				417F52461E0990EA002B71F3 /* ReloadTaskWrapper.m */,
 				41DE17ED1DF5E8E800D2F615 /* Warpify.h */,
 				41DE17EE1DF5E8E800D2F615 /* Warpify.m */,
 				41DE180A1DF5FB2B00D2F615 /* WarpifyManager.m */,
@@ -117,6 +122,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				41DE180B1DF5FB2B00D2F615 /* WarpifyManager.m in Sources */,
+				417F52471E0990EA002B71F3 /* ReloadTaskWrapper.m in Sources */,
 				41DE17EF1DF5E8E800D2F615 /* Warpify.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

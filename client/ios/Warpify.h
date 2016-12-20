@@ -23,6 +23,7 @@
 + (instancetype)shared;
 
 - (NSURL *)sourceBundle;
+- (void)reloadFromPath:(NSString*)path;
 
 @end
 
