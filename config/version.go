@@ -85,6 +85,10 @@ func (vm *VersionMap) Load(documentPath string) error {
 // assign it to map and return the value
 // most of the logic here is for making it easier for caller.
 func (vm *VersionMap) Version(cycle string) *Version {
+	if vm.Cycles == nil {
+		vm.Cycles = make(map[string]*Version)
+	}
+
 	value, ok := vm.Cycles[cycle]
 	if !ok {
 		value = &Version{
