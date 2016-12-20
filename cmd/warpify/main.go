@@ -30,11 +30,6 @@ const (
 	Downloaded
 )
 
-func releaseToString(releases []map[string]*data.Release) string {
-	str, _ := json.Marshal(releases)
-	return string(str)
-}
-
 // SetReload assing an func call from native target for reloading
 // react-native
 func SetReload(reloadTask Callback) {
@@ -71,11 +66,6 @@ func Setup(bundleVersion, bundlePath, documentPath, platform, defaultCycle strin
 	conf.api = makeAPI(warpFile)
 
 	return nil
-}
-
-func warpBundlePath(appID, cycleID int64, version string) string {
-	path := fmt.Sprintf("warpdrive/warp.%d.%d.%s", appID, cycleID, version)
-	return filepath.Join(conf.documentPath, path)
 }
 
 // DownloadRelease it starts download and save the bundle inside path
@@ -137,37 +127,43 @@ func SourcePath() string {
 	}
 
 	// we need to point to main.jsbundle file
-	path := warpBundlePath(appID, cycleConfig.ID, version.Current)
-	return filepath.Join(path, "main.jsbundle")
+	path := filepath.Join(warpBundlePath(appID, cycleConfig.ID, version.Current), "main.jsbundle")
+
+	// start the process but only for defaultCyle
+	process(true)
+
+	return path
 }
 
 // Start accepts a callback and start the process of checking the version
 // and download and restart the
 func Start(callback Callback) {
-	// we are going to detach all calbacks first
-	unsubscribe(Err)
-	unsubscribe(NoUpdate)
-	unsubscribe(Available)
-	unsubscribe(Downloading)
-	unsubscribe(Downloaded)
+	if callback != nil {
+		// we are going to detach all calbacks first
+		unsubscribe(Err)
+		unsubscribe(NoUpdate)
+		unsubscribe(Available)
+		unsubscribe(Downloading)
+		unsubscribe(Downloaded)
 
-	// attach the following events to given callback
-	subscribe(Err, callback)
-	subscribe(NoUpdate, callback)
-	subscribe(Available, callback)
-	subscribe(Downloading, callback)
-	subscribe(Downloaded, callback)
+		// attach the following events to given callback
+		subscribe(Err, callback)
+		subscribe(NoUpdate, callback)
+		subscribe(Available, callback)
+		subscribe(Downloading, callback)
+		subscribe(Downloaded, callback)
+	}
 
 	go func() {
-		err := Process()
+		err := process(callback == nil)
 		if err != nil {
 			conf.pubSub.Publish(Err, err.Error())
 		}
 	}()
 }
 
-// Process is the main logic to handle all the updates
-func Process() error {
+// process is the main logic to handle all the updates
+func process(justDefaultCycle bool) error {
 	versionMap, err := getVersionMap()
 	if err != nil {
 		return err
@@ -214,6 +210,10 @@ func Process() error {
 			// and let client decides whether app needs to be updated or not
 			releases = append(releases, releaseMap)
 		}
+	}
+
+	if justDefaultCycle {
+		return nil
 	}
 
 	// we need to loop through all available configs
@@ -308,4 +308,14 @@ func subscribe(eventKind int, callback Callback) {
 // callback to specific event type. Mainly it's being used for clean up
 func unsubscribe(eventKind int) {
 	conf.pubSub.Unsubscribe(eventKind)
+}
+
+func releaseToString(releases []map[string]*data.Release) string {
+	str, _ := json.Marshal(releases)
+	return string(str)
+}
+
+func warpBundlePath(appID, cycleID int64, version string) string {
+	path := fmt.Sprintf("warpdrive/warp.%d.%d.%s", appID, cycleID, version)
+	return filepath.Join(conf.documentPath, path)
 }
