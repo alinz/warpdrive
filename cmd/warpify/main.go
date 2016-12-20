@@ -49,7 +49,7 @@ func Reload(path string) {
 }
 
 // Setup we need to setup the app
-func Setup(bundleVersion, bundlePath, documentPath, platform, defaultCycle string, forceUpdate bool) {
+func Setup(bundleVersion, bundlePath, documentPath, platform, defaultCycle string, forceUpdate bool) error {
 	conf.bundleVersion = bundleVersion
 	conf.bundlePath = bundlePath
 	conf.documentPath = bundlePath
@@ -58,21 +58,36 @@ func Setup(bundleVersion, bundlePath, documentPath, platform, defaultCycle strin
 	conf.platform = platform
 
 	conf.pubSub = newPubSub()
-}
 
-func warpBundlePath(appID, cycleID, releaseID int64) string {
-	path := fmt.Sprintf("warpdrive/warp.%d.%d.%d", appID, cycleID, releaseID)
-	return filepath.Join(conf.documentPath, path)
-}
-
-// DownloadRelease it starts download and save the bundle inside path
-func DownloadRelease(api *api, appID, cycleID, releaseID int64) error {
-	r, err := api.downloadVersion(appID, cycleID, releaseID)
+	// load versionMap and warpFile
+	warpFile, err := getWarpFile()
 	if err != nil {
 		return err
 	}
 
-	path := warpBundlePath(appID, cycleID, releaseID)
+	conf.warpFile = warpFile
+
+	// we need to create api
+	conf.api = makeAPI(warpFile)
+
+	return nil
+}
+
+func warpBundlePath(appID, cycleID int64, version string) string {
+	path := fmt.Sprintf("warpdrive/warp.%d.%d.%s", appID, cycleID, version)
+	return filepath.Join(conf.documentPath, path)
+}
+
+// DownloadRelease it starts download and save the bundle inside path
+func DownloadRelease(cycleID, releaseID int64, version string) error {
+	appID := conf.warpFile.App.ID
+
+	r, err := conf.api.downloadVersion(appID, cycleID, releaseID)
+	if err != nil {
+		return err
+	}
+
+	path := warpBundlePath(appID, cycleID, version)
 
 	// need to make fodler
 	err = os.MkdirAll(path, os.ModePerm)
@@ -90,8 +105,40 @@ func DownloadRelease(api *api, appID, cycleID, releaseID int64) error {
 }
 
 // SourcePath returns the proper path for react-native app to start the process
+// if there is no downlaod available, simply return an empty string
+// on native side, it will be replaced by default value
+// also this method must be called after Setup function is called with no errors
 func SourcePath() string {
-	return ""
+	versionMap, err := getVersionMap()
+	if err != nil {
+		return ""
+	}
+
+	// So we grab the ActiveCycle to find the current active cycle
+	// then we look for current version
+	// if current version is bundle then, we return "" and let the
+	// native code handle the URL
+	// if not then we need to generate a path to new value
+
+	version := versionMap.Version(versionMap.ActiveCycle)
+
+	// we need to search for current version inside avaiable
+
+	isBundle, ok := version.Available[version.Current]
+	if !ok || isBundle {
+		return ""
+	}
+
+	appID := conf.warpFile.App.ID
+
+	cycleConfig, err := conf.warpFile.GetCycle(versionMap.ActiveCycle)
+	if err != nil {
+		return ""
+	}
+
+	// we need to point to main.jsbundle file
+	path := warpBundlePath(appID, cycleConfig.ID, version.Current)
+	return filepath.Join(path, "main.jsbundle")
 }
 
 // Start accepts a callback and start the process of checking the version
@@ -121,66 +168,62 @@ func Start(callback Callback) {
 
 // Process is the main logic to handle all the updates
 func Process() error {
-	// load versionMap and warpFile
-	warpFile, err := getWarpFile()
-	if err != nil {
-		return err
-	}
-
 	versionMap, err := getVersionMap()
 	if err != nil {
 		return err
 	}
 
-	appID := warpFile.App.ID
-
-	// we need to create api
-	api := makeAPI(warpFile)
+	appID := conf.warpFile.App.ID
 
 	var releases []map[string]*data.Release
 
 	// first we need to see if there is a version for deafultCycle
 	// if there is one, then there is no reason to let app know about other version
-	defaultCycleConfig, err := warpFile.GetCycle(conf.defaultCycle)
+	defaultCycleConfig, err := conf.warpFile.GetCycle(conf.defaultCycle)
 	if err != nil {
 		// we are terminating the process because defaultConfig is not found
 		return err
 	}
 
 	// lets check if default cycle has a new update
-	releaseMap, err := api.checkVersion(appID, defaultCycleConfig.ID, conf.platform, versionMap.CurrentVersion(defaultCycleConfig.Name))
+	currentVersion := versionMap.CurrentVersion(defaultCycleConfig.Name)
+	releaseMap, err := conf.api.checkVersion(appID, defaultCycleConfig.ID, conf.platform, currentVersion)
 	if err != nil {
 		// at this point we are not terminate the process, we simple send an event
 		// to notify the default cycle has some issue
 		conf.pubSub.Publish(Err, err.Error())
 	} else {
 		// we need to check if soft update is available
-		softRelease, ok := releaseMap["soft"]
-		if ok {
+
+		if softRelease, ok := releaseMap["soft"]; ok {
 			// we need to check if forceUpdate is enabled
 			// if forceUpdate is enable, then we simple download the update and update the version
 			// and we should call the objective-c and java part for restart the app
 			if conf.forceUpdate {
-				err = DownloadRelease(api, appID, defaultCycleConfig.ID, softRelease.ID)
+				err = DownloadRelease(defaultCycleConfig.ID, softRelease.ID, currentVersion)
 				if err != nil {
 					return err
 				}
 
 				// We need to call the native to restart the app
-				Reload(warpBundlePath(appID, defaultCycleConfig.ID, softRelease.ID))
+				Reload(warpBundlePath(appID, defaultCycleConfig.ID, currentVersion))
 				return nil
 			}
+
+			// since force update is not enabled, then we are adding the releases
+			// and let client decides whether app needs to be updated or not
+			releases = append(releases, releaseMap)
 		}
 	}
 
 	// we need to loop through all available configs
-	for _, cycleConfig := range warpFile.Cycles {
+	for _, cycleConfig := range conf.warpFile.Cycles {
 		// we don't need to check the default cycle again
 		if cycleConfig.Name == conf.defaultCycle {
 			continue
 		}
 
-		releaseMap, err := api.checkVersion(appID, cycleConfig.ID, conf.platform, versionMap.CurrentVersion(cycleConfig.Name))
+		releaseMap, err := conf.api.checkVersion(appID, cycleConfig.ID, conf.platform, versionMap.CurrentVersion(cycleConfig.Name))
 		if err != nil {
 			conf.pubSub.Publish(Err, err.Error())
 		} else {
@@ -215,18 +258,23 @@ func getVersionMap() (*config.VersionMap, error) {
 	var versionMap config.VersionMap
 
 	path := config.VersionPath(conf.documentPath)
-	exists, _ := folder.PathExists(path)
-	if exists {
+	if exists, _ := folder.PathExists(path); exists {
 		err := versionMap.Load(conf.documentPath)
 		if err != nil {
 			return nil, err
 		}
 	} else {
+		// this is the first time we are creating versions.warp
+		// this file will be saved in documentPath/warpdrive/versions.warp
+
 		version, err := semver.Make(conf.bundleVersion)
 		if err != nil {
 			return nil, err
 		}
 
+		// if the bundle contains pre value then it consider
+		// default cycle name, make sure in your code, defaultCycle and
+		// pre in bundle version was the same
 		var cycleName string
 		if len(version.Pre) > 0 {
 			cycleName = version.Pre[0].String()
@@ -234,8 +282,14 @@ func getVersionMap() (*config.VersionMap, error) {
 			cycleName = conf.defaultCycle
 		}
 
-		versionMap.SetCurrentVersion(cycleName, conf.bundleVersion, false)
-		err = versionMap.Save(conf.documentPath)
+		// set the first version inside versions.warp
+		// and because the first version points in bundle, then
+		// isBundle in `SetCurrentVersion` will be true
+		versionMap.ActiveCycle = cycleName
+		versionMap.SetCurrentVersion(cycleName, conf.bundleVersion, true, false)
+
+		// save the file on disk
+		err = versionMap.Save(path)
 		if err != nil {
 			return nil, err
 		}

@@ -2,6 +2,8 @@ package warpify
 
 import (
 	"path/filepath"
+
+	"github.com/pressly/warpdrive/config"
 )
 
 type warpConf struct {
@@ -13,6 +15,8 @@ type warpConf struct {
 	forceUpdate   bool
 	reloadTask    Callback
 	pubSub        pubSub
+	api           *api
+	warpFile      *config.ClientConfig
 }
 
 func (c *warpConf) getDocumentPath(path string) string {

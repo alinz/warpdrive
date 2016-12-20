@@ -11,48 +11,46 @@ import (
 // Version is simple structure which holds information
 // about which cycle uses which version
 type Version struct {
-	Current string   `json:"current"`
-	Cached  []string `jsong:"cached"`
+	Current   string          `json:"current"`
+	Available map[string]bool `jsong:"available"`
 }
 
 // Add adds a version to internal cache, it makes sure there are no duplicates
-func (v *Version) Add(version string) {
-	found := false
-	for _, value := range v.Cached {
-		if value == version {
-			found = true
-			break
-		}
-	}
-
-	if !found {
-		v.Cached = append(v.Cached, version)
+func (v *Version) Add(version string, isBundle bool) {
+	if _, ok := v.Available[version]; !ok {
+		v.Available[version] = isBundle
 	}
 }
 
 // SetCurrent sets a version as current for Cycle, you have an option
 // to add it to cache. The reason you might not to set it to cache is
 // anything added to cache means download from warpdrive server
-func (v *Version) SetCurrent(version string, cache bool) {
+func (v *Version) SetCurrent(version string, isBundle, cache bool) {
 	v.Current = version
 	if cache {
-		v.Add(version)
+		v.Add(version, isBundle)
 	}
 }
 
-// SortCached sort caches, it helps simplify the caller
-func (v *Version) SortCached() {
-	sort.Strings(v.Cached)
+// SortAvailable sort caches, it helps simplify the caller
+func (v *Version) SortAvailable() []string {
+	var versions []string
+	for version := range v.Available {
+		versions = append(versions, version)
+	}
+	sort.Strings(versions)
+	return versions
 }
 
 // VersionMap is a simple structure wrapping Version
 // it provides basic structure to find and manipulate
 // each version in an easy way
 type VersionMap struct {
-	values map[string]*Version
+	ActiveCycle string              `json:"active_cycle"`
+	Cycles      map[string]*Version `json:"Cycles"`
 }
 
-// Save saves the values of VersionMap to target path.
+// Save saves the VersionMap to target path.
 // Path must ends with filename and must be `versions.warp`
 func (vm *VersionMap) Save(documentPath string) error {
 	path := VersionPath(documentPath)
@@ -64,10 +62,10 @@ func (vm *VersionMap) Save(documentPath string) error {
 
 	defer file.Close()
 
-	return json.NewEncoder(file).Encode(vm.values)
+	return json.NewEncoder(file).Encode(vm)
 }
 
-// Load loads the values of VersionMap from target path.
+// Load loads the Cycles of VersionMap from target path.
 // Path must ends with filename and must be `versions.warp`
 func (vm *VersionMap) Load(documentPath string) error {
 	path := VersionPath(documentPath)
@@ -79,7 +77,7 @@ func (vm *VersionMap) Load(documentPath string) error {
 
 	defer file.Close()
 
-	return json.NewDecoder(file).Decode(vm.values)
+	return json.NewDecoder(file).Decode(vm)
 }
 
 // Version gets a verion struct based on cycle name.
@@ -87,13 +85,20 @@ func (vm *VersionMap) Load(documentPath string) error {
 // assign it to map and return the value
 // most of the logic here is for making it easier for caller.
 func (vm *VersionMap) Version(cycle string) *Version {
-	value, ok := vm.values[cycle]
+	value, ok := vm.Cycles[cycle]
 	if !ok {
-		value = &Version{}
-		vm.values[cycle] = value
+		value = &Version{
+			Available: make(map[string]bool),
+		}
+		vm.Cycles[cycle] = value
 	}
 
 	return value
+}
+
+// SetActiveCycle set the ActiveCycle to load the value during bootup
+func (vm *VersionMap) SetActiveCycle(cycleName string) {
+	vm.ActiveCycle = cycleName
 }
 
 // CurrentVersion returns the current version sets in given cycle
@@ -103,25 +108,14 @@ func (vm *VersionMap) CurrentVersion(cycle string) string {
 }
 
 // SetCurrentVersion assing a new version to cycle. You can add it to cache as well
-func (vm *VersionMap) SetCurrentVersion(cycle, version string, cache bool) {
+func (vm *VersionMap) SetCurrentVersion(cycle, version string, isBundle, cache bool) {
 	value := vm.Version(cycle)
-	value.SetCurrent(version, cache)
-}
-
-// AddVersion adds the version to given cycle's cached and there is an option to
-// set the version as current.
-func (vm *VersionMap) AddVersion(cycle, version string, isCurrent bool) {
-	value := vm.Version(cycle)
-	if isCurrent {
-		value.SetCurrent(version, true)
-	} else {
-		value.Add(version)
-	}
+	value.SetCurrent(version, isBundle, cache)
 }
 
 // VersionPath returns the proper path for loading versions.warp
 func VersionPath(path string) string {
-	return filepath.Join(path, "versions.warp")
+	return filepath.Join(path, "warpdrive/versions.warp")
 }
 
 // NewVersionMapFromReader creates VersionMap from io.Reader
@@ -135,7 +129,7 @@ func NewVersionMapFromReader(r io.Reader) (*VersionMap, error) {
 // NewVersionMap creates a new VersionMap
 func NewVersionMap() *VersionMap {
 	versionMap := &VersionMap{
-		values: make(map[string]*Version),
+		Cycles: make(map[string]*Version),
 	}
 	return versionMap
 }
