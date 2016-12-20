@@ -16,9 +16,10 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+  
   NSURL *jsCodeLocation;
 
-  jsCodeLocation = [[Warpify shared] sourceBundle];
+  jsCodeLocation = [[Warpify createWithDefaultCycle:@"prod" forceUpdate:YES] sourceBundle];
 
   RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:jsCodeLocation
                                                       moduleName:@"Sample1"
