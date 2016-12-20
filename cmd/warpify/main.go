@@ -107,6 +107,9 @@ func SourcePath() string {
 		return ""
 	}
 
+	// start the process but only for defaultCyle
+	defer Start(nil)
+
 	// So we grab the ActiveCycle to find the current active cycle
 	// then we look for current version
 	// if current version is bundle then, we return "" and let the
@@ -130,12 +133,7 @@ func SourcePath() string {
 	}
 
 	// we need to point to main.jsbundle file
-	path := filepath.Join(warpBundlePath(appID, cycleConfig.ID, version.Current), "main.jsbundle")
-
-	// start the process but only for defaultCyle
-	process(true)
-
-	return path
+	return filepath.Join(warpBundlePath(appID, cycleConfig.ID, version.Current), "main.jsbundle")
 }
 
 // Start accepts a callback and start the process of checking the version
@@ -194,7 +192,7 @@ func process(justDefaultCycle bool) error {
 	} else {
 		// we need to check if soft update is available
 
-		if softRelease, ok := releaseMap["soft"]; ok {
+		if softRelease, ok := releaseMap["soft"]; ok && softRelease != nil {
 			// we need to check if forceUpdate is enabled
 			// if forceUpdate is enable, then we simple download the update and update the version
 			// and we should call the objective-c and java part for restart the app
