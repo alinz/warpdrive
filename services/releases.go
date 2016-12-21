@@ -237,12 +237,12 @@ func LatestRelease(appID, cycleID int64, rawVersion string, platform string) (ma
 	releases := make(map[string]*data.Release)
 
 	softRelease, err := data.FindLatestSoftRelease(cycleID, plat, version)
-	if err != nil {
+	if err == nil {
 		releases["soft"] = softRelease
 	}
 
 	hardRelease, err := data.FindLatestHardRelease(cycleID, plat, version)
-	if err != nil {
+	if err == nil {
 		releases["hard"] = hardRelease
 	}
 
