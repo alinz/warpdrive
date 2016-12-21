@@ -90,8 +90,7 @@ db-reset: db-destroy db-create
 ## Development
 ##
 
-build-dev-folder:
-	@rm -rf ./bin
+build-dev-folder:	
 	@mkdir -p ./bin/tmp/warpdrive
 
 run: build-dev-folder
