@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/pressly/chi"
+	"github.com/pressly/chi/middleware"
 	"github.com/pressly/warpdrive"
 	"github.com/pressly/warpdrive/web"
 	"github.com/pressly/warpdrive/web/routes/apps"
@@ -16,6 +17,7 @@ func New() chi.Router {
 	web.JwtSetup(conf.JWT.SecretKey)
 
 	r := chi.NewRouter()
+	r.Use(middleware.Logger)
 
 	// Public routes
 	r.Get("/", index)
