@@ -2,7 +2,6 @@ package data
 
 import (
 	"github.com/pressly/warpdrive"
-	"upper.io/db.v2"
 	"upper.io/db.v2/lib/sqlbuilder"
 	"upper.io/db.v2/postgresql"
 )
@@ -14,9 +13,9 @@ var dbSession sqlbuilder.Database
 // NewDatabase creates a new database based on what set in global Conf.
 // it is better to call this func once and inside your main func.
 func NewDatabase() (sqlbuilder.Database, error) {
-	if warpdrive.VERSION == "dev" {
-		db.Conf.SetLogging(true)
-	}
+	// if warpdrive.VERSION == "dev" {
+	// db.Conf.SetLogging(true)
+	// }
 
 	conf := warpdrive.Conf
 	var settings = postgresql.ConnectionURL{
