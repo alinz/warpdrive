@@ -6,10 +6,13 @@ import (
 
 	"strings"
 
+	"fmt"
+
 	"github.com/blang/semver"
 	"github.com/pressly/warpdrive"
 	"github.com/pressly/warpdrive/data"
 	"github.com/pressly/warpdrive/lib/crypto"
+	"github.com/pressly/warpdrive/lib/folder"
 	"github.com/pressly/warpdrive/lib/warp"
 	"upper.io/db.v2/lib/sqlbuilder"
 )
@@ -217,6 +220,8 @@ func UnlockRelease(userID, appID, cycleID, releaseID int64) error {
 	return nil
 }
 
+// LatestRelease retusn soft and hard version which soft means can be updated and hard means it
+// requires to download from app store or play store
 func LatestRelease(appID, cycleID int64, rawVersion string, platform string) (map[string]*data.Release, error) {
 	// check if cycle id belongs to app id
 	_, err := FindCycleByAppIdCycleId(appID, cycleID)
@@ -249,6 +254,7 @@ func LatestRelease(appID, cycleID int64, rawVersion string, platform string) (ma
 	return releases, nil
 }
 
+// DownloadRelease downloads the bundle releated to a specific release
 func DownloadRelease(appID, cycleID, releaseID int64, encryptedKey []byte, output io.Writer) error {
 	// checks if cycle id belongs to app id and also we need cycle object
 	// for PrivateKey
@@ -278,6 +284,10 @@ func DownloadRelease(appID, cycleID, releaseID int64, encryptedKey []byte, outpu
 	files := make(map[string]string)
 	for _, bundle := range bundles {
 		path := filepath.Join(warpdrive.Conf.Server.BundlesFolder, bundle.Hash)
+		// we need to check if the file exists
+		if exists, _ := folder.PathExists(path); !exists {
+			return fmt.Errorf("file '%s' not found", path)
+		}
 		files[path] = bundle.Name
 	}
 

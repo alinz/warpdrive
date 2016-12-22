@@ -117,7 +117,7 @@ func FindReleaseByID(cycleID, releaseID int64) (*Release, error) {
 func FindLockedReleaseByID(cycleID, releaseID int64) (*Release, error) {
 	var release Release
 
-	err := release.Find(dbSession, db.Cond{"id": releaseID, "cycle_id": releaseID, "lock": true})
+	err := release.Find(dbSession, db.Cond{"id": releaseID, "cycle_id": cycleID, "locked": true})
 	if err != nil {
 		return nil, err
 	}
@@ -128,9 +128,11 @@ func FindLockedReleaseByID(cycleID, releaseID int64) (*Release, error) {
 func FindLatestSoftRelease(cycleID int64, platform Platform, version semver.Version) (*Release, error) {
 	sql := fmt.Sprintf(`
 		SELECT * FROM releases 
-		WHERE cycle_id=%d AND platform=%d AND locked=TRUE AND major=%d
+		WHERE cycle_id=%d AND platform=%d AND locked=TRUE AND major=%d AND (minor > %d OR patch > %d)
 		ORDER BY major, minor, patch DESC, build DESC NULLS FIRST					
-	`, cycleID, platform.ValueAsInt(), version.Major)
+	`, cycleID, platform.ValueAsInt(), version.Major, version.Minor, version.Patch)
+
+	fmt.Println(version)
 
 	rows, err := dbSession.Query(sql)
 

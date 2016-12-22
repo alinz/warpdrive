@@ -18,7 +18,7 @@ func Compress(paths map[string]string, output io.Writer) error {
 	tarfileWriter := tar.NewWriter(fileWriter)
 	defer tarfileWriter.Close()
 
-	for target, src := range paths {
+	for src, target := range paths {
 		file, err := os.Open(src)
 		if err != nil {
 			return err
@@ -61,7 +61,7 @@ func Compress(paths map[string]string, output io.Writer) error {
 func Extract(input io.ReadCloser, targetPath string) error {
 	fileReader, err := gzip.NewReader(input)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	defer fileReader.Close()
