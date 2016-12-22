@@ -25,9 +25,10 @@ func (v *Version) Add(version string, isBundle bool) {
 // SetCurrent sets a version as current for Cycle, you have an option
 // to add it to cache. The reason you might not to set it to cache is
 // anything added to cache means download from warpdrive server
-func (v *Version) SetCurrent(version string, isBundle bool) {
+func (v *Version) SetCurrent(version string, isBundle bool) bool {
 	v.Current = version
 	v.Add(version, isBundle)
+	return v.Available[version]
 }
 
 // SortAvailable sort caches, it helps simplify the caller
@@ -110,9 +111,11 @@ func (vm *VersionMap) CurrentVersion(cycle string) string {
 }
 
 // SetCurrentVersion assing a new version to cycle. You can add it to cache as well
-func (vm *VersionMap) SetCurrentVersion(cycle, version string, isBundle bool) {
+// returns whether the add version is in bundle or document folder
+// we need this if for some reason, user rollback to original deployed bundle
+func (vm *VersionMap) SetCurrentVersion(cycle, version string, isBundle bool) bool {
 	value := vm.Version(cycle)
-	value.SetCurrent(version, isBundle)
+	return value.SetCurrent(version, isBundle)
 }
 
 // VersionPath returns the proper path for loading versions.warp
