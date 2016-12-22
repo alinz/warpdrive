@@ -10,6 +10,8 @@
 
 #import "RCTBridgeModule.h"
 
+typedef RCTBridge*(^BridgeCallback)(void);
+
 @interface Warpify : NSObject
 
 // if you plan to update both share extension and app itself, you have to pass the groupName
@@ -21,6 +23,8 @@
 // if you want to change the default value, you have to call createWithDefaultCycle first.
 // calling shared will return the same object
 + (instancetype)shared;
+
+- (void)setBridgeCallback:(BridgeCallback) bridgeCallback;
 
 - (NSURL *)sourceBundle;
 - (void)reloadFromPath:(NSString*)path;

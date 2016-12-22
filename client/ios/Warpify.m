@@ -7,6 +7,11 @@
 //
 
 #import "RCTBundleURLProvider.h"
+#import "RCTBridgeModule.h"
+#import "RCTConvert.h"
+#import "RCTEventDispatcher.h"
+#import "RCTRootView.h"
+#import "RCTUtils.h"
 
 #import "Warpify.framework/Headers/Warpify.h"
 
@@ -19,6 +24,7 @@ static Warpify *sharedInstance;
   // we are creating this variable to make sure it never
   // garbage collected
   EventCallbackWrapper* _reloadCallback;
+  BridgeCallback _bridgeCallback;
 }
 
 // this method returns the document path based on whether groupName given or not
@@ -49,7 +55,15 @@ static Warpify *sharedInstance;
     // set the reload path here
     sharedInstance->_reloadCallback = [EventCallbackWrapper new];
     [sharedInstance->_reloadCallback setBlock:^(long kind, NSString* path) {
-      [sharedInstance reloadFromPath:path];
+      
+      // HACK, this is just a hack becuase, init in WarpifyManager won't be called sync
+      // so we don't know when the bridge callback is going to set. by adding a little bit of delay
+      // we are kind of waiting and hopefully the RCTBridgeModule calls the init method 
+      dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 2.0);
+      dispatch_after(delay, dispatch_get_main_queue(), ^(void){
+        [sharedInstance reloadFromPath:path];
+      });
+      
     }];
     GoWarpifySetReload((EventCallbackWrapper*)sharedInstance->_reloadCallback);
     
@@ -76,6 +90,10 @@ static Warpify *sharedInstance;
   return [Warpify createWithDefaultCycle:@"prod" forceUpdate:false];
 }
 
+- (void)setBridgeCallback:(BridgeCallback) bridgeCallback {
+  _bridgeCallback = bridgeCallback;
+}
+
 - (NSURL *)sourceBundle {
   NSString* path = GoWarpifySourcePath();
   if (path == nil || [path isEqualToString:@""]) {
@@ -85,9 +103,14 @@ static Warpify *sharedInstance;
   return [NSURL URLWithString:path];
 }
 
-- (void) reloadFromPath:(NSString*)path {
-  NSLog(@"reload...");
-  NSLog(path);
+- (void)reloadFromPath:(NSString*)path {
+  // Since the bridge will be set automatically, we don't know when,
+  // so in order to get the ref to bridge, we need to call the block code
+  // which returns the correct instance of bridge
+  RCTBridge* bridge = _bridgeCallback();
+  // bundleURL has to be NSURL, if you pass it as string it will blow out
+  [bridge setValue:[NSURL URLWithString:path] forKey:@"bundleURL"];
+  [bridge reload];
 }
 
 @end

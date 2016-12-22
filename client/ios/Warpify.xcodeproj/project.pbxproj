@@ -25,6 +25,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		414C8C411E0B2EF30004C450 /* WarpifyManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WarpifyManager.h; sourceTree = "<group>"; };
 		417F524A1E09961D002B71F3 /* EventCallbackWrapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EventCallbackWrapper.h; sourceTree = "<group>"; };
 		417F524B1E09962F002B71F3 /* EventCallbackWrapper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EventCallbackWrapper.m; sourceTree = "<group>"; };
 		41DE17E01DF5E76D00D2F615 /* libWarpify.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libWarpify.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -51,6 +52,7 @@
 				417F524B1E09962F002B71F3 /* EventCallbackWrapper.m */,
 				41DE17ED1DF5E8E800D2F615 /* Warpify.h */,
 				41DE17EE1DF5E8E800D2F615 /* Warpify.m */,
+				414C8C411E0B2EF30004C450 /* WarpifyManager.h */,
 				41DE180A1DF5FB2B00D2F615 /* WarpifyManager.m */,
 				41DE17E11DF5E76D00D2F615 /* Products */,
 			);
