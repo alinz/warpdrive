@@ -284,46 +284,57 @@ func getWarpFile() (*config.ClientConfig, error) {
 // versionMap loads versions.warp from documentPath, if it exists,
 // if not we created a new versions.warp and save it to document folder
 func getVersionMap() (*config.VersionMap, error) {
-	var versionMap config.VersionMap
+	versionMap := &config.VersionMap{}
 
 	if exists, _ := folder.PathExists(config.VersionPath(conf.documentPath)); exists {
 		err := versionMap.Load(conf.documentPath)
 		if err != nil {
 			return nil, err
 		}
-	} else {
-		// this is the first time we are creating versions.warp
-		// this file will be saved in documentPath/warpdrive/versions.warp
 
-		version, err := semver.Make(conf.bundleVersion)
-		if err != nil {
-			return nil, err
-		}
+		// we need to check for one more thing, what if we publish something into app store or
+		// play store and user download a new update from there. the versions still be there
+		// but it needs to be clean up, this check does this for us, it will clean the warpdrive folder and
+		// rebuild everything from scratch if and only if bundle version is differeant than bundle version
+		// inside versions.warp file
 
-		// if the bundle contains pre value then it consider
-		// default cycle name, make sure in your code, defaultCycle and
-		// pre in bundle version was the same
-		var cycleName string
-		if len(version.Pre) > 0 {
-			cycleName = version.Pre[0].String()
-		} else {
-			cycleName = conf.defaultCycle
-		}
-
-		// set the first version inside versions.warp
-		// and because the first version points in bundle, then
-		// isBundle in `SetCurrentVersion` will be true
-		versionMap.ActiveCycle = cycleName
-		versionMap.SetCurrentVersion(cycleName, conf.bundleVersion, true)
-
-		// save the file on disk
-		err = versionMap.Save(conf.documentPath)
-		if err != nil {
-			return nil, err
+		if versionMap.BundleVersion(conf.defaultCycle) == conf.bundleVersion {
+			return versionMap, nil
 		}
 	}
 
-	return &versionMap, nil
+	// this is the first time we are creating versions.warp or we need to override it
+	// this file will be saved in documentPath/warpdrive/versions.warp
+	versionMap = &config.VersionMap{}
+
+	version, err := semver.Make(conf.bundleVersion)
+	if err != nil {
+		return nil, err
+	}
+
+	// if the bundle contains pre value then it consider
+	// default cycle name, make sure in your code, defaultCycle and
+	// pre in bundle version was the same
+	var cycleName string
+	if len(version.Pre) > 0 {
+		cycleName = version.Pre[0].String()
+	} else {
+		cycleName = conf.defaultCycle
+	}
+
+	// set the first version inside versions.warp
+	// and because the first version points in bundle, then
+	// isBundle in `SetCurrentVersion` will be true
+	versionMap.ActiveCycle = cycleName
+	versionMap.SetCurrentVersion(cycleName, conf.bundleVersion, true)
+
+	// save the file on disk
+	err = versionMap.Save(conf.documentPath)
+	if err != nil {
+		return nil, err
+	}
+
+	return versionMap, nil
 }
 
 // subscribe this is a easy to use method to expose to objective-c and jave

@@ -110,6 +110,19 @@ func (vm *VersionMap) CurrentVersion(cycle string) string {
 	return value.Current
 }
 
+// BundleVersion is a helper to return version belongs to bundle
+// this is useful during check whther bundle version has changed due to new
+// update in app store or play store
+func (vm *VersionMap) BundleVersion(cycleName string) string {
+	version := vm.Version(cycleName)
+	for version, isBundle := range version.Available {
+		if isBundle {
+			return version
+		}
+	}
+	return ""
+}
+
 // SetCurrentVersion assing a new version to cycle. You can add it to cache as well
 // returns whether the add version is in bundle or document folder
 // we need this if for some reason, user rollback to original deployed bundle
