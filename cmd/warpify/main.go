@@ -39,8 +39,37 @@ func SetReload(reloadTask Callback) {
 // Reload passes path of assets and force the react-native to reload.
 // Target native code must register a proepr function for rreloading the
 // react-native or this method returns an error
-func Reload(path string) {
-	conf.reloadTask.Do(0, path)
+func Reload(cycleID int64, version string) error {
+	// before we update the the path, we need to change the VersionMap
+	// and save it back to disk
+	versionMap, err := getVersionMap()
+	if err != nil {
+		return err
+	}
+
+	cycleConfig, err := conf.warpFile.GetCycleByID(conf.warpFile.App.ID, cycleID)
+	if err != nil {
+		return err
+	}
+
+	versionMap.SetActiveCycle(cycleConfig.Name)
+	// you might ask yourself, why we are passing false here, we might goback to
+	// the one from bundle. the bundle version can not be changed from true to false
+	// the new version will be added. so it is safe to pass false here
+	isSourceInBundle := versionMap.SetCurrentVersion(cycleConfig.Name, version, false)
+	versionMap.Save(conf.documentPath)
+
+	var path string
+
+	if isSourceInBundle {
+		path = conf.bundlePath
+	} else {
+		path = warpBundlePath(conf.warpFile.App.ID, cycleID, version)
+	}
+
+	conf.reloadTask.Do(0, filepath.Join(path, "main.jsbundle"))
+
+	return nil
 }
 
 // Setup we need to setup the app
@@ -197,14 +226,13 @@ func process(justDefaultCycle bool) error {
 			// if forceUpdate is enable, then we simple download the update and update the version
 			// and we should call the objective-c and java part for restart the app
 			if conf.forceUpdate {
-				err = DownloadRelease(defaultCycleConfig.ID, softRelease.ID, currentVersion)
+				err = DownloadRelease(defaultCycleConfig.ID, softRelease.ID, softRelease.Version)
 				if err != nil {
 					return err
 				}
 
 				// We need to call the native to restart the app
-				Reload(warpBundlePath(appID, defaultCycleConfig.ID, currentVersion))
-				return nil
+				return Reload(defaultCycleConfig.ID, softRelease.Version)
 			}
 
 			// since force update is not enabled, then we are adding the releases

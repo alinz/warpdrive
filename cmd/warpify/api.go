@@ -106,8 +106,6 @@ func (a *api) downloadVersion(appID, cycleID, releaseID int64) (io.ReadCloser, e
 	r, w := io.Pipe()
 
 	go func() {
-		// if any errors happen, we need to close the
-		// the writer
 		err := crypto.AESDecryptStream(key, resp.Body, w)
 		if err != nil {
 			w.CloseWithError(err)
