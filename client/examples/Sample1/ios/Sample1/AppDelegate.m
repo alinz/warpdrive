@@ -10,7 +10,7 @@
 #import "AppDelegate.h"
 
 #import "RCTRootView.h"
-#import "Warpify.h"
+#import "WarpifyManager.h"
 
 @implementation AppDelegate
 
@@ -18,15 +18,15 @@
 {
   
   NSURL *jsCodeLocation;
-
-  jsCodeLocation = [[Warpify createWithDefaultCycle:@"prod" forceUpdate:YES] sourceBundle];
-
+  
+  jsCodeLocation = [WarpifyManager sourceBundleWithDefaultCycle:@"prod" groupName:nil forceUpdate:YES];
+  
   RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:jsCodeLocation
                                                       moduleName:@"Sample1"
                                                initialProperties:nil
                                                    launchOptions:launchOptions];
   rootView.backgroundColor = [[UIColor alloc] initWithRed:1.0f green:1.0f blue:1.0f alpha:1];
-
+  
   self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
   UIViewController *rootViewController = [UIViewController new];
   rootViewController.view = rootView;
