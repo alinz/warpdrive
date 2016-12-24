@@ -3,7 +3,6 @@ package com.sample1;
 import android.support.annotation.Nullable;
 
 import com.facebook.react.ReactActivity;
-import go.warpify.Warpify;
 
 public class MainActivity extends ReactActivity {
     /**
