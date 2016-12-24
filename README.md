@@ -67,3 +67,17 @@ cycles:
 
 # Rollback
 you have to unlock those version that you don't want
+
+
+# Android
+
+if you getting an error in Android Studio
+
+```
+Unsupported method: AndroidProject.getPluginGeneration().
+The version of Gradle you connect to does not support that method.
+To resolve the problem you can change/upgrade the target version of Gradle you connect to.
+Alternatively, you can ignore this exception and read other information from the model.
+```
+
+then you should do this, go to `File / Settings/ Build, Execution, Deployment / Instant Run.` and Uncheck `Enable Instant Run to hot swap code...`
