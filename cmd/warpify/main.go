@@ -7,6 +7,8 @@ import (
 
 	"encoding/json"
 
+	"time"
+
 	"github.com/blang/semver"
 	"github.com/pressly/warpdrive/config"
 	"github.com/pressly/warpdrive/data"
@@ -137,7 +139,12 @@ func SourcePath() string {
 	}
 
 	// start the process but only for defaultCyle
-	defer Start(nil)
+	defer func() {
+		go func() {
+			time.Sleep(time.Second * 5)
+			Start(nil)
+		}()
+	}()
 
 	// So we grab the ActiveCycle to find the current active cycle
 	// then we look for current version
