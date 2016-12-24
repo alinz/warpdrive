@@ -1,6 +1,8 @@
 package com.pressly.warpdrive;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 
@@ -9,6 +11,7 @@ import com.facebook.react.bridge.JavaScriptModule;
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
+import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.uimanager.ViewManager;
 
 import java.io.File;
@@ -128,7 +131,7 @@ public class WarpifyPackage implements ReactPackage {
     }
 
     class WarpifyModule extends ReactContextBaseJavaModule {
-        public WarpifyModule(ReactApplicationContext reactContext) {
+        public WarpifyModule(final ReactApplicationContext reactContext) {
             super(reactContext);
 
             // we need to pass the internal callback. the internal callback is used to know whether
@@ -137,8 +140,21 @@ public class WarpifyPackage implements ReactPackage {
                 @Override
                 public void do_(long kind, String path) {
                     sourceBundlePath = path;
+                    reload();
                 }
             });
+        }
+
+        @ReactMethod
+        public void reload() {
+            final Activity currentActivity = getCurrentActivity();
+            if (currentActivity != null) {
+                Intent intent = currentActivity.getIntent();
+                currentActivity.finish();
+                currentActivity.startActivity(intent);
+                // I don't really know if we need this.
+                currentActivity.recreate();
+            }
         }
 
         @Override
