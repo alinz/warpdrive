@@ -126,13 +126,20 @@ func FindLockedReleaseByID(cycleID, releaseID int64) (*Release, error) {
 }
 
 func FindLatestSoftRelease(cycleID int64, platform Platform, version semver.Version) (*Release, error) {
+	// sql := fmt.Sprintf(`
+	// 	SELECT * FROM releases
+	// 	WHERE cycle_id=%d AND platform=%d AND locked=TRUE AND major=%d AND (minor > %d OR patch > %d)
+	// 	ORDER BY major, minor, patch DESC, build DESC NULLS FIRST
+	// `, cycleID, platform.ValueAsInt(), version.Major, version.Minor, version.Patch)
+
+	// we need to remove Minor and Patch from the sql statement
+	// because of rollback
+
 	sql := fmt.Sprintf(`
 		SELECT * FROM releases 
-		WHERE cycle_id=%d AND platform=%d AND locked=TRUE AND major=%d AND (minor > %d OR patch > %d)
+		WHERE cycle_id=%d AND platform=%d AND locked=TRUE AND major=%d
 		ORDER BY major, minor, patch DESC, build DESC NULLS FIRST					
-	`, cycleID, platform.ValueAsInt(), version.Major, version.Minor, version.Patch)
-
-	fmt.Println(version)
+	`, cycleID, platform.ValueAsInt(), version.Major)
 
 	rows, err := dbSession.Query(sql)
 
