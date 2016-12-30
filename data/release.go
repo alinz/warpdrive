@@ -86,10 +86,20 @@ func FindAllReleases(session db.Database, query db.Cond) ([]*Release, error) {
 }
 
 func FindReleases(cycleID int64, platform Platform, version string, note string) ([]*Release, error) {
-	sql := fmt.Sprintf(`
+	var sql string
+
+	if version != "" {
+		sql = fmt.Sprintf(`
 		SELECT * FROM releases 
 		WHERE cycle_id=%d AND version='%s' AND platform=%d AND note like '%%%s%%'
 	`, cycleID, version, PlatformToInt(platform), note)
+	} else {
+		sql = fmt.Sprintf(`
+		SELECT * FROM releases 
+		WHERE cycle_id=%d AND platform=%d AND note like '%%%s%%'
+	`, cycleID, PlatformToInt(platform), note)
+	}
+
 	rows, err := dbSession.Query(sql)
 
 	if err != nil {
@@ -118,6 +128,30 @@ func FindLockedReleaseByID(cycleID, releaseID int64) (*Release, error) {
 	var release Release
 
 	err := release.Find(dbSession, db.Cond{"id": releaseID, "cycle_id": cycleID, "locked": true})
+	if err != nil {
+		return nil, err
+	}
+
+	return &release, nil
+}
+
+func FindLockedReleaseByVersion(cycleID int64, platform Platform, version semver.Version) (*Release, error) {
+	sql := fmt.Sprintf(`
+		SELECT * FROM releases 
+		WHERE cycle_id=%d AND platform=%d AND locked=TRUE AND version=%s
+		ORDER BY major, minor, patch DESC, build DESC NULLS FIRST					
+	`, cycleID, platform.ValueAsInt(), version.String())
+
+	rows, err := dbSession.Query(sql)
+
+	if err != nil {
+		return nil, err
+	}
+
+	release := Release{}
+	iter := sqlbuilder.NewIterator(rows)
+	err = iter.One(&release)
+
 	if err != nil {
 		return nil, err
 	}
