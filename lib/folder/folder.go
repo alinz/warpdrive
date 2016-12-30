@@ -1,6 +1,7 @@
 package folder
 
 import (
+	"io/ioutil"
 	"os"
 	"path/filepath"
 )
@@ -50,4 +51,21 @@ func ListFilePaths(path string) ([]string, error) {
 	err := loop(path, &files)
 
 	return files, err
+}
+
+func ListFolders(path string) ([]string, error) {
+	var folders []string
+
+	files, err := ioutil.ReadDir(path)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, f := range files {
+		if f.IsDir() {
+			folders = append(folders, f.Name())
+		}
+	}
+
+	return folders, nil
 }
