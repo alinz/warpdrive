@@ -17,18 +17,20 @@ import (
 	"upper.io/db.v2/lib/sqlbuilder"
 )
 
-func SearchReleases(userID, appID, cycleID int64, platform, version, note string) ([]*data.Release, error) {
+func SearchReleases(appID, cycleID int64, platform, version, note string) ([]*data.Release, error) {
 	plat, err := data.ParsePlatform(platform)
 	if err != nil {
 		return nil, err
 	}
 
-	_, err = semver.Make(version)
-	if err != nil {
-		return nil, err
+	if version != "" {
+		_, err = semver.Make(version)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	_, err = FindCycleByID(userID, appID, cycleID)
+	_, err = FindCycleByAppIdCycleId(appID, cycleID)
 	if err != nil {
 		return nil, err
 	}
@@ -292,4 +294,35 @@ func DownloadRelease(appID, cycleID, releaseID int64, encryptedKey []byte, outpu
 	}
 
 	return warp.Compress(files, crypto.NewAESEncryptWriter(key, output))
+}
+
+// DownloadVersion is similar to DownloadRelease but it uses version instead of release id
+func DownloadVersion(appID, cycleID int64, platformStr, versionStr string, encryptedKey []byte, output io.Writer) error {
+	// checks if cycle id belongs to app id and also we need cycle object
+	// for PrivateKey
+	cycle, err := FindCycleByAppIdCycleId(appID, cycleID)
+	if err != nil {
+		return err
+	}
+
+	// checks if format of version is correct
+	version, err := semver.Make(versionStr)
+	if err != nil {
+		return err
+	}
+
+	// check if platform is correct, either ios or android
+	platform, err := data.ParsePlatform(platformStr)
+	if err != nil {
+		return err
+	}
+
+	// find the release based on version
+	release, err := data.FindLockedReleaseByVersion(cycle.ID, platform, version)
+	if err != nil {
+		return err
+	}
+
+	// and start the download
+	return DownloadRelease(appID, cycle.ID, release.ID, encryptedKey, output)
 }
