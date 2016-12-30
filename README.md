@@ -46,7 +46,6 @@ cycles:
 - [X] PUT       /apps/:appId/cycles/:cycleId
 - [X] DELETE    /apps/:appId/cycles/:cycleId
 
-- [x] GET       /apps/:appId/cycles/:cycleId/releases?platforn=&version=&note=
 - [x] GET       /apps/:appId/cycles/:cycleId/releases/:releaseId
 - [x] POST      /apps/:appId/cycles/:cycleId/releases
 - [x] PUT       /apps/:appId/cycles/:cycleId/releases/:releaseId
@@ -58,12 +57,10 @@ cycles:
 
 ## the following apis call in clinet native, also they are public
 
+- [x] GET       /apps/:appId/cycles/:cycleId/releases?platforn=&version=&note=
 - [x] GET       /apps/:appId/cycles/:cycleId/releases/latest/version/:version/platform/:platform
 - [x] POST      /apps/:appId/cycles/:cycleId/releases/:releaseId/download
-
-## this following api calls for any auditing
-
-- [ ] GET       /apps/:appId/logs
+- [x] POST      /apps/:appId/cycles/:cycleId/version/:version/platform/:platform/download
 
 # Rollback
 you have to unlock those version that you don't want
