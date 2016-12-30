@@ -12,6 +12,8 @@ import (
 	"github.com/pressly/warpdrive/web/routes/users"
 )
 
+// New this is the root level that creates all the routes for
+// warpdrive server
 func New() chi.Router {
 	conf := warpdrive.Conf
 	web.JwtSetup(conf.JWT.SecretKey)
@@ -24,8 +26,10 @@ func New() chi.Router {
 
 	r.Mount("/session", session.Routes())
 
+	r.Get("/apps/:appId/cycles/:cycleId/releases", getReleasesHandler)
 	r.Get("/apps/:appId/cycles/:cycleId/releases/latest/version/:version/platform/:platform", checkVersionHandler)
-	r.Post("/apps/:appId/cycles/:cycleId/releases/:releaseId/download", downloadHandler)
+	r.Post("/apps/:appId/cycles/:cycleId/releases/:releaseId/download", downloadWithReleaseIDHandler)
+	r.Post("/apps/:appId/cycles/:cycleId/version/:version/platform/:platform/download", downloadWithVersionHandler)
 
 	// Private routes
 	r.Group(func(r chi.Router) {

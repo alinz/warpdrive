@@ -36,7 +36,6 @@ func Routes() http.Handler {
 				r.Get("/key", getCycleKeyHandler)
 
 				r.Route("/releases", func(r chi.Router) {
-					r.Get("/", getReleasesHandler)
 					r.With(web.BodyParser(&createRelease{}, 1024)).Post("/", createReleaseHandler)
 					r.Route("/:releaseId", func(r chi.Router) {
 						r.Get("/", getReleaseHandler)
