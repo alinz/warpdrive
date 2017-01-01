@@ -26,8 +26,14 @@ typedef RCTBridge*(^BridgeCallback)(void);
 
 - (void)setBridgeCallback:(BridgeCallback) bridgeCallback;
 
-- (NSURL *)sourceBundle;
+- (NSURL*)sourceBundle;
 - (void)reloadFromPath:(NSString*)path;
 
+- (NSString*)cyclesWithError:(NSError**)err;
+- (NSString*)remoteVersionsWithCycleId:(int64_t)cycleID error:(NSError**)err;
+- (NSString*)localVersionsWithCycleId:(int64_t)cycleID error:(NSError**)err;
+- (NSString*)latestVersionWithCycleId:(int64_t)cycleID error:(NSError**)err;
+- (void)downloadVersionWithCycleID:(int64_t)cycleId version:(NSString*)version error:(NSError**)err;
+- (void)reloadVersionWithCycleID:(int64_t)cycleId version:(NSString*)version error:(NSError**)err;
 @end
 

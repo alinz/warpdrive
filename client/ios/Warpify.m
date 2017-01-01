@@ -113,4 +113,28 @@ static Warpify *sharedInstance;
   [bridge reload];
 }
 
+- (NSString*)cyclesWithError:(NSError**)err {
+  return GoWarpifyCycles(err);
+}
+
+- (NSString*)remoteVersionsWithCycleId:(int64_t)cycleID error:(NSError**)err {
+  return GoWarpifyRemoteVersions(cycleID, err);
+}
+
+- (NSString*)localVersionsWithCycleId:(int64_t)cycleID error:(NSError**)err {
+  return GoWarpifyLocalVersions(cycleID, err);
+}
+
+- (NSString*)latestVersionWithCycleId:(int64_t)cycleID error:(NSError**)err {
+  return GoWarpifyLatest(cycleID, err);
+}
+
+- (void)downloadVersionWithCycleID:(int64_t)cycleId version:(NSString*)version error:(NSError**)err {
+  GoWarpifyDownloadVersion(cycleId, version, err);
+}
+
+- (void)reloadVersionWithCycleID:(int64_t)cycleId version:(NSString*)version error:(NSError**)err {
+  GoWarpifyReload(cycleId, version, err);
+}
+
 @end
