@@ -12,7 +12,23 @@ import {
   View
 } from 'react-native';
 
+import * as Warpify from 'react-native-warpdrive'
+
 export default class Sample1 extends Component {
+
+  async componentDidMount() {
+    try {
+      const cycles = await Warpify.cycles()
+      console.log(cycles)
+      const localVersions = await Warpify.local(1)
+      console.log(localVersions)
+      const remoteVersions = await Warpify.remote(1)
+      console.log(remoteVersions)
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
   render() {
     return (
       <View style={styles.container}>
