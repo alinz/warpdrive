@@ -92,11 +92,13 @@ func FindReleases(cycleID int64, platform Platform, version string, note string)
 		sql = fmt.Sprintf(`
 		SELECT * FROM releases 
 		WHERE cycle_id=%d AND version='%s' AND platform=%d AND note like '%%%s%%'
+		ORDER BY major, minor, patch DESC, build DESC NULLS FIRST	
 	`, cycleID, version, PlatformToInt(platform), note)
 	} else {
 		sql = fmt.Sprintf(`
 		SELECT * FROM releases 
 		WHERE cycle_id=%d AND platform=%d AND note like '%%%s%%'
+		ORDER BY major, minor, patch DESC, build DESC NULLS FIRST	
 	`, cycleID, PlatformToInt(platform), note)
 	}
 
