@@ -35,7 +35,7 @@ func main() {
 	}
 
 	// Routes
-	r := routes.New()
+	r := routes.New(false)
 
 	// Server boot
 	graceful.AddSignal(syscall.SIGINT, syscall.SIGTERM)
