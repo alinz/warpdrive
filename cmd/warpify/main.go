@@ -177,7 +177,6 @@ func Setup(bundleVersion, bundlePath, documentPath, platform, defaultCycle strin
 	conf.defaultCycle = defaultCycle
 	conf.forceUpdate = forceUpdate
 	conf.platform = platform
-	conf.reloadReady = make(chan struct{})
 
 	// we are making sure that warpdrive folder does exist in document path
 	os.MkdirAll(filepath.Join(documentPath, "warpdrive"), os.ModePerm)

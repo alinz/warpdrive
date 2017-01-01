@@ -16,4 +16,11 @@ type warpConf struct {
 }
 
 // conf is a global warpConf for this package
-var conf warpConf
+var conf *warpConf
+
+func init() {
+	// we need to initialize reloadReady before the application started
+	conf = &warpConf{
+		reloadReady: make(chan struct{}),
+	}
+}
