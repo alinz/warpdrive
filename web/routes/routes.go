@@ -25,20 +25,8 @@ func New() chi.Router {
 	r.Get("/", index)
 
 	r.Mount("/session", session.Routes())
-
-	r.Get("/apps/:appId/cycles/:cycleId/releases", getReleasesHandler)
-	r.Get("/apps/:appId/cycles/:cycleId/releases/latest/version/:version/platform/:platform", checkVersionHandler)
-	r.Post("/apps/:appId/cycles/:cycleId/releases/:releaseId/download", downloadWithReleaseIDHandler)
-	r.Post("/apps/:appId/cycles/:cycleId/version/:version/platform/:platform/download", downloadWithVersionHandler)
-
-	// Private routes
-	r.Group(func(r chi.Router) {
-		r.Use(web.TokenAuth.Verifier)
-		r.Use(web.Authenticator)
-
-		r.Mount("/users", users.Routes())
-		r.Mount("/apps", apps.Routes())
-	})
+	r.Mount("/users", users.Routes())
+	r.Mount("/apps", apps.Routes())
 
 	return r
 }
