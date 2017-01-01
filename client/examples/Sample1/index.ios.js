@@ -20,10 +20,18 @@ export default class Sample1 extends Component {
     try {
       const cycles = await Warpify.cycles()
       console.log(cycles)
-      const localVersions = await Warpify.local(1)
+      const localVersions = await Warpify.local(4)
       console.log(localVersions)
-      const remoteVersions = await Warpify.remote(1)
+      const remoteVersions = await Warpify.remote(4)
       console.log(remoteVersions)
+
+      const latestVersion = await Warpify.latest(4)
+      console.log(latestVersion)
+      
+      await Warpify.download(4, latestVersion.soft.version)
+
+      await Warpify.reload(4, latestVersion.soft.version)
+
     } catch (e) {
       console.log(e)
     }
