@@ -58,8 +58,7 @@ cycles:
 ## the following apis call in clinet native, also they are public
 
 - [x] GET       /apps/:appId/cycles/:cycleId/releases?platforn=&version=&note=
-- [x] GET       /apps/:appId/cycles/:cycleId/releases/latest/version/:version/platform/:platform
-- [x] POST      /apps/:appId/cycles/:cycleId/releases/:releaseId/download
+- [x] GET       /apps/:appId/cycles/:cycleId/version/:version/platform/:platform/latest
 - [x] POST      /apps/:appId/cycles/:cycleId/version/:version/platform/:platform/download
 
 # Rollback

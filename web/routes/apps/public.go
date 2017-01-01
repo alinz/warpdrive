@@ -62,6 +62,36 @@ func checkVersionHandler(w http.ResponseWriter, r *http.Request) {
 	web.Respond(w, http.StatusOK, releases)
 }
 
+func downloadWithVersionHandler(w http.ResponseWriter, r *http.Request) {
+	appID, err := web.ParamAsInt64(r, "appId")
+	if err != nil {
+		web.Respond(w, http.StatusBadRequest, err)
+		return
+	}
+
+	cycleID, err := web.ParamAsInt64(r, "cycleId")
+	if err != nil {
+		web.Respond(w, http.StatusBadRequest, err)
+		return
+	}
+
+	version := web.ParamAsString(r, "version")
+	platform := web.ParamAsString(r, "platform")
+
+	encryptedKey, err := ioutil.ReadAll(io.LimitReader(r.Body, 4096))
+	if err != nil {
+		web.Respond(w, http.StatusBadRequest, err)
+		return
+	}
+
+	err = services.DownloadVersion(appID, cycleID, platform, version, encryptedKey, w)
+	if err != nil {
+		web.Respond(w, http.StatusBadRequest, err)
+	}
+}
+
+// this handler is deprectaed and not being used anymore, we should use `downloadWithVersionHandler` instead
+// POST /apps/:appId/cycles/:cycleId/releases/:releaseId/download
 func downloadWithReleaseIDHandler(w http.ResponseWriter, r *http.Request) {
 	appID, err := web.ParamAsInt64(r, "appId")
 	if err != nil {
@@ -88,34 +118,6 @@ func downloadWithReleaseIDHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = services.DownloadRelease(appID, cycleID, releaseID, encryptedKey, w)
-	if err != nil {
-		web.Respond(w, http.StatusBadRequest, err)
-	}
-}
-
-func downloadWithVersionHandler(w http.ResponseWriter, r *http.Request) {
-	appID, err := web.ParamAsInt64(r, "appId")
-	if err != nil {
-		web.Respond(w, http.StatusBadRequest, err)
-		return
-	}
-
-	cycleID, err := web.ParamAsInt64(r, "cycleId")
-	if err != nil {
-		web.Respond(w, http.StatusBadRequest, err)
-		return
-	}
-
-	version := web.ParamAsString(r, "version")
-	platform := web.ParamAsString(r, "platform")
-
-	encryptedKey, err := ioutil.ReadAll(io.LimitReader(r.Body, 4096))
-	if err != nil {
-		web.Respond(w, http.StatusBadRequest, err)
-		return
-	}
-
-	err = services.DownloadVersion(appID, cycleID, platform, version, encryptedKey, w)
 	if err != nil {
 		web.Respond(w, http.StatusBadRequest, err)
 	}

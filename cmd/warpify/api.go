@@ -39,7 +39,7 @@ func (a *api) makePath(path string, args ...interface{}) (string, error) {
 }
 
 func (a *api) checkVersion(appID, cycleID int64, platform, currentVersion string) (map[string]*data.Release, error) {
-	path, err := a.makePath("/apps/%d/cycles/%d/releases/latest/version/%s/platform/%s", appID, cycleID, currentVersion, platform)
+	path, err := a.makePath("/apps/%d/cycles/%d/version/%s/platform/%s/latest", appID, cycleID, currentVersion, platform)
 	if err != nil {
 		return nil, err
 	}

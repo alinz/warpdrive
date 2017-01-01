@@ -58,13 +58,13 @@ func Routes() http.Handler {
 				})
 
 				// public api
+				r.Get("/version/:version/platform/:platform/latest", checkVersionHandler)
 				r.Post("/version/:version/platform/:platform/download", downloadWithVersionHandler)
 
 				r.Route("/releases", func(r chi.Router) {
 
 					// public apis
 					r.Get("/", getReleasesHandler)
-					r.Get("/latest/versions/:version/platform/:platform", checkVersionHandler)
 
 					r.Group(func(r chi.Router) {
 						r.Use(web.TokenAuth.Verifier)
@@ -93,9 +93,6 @@ func Routes() http.Handler {
 								r.Delete("/", unlockReleaseHandler)
 							})
 						})
-
-						// public api
-						r.Post("/download", downloadWithReleaseIDHandler)
 					})
 				})
 			})

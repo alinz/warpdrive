@@ -14,9 +14,11 @@ import (
 
 // New this is the root level that creates all the routes for
 // warpdrive server
-func New() chi.Router {
-	conf := warpdrive.Conf
-	web.JwtSetup(conf.JWT.SecretKey)
+func New(forDoc bool) chi.Router {
+	if !forDoc {
+		conf := warpdrive.Conf
+		web.JwtSetup(conf.JWT.SecretKey)
+	}
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
