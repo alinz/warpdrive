@@ -189,6 +189,15 @@ func FindLatestSoftRelease(cycleID int64, platform Platform, version semver.Vers
 		return nil, err
 	}
 
+	foundVersion, err := semver.Make(release.Version)
+	if err != nil {
+		return nil, err
+	}
+
+	if version.Equals(foundVersion) {
+		return nil, fmt.Errorf("found same version")
+	}
+
 	return &release, nil
 }
 
