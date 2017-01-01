@@ -58,8 +58,10 @@ func Routes() http.Handler {
 				})
 
 				// public api
-				r.Get("/version/:version/platform/:platform/latest", checkVersionHandler)
-				r.Post("/version/:version/platform/:platform/download", downloadWithVersionHandler)
+				r.Route("/version/:version/platform/:platform/", func(r chi.Router) {
+					r.Get("/latest", checkVersionHandler)
+					r.Post("/download", downloadWithVersionHandler)
+				})
 
 				r.Route("/releases", func(r chi.Router) {
 
