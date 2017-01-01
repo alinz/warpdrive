@@ -44,7 +44,7 @@ func bundleReader(platform string) (io.Reader, error) {
 
 	bundleFilesMap := make(map[string]string)
 	for _, file := range bundleFiles {
-		bundleFilesMap[strings.Replace(file, cleanedPath, "", 1)] = file
+		bundleFilesMap[file] = strings.Replace(file, cleanedPath, "", 1)
 	}
 
 	r, w := io.Pipe()
