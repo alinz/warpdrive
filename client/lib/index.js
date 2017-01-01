@@ -38,7 +38,7 @@ export const local = (cycleId) => {
 // e.g. { "soft": {}, "hard": {} }
 export const latest = (cycleId) => {
   return new Promise((resolve, reject) => {
-    WarpifyManager.latestVersion(reject, (value) => {
+    WarpifyManager.latestVersion(cycleId, reject, (value) => {
       resolve(JSON.parse(value))
     })
   })
