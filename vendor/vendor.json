@@ -59,8 +59,20 @@
 		{
 			"checksumSHA1": "ZfO0bvDS6WOAG+mKN90UAS+tuMA=",
 			"path": "github.com/pressly/chi",
-			"revision": "93b82e371f2e01f8c0a8bbc4d78af800446b6f7d",
-			"revisionTime": "2016-11-25T14:22:16Z"
+			"revision": "bda7fc49d11ad4024c761b858e295360ecb7fbaf",
+			"revisionTime": "2016-12-31T17:22:31Z"
+		},
+		{
+			"checksumSHA1": "5nM0DY8x1++mmX/W/Q5i2SFrBLA=",
+			"path": "github.com/pressly/chi/docgen",
+			"revision": "bda7fc49d11ad4024c761b858e295360ecb7fbaf",
+			"revisionTime": "2016-12-31T17:22:31Z"
+		},
+		{
+			"checksumSHA1": "o4x7qAR5Yt3Mw5/4XMYzyudq6tc=",
+			"path": "github.com/pressly/chi/middleware",
+			"revision": "bda7fc49d11ad4024c761b858e295360ecb7fbaf",
+			"revisionTime": "2016-12-31T17:22:31Z"
 		},
 		{
 			"checksumSHA1": "FZ0r4TzEy9UxXLkFVXFygApni4M=",

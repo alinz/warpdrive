@@ -90,6 +90,9 @@ db-reset: db-destroy db-create
 ## Development
 ##
 
+print-api:
+	@go run ./cmd/doc/main.go
+
 build-dev-folder:	
 	@mkdir -p ./bin/tmp/warpdrive
 
