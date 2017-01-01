@@ -19,7 +19,7 @@
   
   NSURL *jsCodeLocation;
   
-  jsCodeLocation = [WarpifyManager sourceBundleWithDefaultCycle:@"prod" groupName:nil forceUpdate:YES];
+  jsCodeLocation = [WarpifyManager sourceBundleWithDefaultCycle:@"prod" groupName:nil forceUpdate:NO];
   
   RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:jsCodeLocation
                                                       moduleName:@"Sample1"
