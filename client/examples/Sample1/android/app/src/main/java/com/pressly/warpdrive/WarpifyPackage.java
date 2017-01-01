@@ -7,6 +7,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 
 import com.facebook.react.ReactPackage;
+import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.JavaScriptModule;
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -23,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import go.warpify.Callback;
 import go.warpify.Warpify;
 
 public class WarpifyPackage implements ReactPackage {
@@ -136,17 +136,16 @@ public class WarpifyPackage implements ReactPackage {
 
             // we need to pass the internal callback. the internal callback is used to know whether
             // we have a new update or not
-            Warpify.setReload(new Callback() {
+            Warpify.setReload(new go.warpify.Callback() {
                 @Override
                 public void do_(long kind, String path) {
                     sourceBundlePath = path;
-                    reload();
+                    reloadBundle();
                 }
             });
         }
 
-        @ReactMethod
-        public void reload() {
+        private void reloadBundle() {
             final Activity currentActivity = getCurrentActivity();
             if (currentActivity != null) {
                 Intent intent = currentActivity.getIntent();
@@ -154,6 +153,66 @@ public class WarpifyPackage implements ReactPackage {
                 currentActivity.startActivity(intent);
                 // I don't really know if we need this.
                 currentActivity.recreate();
+            }
+        }
+
+        @ReactMethod
+        public void cycles(Callback errorCallback, Callback successCallback) {
+            try {
+                String result = Warpify.cycles();
+                successCallback.invoke(result);
+            } catch (Exception e) {
+                errorCallback.invoke(e.getMessage());
+            }
+        }
+
+        @ReactMethod
+        public void remoteVersions(long cycleId, Callback errorCallback, Callback successCallback) {
+            try {
+                String result = Warpify.remoteVersions(cycleId);
+                successCallback.invoke(result);
+            } catch (Exception e) {
+                errorCallback.invoke(e.getMessage());
+            }
+        }
+
+        @ReactMethod
+        public void localVersions(long cycleId, Callback errorCallback, Callback successCallback) {
+            try {
+                String result = Warpify.localVersions(cycleId);
+                successCallback.invoke(result);
+            } catch (Exception e) {
+                errorCallback.invoke(e.getMessage());
+            }
+        }
+
+        @ReactMethod
+        public void latestVersion(long cycleId, Callback errorCallback, Callback successCallback) {
+            try {
+                String result = Warpify.latest(cycleId);
+                successCallback.invoke(result);
+            } catch (Exception e) {
+                errorCallback.invoke(e.getMessage());
+            }
+        }
+
+        @ReactMethod
+        public void downloadVersion(long cycleId, String version, Callback errorCallback, Callback successCallback) {
+            try {
+                Warpify.downloadVersion(cycleId, version);
+                successCallback.invoke();
+            } catch (Exception e) {
+                errorCallback.invoke(e.getMessage());
+            }
+        }
+
+        @ReactMethod
+        public void reload(long cycleId, String version, Callback errorCallback, Callback successCallback) {
+            try {
+                Warpify.reload(cycleId, version);
+                successCallback.invoke();
+            } catch (Exception e) {
+                errorCallback.invoke(e.getMessage());
             }
         }
 
