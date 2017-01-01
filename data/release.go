@@ -140,7 +140,7 @@ func FindLockedReleaseByID(cycleID, releaseID int64) (*Release, error) {
 func FindLockedReleaseByVersion(cycleID int64, platform Platform, version semver.Version) (*Release, error) {
 	sql := fmt.Sprintf(`
 		SELECT * FROM releases 
-		WHERE cycle_id=%d AND platform=%d AND locked=TRUE AND version=%s
+		WHERE cycle_id=%d AND platform=%d AND locked=TRUE AND version='%s'
 		ORDER BY major, minor, patch DESC, build DESC NULLS FIRST					
 	`, cycleID, platform.ValueAsInt(), version.String())
 
