@@ -12,7 +12,31 @@ import {
   View
 } from 'react-native';
 
+import Warpify from 'react-native-warpdrive'
+
 export default class Sample1 extends Component {
+
+  async componentDidMount() {
+    try {
+      const cycles = await Warpify.cycles()
+      console.log(cycles)
+      const localVersions = await Warpify.local(4)
+      console.log(localVersions)
+      const remoteVersions = await Warpify.remote(4)
+      console.log(remoteVersions)
+
+      const latestVersion = await Warpify.latest(4)
+      console.log(latestVersion)
+      
+      await Warpify.download(4, latestVersion.soft.version)
+
+      await Warpify.reload(4, latestVersion.soft.version)
+
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
   render() {
     return (
       <View style={styles.container}>
@@ -20,11 +44,11 @@ export default class Sample1 extends Component {
           Welcome to React Native!
         </Text>
         <Text style={styles.instructions}>
-          To get started, edit index.android.js
+          To get started, edit index.ios.js
         </Text>
         <Text style={styles.instructions}>
-          Double tap R on your keyboard to reload,{'\n'}
-          Shake or press menu button for dev menu
+          Press Cmd+R to reload,{'\n'}
+          Cmd+D or shake for dev menu
         </Text>
       </View>
     );
