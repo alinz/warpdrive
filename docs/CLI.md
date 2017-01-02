@@ -23,7 +23,7 @@ details descriptions of all commands.
 
 `warp` cli contains 5 main commands
 
-##### version
+#### version
 
 Prints the version. It is usually used to make sure the cli and server side has the same version.
 
@@ -33,7 +33,7 @@ Prints the version. It is usually used to make sure the cli and server side has 
 Warp v1.0.1
 ```
 
-##### bundle
+#### bundle
 
 it bundles react-native project for both ios and android and store them in `.bundles` folder inside your react-native project.
 every time you execute this command, it will erase the `.bundles` folder and recreate it again. So you don't have to delete this
@@ -48,6 +48,50 @@ android bundle started
 android bundle finished
 ```
 
-##### publish
+#### publish
 
+> requires `setup` command being set before calling this command
 
+`publish` pushes newly created bundles to warpdrive. it accepts 3 flags, version `-v`, platform `-p` and release note `-n`.
+Only version flag is required. if platform flag not provided, it tries to push ios and android from `.bundles` folder which created from `bundle` command.
+
+```bash
+> warp publish -v 1.0.1-prod -p android -n "fixed couple of bugs"
+
+published new version for android
+```
+
+#### setup
+
+in order for warpdrive to work, a configuration file needs to be created and placed inside the both ios and android. This configuration tells the warpdrive
+how and where it needs to get the updates. The name of the file is `WarpFile` and it automatically being placed inside `ios` and `android/app/src/main/assets`.
+for ios, developer needs to import the WarpFile from ios folder into the xcode project. For android, there is no action required since anything inside `assets`
+folder will be bundled.
+
+setup command let's you view the current configuration, if a `WarpFile` already exists inside the project file
+
+```bash
+> warp setup -l
+
+Server Address: localhost:8221
+
+App's ID: 1
+App's Name: app
+
+Cycles:
+
+ID: 1
+Name: dev
+Key: -----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA92Qh/p4xlotcviMNk0Kf
+LTWFf1B0aCBSm4UbpxzyvrBeY6suG45ueXPEgoSRzY9e8sQiiFtgliEKU/19NyYf
+7WgH8lmKcg9h7m0H0GJNglS5A/h9Wa3V4uKGPkQHfKxoqAagXLAnVZ3SrOkLHla6
+rLJSaMwGXNAr9qa8mFAVBx2Hl6slDAkH+EW5AGDSl7ckdFreAivDMPKpyQhBqL78
+VAsZLtAvK4JLVCxoB0LqvndiAlHSZomv8kYFeLOHtZtxQJbgaSnb9pfR+8btoMhg
+kBx28V+aJA8r5r8A27YxLV5pcsy7cVEjMGo+dvyFOnWMIsV1lefx38SbSYDqYUkb
+AwIDAQAB
+-----END PUBLIC KEY-----
+```
+
+if you plan to add add a new cycle to your project, you can call `-c`
+and if you want to completely change the configuration, you can call the command with `-r`
