@@ -60,3 +60,11 @@ file_max_size     = 8388608
 
 Usually you need to change couple of them, for example, you need to change the `data_dir` to reflect the directory patch which it needs to save bundles, and `secert_key` for your encrypt and decrypt JWT tokens and `db` section to connects to a postgres database.
 if you need to increase the security, you can always increase the `key_size`. But beawre of performance penalty on mobile side if you increase the key too hight.
+
+## Running
+
+Simply run the warpdrive executable with `-config` flag and path to the configuration file and you are set to go!
+
+```bash
+> warpdrive -config=/etc/warpdrive.conf
+```
