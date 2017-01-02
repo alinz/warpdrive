@@ -7,7 +7,7 @@ One of the main reason for choosing `Golang` was easy to write very complex oper
 Warpify was designed to uses as little memory as possible. All the download, decreypt and unpacking the bundles on device was written to be stream compatiable.
 Also by using Golang, we can support multiple target devices without spending time on two or more different languages.
 
-> Note: make sure to use `Yarn` for provided examples. Because Yarn local installation path is different than npm one.
+> Note: if you plan to use the provided examples, make sure to use `Yarn`. Because Yarn local installation path is different than npm one.
 
 ## Installation
 
@@ -71,7 +71,34 @@ There are 2 things we need to import into `xcode`, `Warpify.framework` and `Warp
     <img src ="https://github.com/pressly/warpdrive/raw/master/docs/images/ios-step8.png" />
 </p>
 
-- by now you should be able to compile the and build the your project with warpify successfully.
+- by now you should be able to compile and build the your project with warpify successfully.
 
+- we also need to add the Warpify Header path to your project. So select the `Build Settings` and search for `Header Search Paths` and add this path `$(SRCROOT)/../node_modules/react-native-warpdrive/ios`.
+
+<p align="center">
+    <img src ="https://github.com/pressly/warpdrive/raw/master/docs/images/ios-step9.png" />
+</p>
+
+- very React-Native project at runtime requires a path to source bundle. `Warpify` is going to take over that responsibility but first we have to tell React-Native to use warpdrive.
+
+`WarpifyManager` exposes only one class method. This method requires 3 arguments.
+
+- defaultCycleName: is the name of the cycle name which you have provided by cli tool. This name will be used along side of forceUpdate
+- groupName: if you plan to use react-native for share extension and you want to update the share extension as well, then you need to configure the groupName, otherwise pass `nil`.
+- forceUpdate: forceUpdate is a built-in functionality which takes over updating app without using javascript.
+
+- go to `AppDelegate.m` file. add a new header `#import "WarpifyManager.h"` and replace the 
+
+```obj-c
+jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index.ios" fallbackResource:nil];
+```
+
+to
+
+```obj-c
+jsCodeLocation = [WarpifyManager sourceBundleWithDefaultCycle:@"prod" groupName:nil forceUpdate:NO];
+```
+
+- the last part is to include the `WarpFile`. `WarpFile` is created by cli tool provided with `warpdrive`. Please refer to cli doc.
 
 ### android Setup
