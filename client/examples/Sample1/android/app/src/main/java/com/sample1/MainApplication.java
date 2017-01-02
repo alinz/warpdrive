@@ -28,7 +28,7 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
-          new WarpifyPackage(MainApplication.this, "prod", true)
+          new WarpifyPackage(MainApplication.this, "prod", false)
       );
     }
 
