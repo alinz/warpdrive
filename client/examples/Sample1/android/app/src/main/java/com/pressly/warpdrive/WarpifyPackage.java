@@ -167,7 +167,7 @@ public class WarpifyPackage implements ReactPackage {
         }
 
         @ReactMethod
-        public void remoteVersions(long cycleId, Callback errorCallback, Callback successCallback) {
+        public void remoteVersions(int cycleId, Callback errorCallback, Callback successCallback) {
             try {
                 String result = Warpify.remoteVersions(cycleId);
                 successCallback.invoke(result);
@@ -177,7 +177,7 @@ public class WarpifyPackage implements ReactPackage {
         }
 
         @ReactMethod
-        public void localVersions(long cycleId, Callback errorCallback, Callback successCallback) {
+        public void localVersions(int cycleId, Callback errorCallback, Callback successCallback) {
             try {
                 String result = Warpify.localVersions(cycleId);
                 successCallback.invoke(result);
@@ -187,7 +187,7 @@ public class WarpifyPackage implements ReactPackage {
         }
 
         @ReactMethod
-        public void latestVersion(long cycleId, Callback errorCallback, Callback successCallback) {
+        public void latestVersion(int cycleId, Callback errorCallback, Callback successCallback) {
             try {
                 String result = Warpify.latest(cycleId);
                 successCallback.invoke(result);
@@ -197,7 +197,7 @@ public class WarpifyPackage implements ReactPackage {
         }
 
         @ReactMethod
-        public void downloadVersion(long cycleId, String version, Callback errorCallback, Callback successCallback) {
+        public void downloadVersion(int cycleId, String version, Callback errorCallback, Callback successCallback) {
             try {
                 Warpify.downloadVersion(cycleId, version);
                 successCallback.invoke();
@@ -207,7 +207,7 @@ public class WarpifyPackage implements ReactPackage {
         }
 
         @ReactMethod
-        public void reload(long cycleId, String version, Callback errorCallback, Callback successCallback) {
+        public void reload(int cycleId, String version, Callback errorCallback, Callback successCallback) {
             try {
                 Warpify.reload(cycleId, version);
                 successCallback.invoke();
@@ -218,7 +218,7 @@ public class WarpifyPackage implements ReactPackage {
 
         @Override
         public String getName() {
-            return "Warpify";
+            return "WarpifyManager";
         }
     }
 }
