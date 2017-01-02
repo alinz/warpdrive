@@ -102,3 +102,58 @@ jsCodeLocation = [WarpifyManager sourceBundleWithDefaultCycle:@"prod" groupName:
 - the last part is to include the `WarpFile`. `WarpFile` is created by cli tool provided with `warpdrive`. Please refer to cli doc.
 
 ### android Setup
+
+- create a folder under `android` called `warpify` and copy the contents of `node_modules/react-native-warpdrive/android/lib` into it.
+
+- so by now you should have `build.gradle` and `warpify.aar` inside `android/warpify` folder.
+
+- edit `android/settings.gradle` and add the `':warpify', ':react-native-warpdrive'` and add the `project(':react-native-warpdrive').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-warpdrive/android')`. 
+
+for example:
+
+```
+include ':app', ':warpify', ':react-native-warpdrive'
+
+project(':react-native-warpdrive').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-warpdrive/android')
+```
+
+- edit `android/app/build.gradle` under `dependencies` section right before `compile "com.facebook.react:react-native:+"` add `compile project(':warpify')` and `compile project(':react-native-warpdrive')`
+
+for example:
+
+```
+dependencies {
+    compile fileTree(dir: "libs", include: ["*.jar"])
+    compile "com.android.support:appcompat-v7:23.0.1"
+    compile project(':warpify')
+    compile project(':react-native-warpdrive')
+    compile "com.facebook.react:react-native:+"  // From node_modules
+}
+```
+
+- now go to `MainApplication.java` and import the warpdrive package. `import com.pressly.warpdrive.WarpifyPackage;`
+- we need to override a method called `getJSBundleFile`. This method will be invoked by react-native to find out about the source bundle path.
+
+```java
+@Override
+protected @Nullable String getJSBundleFile() {
+    return WarpifyPackage.sourceBundle();
+}
+```
+
+- final part is to instanciate the `WarpifyPackage` and include it into react-native.
+
+```java
+@Override
+protected List<ReactPackage> getPackages() {
+    return Arrays.<ReactPackage>asList(
+        new MainReactPackage(),
+        new WarpifyPackage(MainApplication.this, "prod", false)
+    );
+}
+```
+
+`WarpifyPackage` constructor accepts 3 arguments, the first one is the `MainApplication` instance. we need this to restart the app. The second argument is for defaultCycle and the last one is for forceUpdate.
+we don't need to provide groupName here, sicne android doesn't have the restrict access between share bundle and main app bundle.
+
+> Final note, please make sure to have a WarpFile inside `android/app/src/main/assets` folder. If you don't have one, please run the cli command `warp settings -r` to build it for you.
