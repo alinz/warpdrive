@@ -61,10 +61,10 @@ build-ios: clean-ios
 	@cd ./cmd/warpify && gomobile bind -target=ios . && mv -f Warpify.framework ../../client/ios
 
 clean-android:
-	@rm -rf client/android/warpify.aar
+	@rm -rf client/android/lib/warpify.aar
 
 build-android: clean-android
-	@cd ./cmd/warpify && gomobile bind -target=android . && mv -f warpify.aar ../../client/android
+	@cd ./cmd/warpify && gomobile bind -target=android . && mv -f warpify.aar ../../client/android/lib
 
 build-clients: build-ios build-android
 
