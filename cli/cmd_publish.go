@@ -211,7 +211,7 @@ var publishCmd = &cobra.Command{
 				return
 			}
 
-			fmt.Printf("published new version for %s", release.Platform)
+			fmt.Printf("published new version for %s", release.Platform.String())
 		}
 	},
 }
