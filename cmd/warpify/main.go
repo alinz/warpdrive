@@ -12,6 +12,8 @@ import (
 
 	"strings"
 
+	"time"
+
 	"github.com/blang/semver"
 	"github.com/pressly/warpdrive/config"
 	"github.com/pressly/warpdrive/data"
@@ -118,7 +120,14 @@ func SetReload(reloadTask Callback) {
 
 	// once the reloadTask is set, we are going to close the reloadReady channel
 	// which triggers the go to go ahead and run the task.
-	close(conf.reloadReady)
+	// for some reasons, android call this function more than once and since
+	// the channel is already closed, go panics. the variable conf.chanClosed is
+	// a helpper to prevent this. Also, there is no right way to detect wether channel is closed or not
+	// and that's why I'm using this variable.
+	if !conf.chanClosed {
+		conf.chanClosed = true
+		close(conf.reloadReady)
+	}
 }
 
 // Reload accepts a version. The version needs to be already downloaded or
@@ -250,6 +259,10 @@ func SourcePath() string {
 	if conf.forceUpdate {
 		defer func() {
 			go func() {
+				// we need sometime to let the react-native boots up all the narive modules
+				// so we are sleeping this go routine for around 5 seconds
+				time.Sleep(5 * time.Second)
+
 				// we are blocking here until reload is ready to be called
 				// this is a trick which make sure the sync between threads
 				<-conf.reloadReady

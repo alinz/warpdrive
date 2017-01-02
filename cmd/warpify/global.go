@@ -13,6 +13,7 @@ type warpConf struct {
 	api           *api
 	warpFile      *config.ClientConfig
 	reloadReady   chan struct{}
+	chanClosed    bool
 }
 
 // conf is a global warpConf for this package
@@ -22,5 +23,6 @@ func init() {
 	// we need to initialize reloadReady before the application started
 	conf = &warpConf{
 		reloadReady: make(chan struct{}),
+		chanClosed:  false,
 	}
 }
