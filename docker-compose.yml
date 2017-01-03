@@ -1,11 +1,17 @@
+db:
+  image: postgres
+  environment:
+    - "POSTGRES_DB=warpdrivedb"
+    - "POSTGRES_USER=warpdrive"
+    - "POSTGRES_PASSWORD=warpdrive"
+    - "PGDATA:/pgdata"
+  volumes:
+    - ./db/pgdata:/pgdata
+    - ./db/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+
 web:
   build: .
   ports:
     - "8221:8221"
   links:
     - db
-db:
-  image: postgres
-  environment:
-    POSTGRES_PASSWORD: warpdrive
-    POSTGRES_USER: warpdrive
