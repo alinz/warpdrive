@@ -1,6 +1,9 @@
 LDFLAGS+=-X github.com/pressly/warpdrive.VERSION=$$(git describe --tags --abbrev=0 --always)
 LDFLAGS+=-X github.com/pressly/warpdrive.LONGVERSION=$$(git describe --tags --long --always --dirty)
 
+OS=darwin linux windows
+ARCH=386 amd64
+
 ##
 ## Tools
 ##
@@ -35,10 +38,22 @@ vendor-rebuild:
 
 clean-server:
 	@rm -rf ./bin/warpdrive
-	@mkdir -p ./bin
+	@mkdir -p ./bin/warpdrive
 
 build-server: clean-server
 	GOGC=off go build -i -gcflags="-e" -ldflags "$(LDFLAGS)" -o ./bin/warpdrive ./cmd/warpdrive
+
+build-all-servers: clean-server
+	for GOOS in $(OS); do 																											\
+		for GOARCH in $(ARCH); do 																								\
+			echo "building $$GOOS $$GOARCH ..."; 																		\
+			export GOGC=off;																												\
+			export GOOS=$$GOOS; 																										\
+			export GOARCH=$$GOARCH; 																								\
+			go build -ldflags "$(LDFLAGS)" 																					\
+			-o ./bin/warpdrive/warpdrive-$$GOOS-$$GOARCH ./cmd/warpdrive;       		\
+		done 																																			\
+	done
 
 ##
 ## Building cli
