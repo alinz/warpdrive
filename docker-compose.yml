@@ -1,10 +1,11 @@
 db:
   image: postgres
   environment:
-    - "POSTGRES_DB=warpdrivedb"
-    - "POSTGRES_USER=warpdrive"
-    - "POSTGRES_PASSWORD=warpdrive"
-    - "PGDATA:/pgdata"
+    #- POSTGRES_DB=warpdrivedb
+    - POSTGRES_USER=warpdrive
+    - POSTGRES_PASSWORD=warpdrive
+    - POSTGRES_DB=warpdrivedb
+    - PGDATA:/pgdata
   volumes:
     - ./db/pgdata:/pgdata
     - ./db/schema.sql:/docker-entrypoint-initdb.d/schema.sql
@@ -15,3 +16,6 @@ web:
     - "8221:8221"
   links:
     - db
+  volumes:
+    - ./etc/warpdrive.docker.conf:/warpdrive/conf/warpdrive.conf
+    - ./bin/tmp:/warpdrive/tmp

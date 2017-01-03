@@ -1,7 +1,8 @@
 
 -- create database
+-- DROP DATABASE IF EXISTS warpdrivedb;
 
-CREATE DATABASE warpdrivedb;
+-- CREATE DATABASE warpdrivedb;
 
 -- users table
 
