@@ -73,13 +73,13 @@ clean-ios:
 	@rm -rf ./client/ios/Warpify.framework
 
 build-ios: clean-ios
-	@cd ./cmd/warpify && gomobile bind -target=ios . && mv -f Warpify.framework ../../client/ios
+	@cd ./cmd/warpify && gomobile bind -target=ios -ldflags="-s -w" . && mv -f Warpify.framework ../../client/ios
 
 clean-android:
 	@rm -rf client/android/lib/warpify.aar
 
 build-android: clean-android
-	@cd ./cmd/warpify && gomobile bind -target=android . && mv -f warpify.aar ../../client/android/lib
+	@cd ./cmd/warpify && gomobile bind -target=android -ldflags="-s -w" . && mv -f warpify.aar ../../client/android/lib
 
 build-clients: build-ios build-android
 
