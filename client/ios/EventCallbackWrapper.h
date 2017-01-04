@@ -11,7 +11,7 @@
 
 typedef void (^EventCallbackBlock)(long, NSString* path);
 
-@interface EventCallbackWrapper : NSObject<GoWarpifyCallback>
+@interface EventCallbackWrapper : NSObject<WarpifyCallback>
 - (void)do:(long)kind value:(NSString*)value;
 - (void)setBlock: (EventCallbackBlock)block;
 @end

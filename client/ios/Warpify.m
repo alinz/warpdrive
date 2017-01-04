@@ -65,11 +65,11 @@ static Warpify *sharedInstance;
       });
       
     }];
-    GoWarpifySetReload((EventCallbackWrapper*)sharedInstance->_reloadCallback);
+    WarpifySetReload((EventCallbackWrapper*)sharedInstance->_reloadCallback);
     
     // Setup the basic requirements
     NSError* err;
-    GoWarpifySetup(bundleVersion, bundlePath, documentPath, platform, defaultCycle, forceUpdate, &err);
+    WarpifySetup(bundleVersion, bundlePath, documentPath, platform, defaultCycle, forceUpdate, &err);
     
     // if some error happends, we are forcefully set sharedInstance to nil
     // to crash the app at the beginning.
@@ -95,7 +95,7 @@ static Warpify *sharedInstance;
 }
 
 - (NSURL *)sourceBundle {
-  NSString* path = GoWarpifySourcePath();
+  NSString* path = WarpifySourcePath();
   if (path == nil || [path isEqualToString:@""]) {
     return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index.ios" fallbackResource:nil];
   }
@@ -114,27 +114,27 @@ static Warpify *sharedInstance;
 }
 
 - (NSString*)cyclesWithError:(NSError**)err {
-  return GoWarpifyCycles(err);
+  return WarpifyCycles(err);
 }
 
 - (NSString*)remoteVersionsWithCycleId:(int64_t)cycleID error:(NSError**)err {
-  return GoWarpifyRemoteVersions(cycleID, err);
+  return WarpifyRemoteVersions(cycleID, err);
 }
 
 - (NSString*)localVersionsWithCycleId:(int64_t)cycleID error:(NSError**)err {
-  return GoWarpifyLocalVersions(cycleID, err);
+  return WarpifyLocalVersions(cycleID, err);
 }
 
 - (NSString*)latestVersionWithCycleId:(int64_t)cycleID error:(NSError**)err {
-  return GoWarpifyLatest(cycleID, err);
+  return WarpifyLatest(cycleID, err);
 }
 
 - (void)downloadVersionWithCycleID:(int64_t)cycleId version:(NSString*)version error:(NSError**)err {
-  GoWarpifyDownloadVersion(cycleId, version, err);
+  WarpifyDownloadVersion(cycleId, version, err);
 }
 
 - (void)reloadVersionWithCycleID:(int64_t)cycleId version:(NSString*)version error:(NSError**)err {
-  GoWarpifyReload(cycleId, version, err);
+  WarpifyReload(cycleId, version, err);
 }
 
 @end
