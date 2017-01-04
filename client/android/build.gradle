@@ -30,5 +30,6 @@ repositories {
 }
 
 dependencies {
+  compile project(':warpify')
   compile "com.facebook.react:react-native:+"
 }
