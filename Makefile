@@ -87,7 +87,7 @@ build-clients: build-ios build-android
 ## Building everything
 ##
 
-build: build-server build-cli build-clients
+build: build-all-servers build-cli build-clients
 
 ##
 ## Database
