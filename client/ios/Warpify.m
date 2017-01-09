@@ -6,12 +6,12 @@
 //  Copyright © 2016 Ali Najafizadeh. All rights reserved.
 //
 
-#import "RCTBundleURLProvider.h"
-#import "RCTBridgeModule.h"
-#import "RCTConvert.h"
-#import "RCTEventDispatcher.h"
-#import "RCTRootView.h"
-#import "RCTUtils.h"
+#import "React/RCTBundleURLProvider.h"
+#import "React/RCTBridgeModule.h"
+#import "React/RCTConvert.h"
+#import "React/RCTEventDispatcher.h"
+#import "React/RCTRootView.h"
+#import "React/RCTUtils.h"
 
 #import "Warpify.framework/Headers/Warpify.h"
 
