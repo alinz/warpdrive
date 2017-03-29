@@ -44,7 +44,7 @@ build-server: clean-server
 	GOGC=off go build -i -gcflags="-e" -ldflags "$(LDFLAGS)" -o ./bin/warpdrive ./cmd/warpdrive
 
 build-all-servers: clean-server
-	for GOOS in $(OS); do 																											\
+	@for GOOS in $(OS); do 																											\
 		for GOARCH in $(ARCH); do 																								\
 			echo "building $$GOOS $$GOARCH ..."; 																		\
 			export GOGC=off;																												\
@@ -106,7 +106,7 @@ db-reset: db-destroy db-create
 ##
 
 print-api:
-	@go run ./cmd/doc/main.go
+	go run ./cmd/doc/main.go
 
 build-dev-folder:	
 	@mkdir -p ./bin/tmp/warpdrive
