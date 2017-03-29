@@ -1,5 +1,28 @@
 # Warpdrive
 
+# Dev Setup
+
+in order to compile the code for android and ios, you need to have gomobile install
+
+first install the gomobile
+
+```
+go get -u golang.org/x/mobile/cmd/gomobile 
+```
+
+make sure you have install ndk as well if you are not sure, look into this tutorial
+
+``` 
+https://developer.android.com/ndk/guides/index.html
+```
+
+then you have to initialize gomobile. this is one time operation
+
+```
+gomobile init
+gomobile init -ndk ~/Library/Android/sdk/ndk-bundle/
+```
+
 ### Postgres Setup
 
 before running warpdrive, make sure you have a right role and database. you can run the follwoing sql in Postgres terminal
