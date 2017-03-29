@@ -1,6 +1,6 @@
 {
   "name": "react-native-warpdrive",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "In-App upgrade service for React-Native! Supporting iOS and Android apps",
   "main": "lib",
   "files": [
@@ -12,7 +12,7 @@
   ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "postinstall": "cd ./ios/Warpify.framework && ln -s Versions/Current/Modules Modules && ln -s Versions/Current/Resources Resources && ln -s Versions/Current/Headers Headers && ln -s Versions/Current/Warpify Warpify"
+    "postinstall": "cd ./ios/Warpify.framework && ln -s Versions/A/Modules Modules && ln -s Versions/A/Resources Resources && ln -s Versions/A/Headers Headers && ln -s Versions/A/Warpify Warpify"
   },
   "repository": {
     "type": "git",
