@@ -89,8 +89,7 @@ func Extract(input io.ReadCloser, targetPath string) error {
 				return err
 			}
 
-		case tar.TypeReg:
-		case tar.TypeRegA:
+		case tar.TypeReg, tar.TypeRegA:
 			// we need to make sure the folder exists
 			dir := filepath.Dir(filename)
 			err = os.MkdirAll(dir, os.ModePerm)
