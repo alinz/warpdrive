@@ -11,6 +11,7 @@ temp
 etc/warpdrive.conf
 WarpFile
 .warp
+cert
 
 ##
 ## client build
