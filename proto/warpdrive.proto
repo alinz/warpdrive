@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package warpdrive;
+
+// only being used by cli and/or UI if available
+service Command {
+  rpc CreateApp(App) returns (App);
+  rpc GetAllApps(Empty) returns (stream App);
+  rpc RemoveApp(App) returns (Empty);
+
+  rpc CreateRelease(Release) returns (Release);
+  rpc GetRelease(Release) returns (Release);
+  rpc UpdateRelease(Release) returns (Release);
+}
+
+// only being used by mobile devices
+service Query {
+  rpc GetUpgrade(Upgrade) returns (Release);
+}
+
+message Empty {
+
+}
+
+message App {
+  // @inject_tag: storm:"id"
+  uint64 id = 1;
+  // @inject_tag: storm:"unique"
+  string name = 2;
+}
+
+enum Platform {
+  IOS = 0;
+  ANDROID = 1;
+}
+
+message Release {
+  // @inject_tag: storm:"id"
+  uint64 id = 1;
+  uint64 appId = 2;
+  // this is just for label. it's not unique
+  // becuase you might want to rollback
+  string version = 3;
+  string notes = 4;
+  Platform platform = 5;
+  // this is list of releases that can safely upgrade to this 
+  // version
+  repeated uint64 upgradableReleases = 6;
+  // this is used as what kind of release is. As an example `beta`
+  string rolloutAt = 7;
+  // this is the hash value of bundle package
+  string bundle = 8;
+  // if the lock value is true, it means that this release can not be ultered or modified.
+  // this is used to make sure the production doesn't download the unlock one.
+  bool lock = 9;
+  string createdAt = 10;
+  string updatedAt = 11;
+}
+
+message Upgrade {
+  uint64 releaseId = 1;
+  // so if shouldBeLock is `true`, then we only retern locked releases.
+  // if it's `false`, we are returning locked and unlocked releases
+  bool shouldBeLock = 2;
+}
