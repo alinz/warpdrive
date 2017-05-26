@@ -12,7 +12,7 @@ service Command {
   rpc GetRelease(Release) returns (Release);
   rpc UpdateRelease(Release) returns (Release);
 
-  rpc UploadRelease(stream Chunck) returns (Release);
+  rpc UploadRelease(stream Chunck) returns (Empty){};
 }
 
 // only being used by mobile devices
