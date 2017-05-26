@@ -16,8 +16,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
-	"time"
-
 	pb "github.com/pressly/warpdrive/proto"
 )
 
@@ -169,22 +167,18 @@ func main() {
 
 	commandCloseChan := make(chan error)
 	go func() {
-		err := grpcCommandServer.Serve(lnCommand)
-		commandCloseChan <- err
+		commandCloseChan <- grpcCommandServer.Serve(lnCommand)
 	}()
 
 	queryCloseChan := make(chan error)
 	go func() {
-		var err error
-		if err == nil {
-			time.Sleep(5 * time.Second)
-			queryCloseChan <- fmt.Errorf("hahahaha")
-			return
-		}
-		err = grpcQueryServer.Serve(lnQuery)
-		queryCloseChan <- err
+		queryCloseChan <- grpcQueryServer.Serve(lnQuery)
 	}()
 
+	// proper graceful shutdown of services
+	// this select waits until one of the services
+	// sends a nil or error. In either cases, we need to
+	// shutdown the other service gracefully and log the error
 	select {
 	case err := <-commandCloseChan:
 		if err != nil {
