@@ -74,23 +74,65 @@ type commandServer struct {
 	db *storm.DB
 }
 
-func (c *commandServer) CreateApp(context.Context, *pb.App) (*pb.App, error) {
-	return nil, nil
+func (c *commandServer) CreateApp(ctx context.Context, app *pb.App) (*pb.App, error) {
+	err := c.db.Save(app)
+	if err != nil {
+		return nil, err
+	}
+
+	return app, nil
 }
-func (c *commandServer) GetAllApps(*pb.Empty, pb.Command_GetAllAppsServer) error {
+
+func (c *commandServer) GetAllApps(_ *pb.Empty, stream pb.Command_GetAllAppsServer) error {
+	var apps []pb.App
+	err := c.db.All(&apps)
+	if err != nil {
+		return err
+	}
+
+	for _, app := range apps {
+		if err = stream.Send(&app); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
-func (c *commandServer) RemoveApp(context.Context, *pb.App) (*pb.Empty, error) {
+
+func (c *commandServer) RemoveApp(ctx context.Context, app *pb.App) (*pb.Empty, error) {
+	err := c.db.Remove(app)
+	if err != nil {
+		return nil, err
+	}
+
 	return nil, nil
 }
-func (c *commandServer) CreateRelease(context.Context, *pb.Release) (*pb.Release, error) {
-	return nil, nil
+
+func (c *commandServer) CreateRelease(ctx context.Context, release *pb.Release) (*pb.Release, error) {
+	err := c.db.Save(release)
+	if err != nil {
+		return nil, err
+	}
+
+	return release, nil
 }
-func (c *commandServer) GetRelease(context.Context, *pb.Release) (*pb.Release, error) {
-	return nil, nil
+
+func (c *commandServer) GetRelease(ctx context.Context, release *pb.Release) (*pb.Release, error) {
+	err := c.db.Find("id", release.Id, release)
+	if err != nil {
+		return nil, err
+	}
+
+	return release, nil
 }
-func (c *commandServer) UpdateRelease(context.Context, *pb.Release) (*pb.Release, error) {
-	return nil, nil
+
+func (c *commandServer) UpdateRelease(ctx context.Context, release *pb.Release) (*pb.Release, error) {
+	err := c.db.Save(release)
+	if err != nil {
+		return nil, err
+	}
+
+	return release, nil
 }
 
 func (c *commandServer) UploadRelease(upload pb.Command_UploadReleaseServer) error {
@@ -171,6 +213,17 @@ func (c *commandServer) UploadRelease(upload pb.Command_UploadReleaseServer) err
 	release := pb.Release{}
 
 	err = c.db.One("id", releaseID, &release)
+	if err != nil {
+		return err
+	}
+
+	// initialize buckets
+	err = c.db.Init(&pb.App{})
+	if err != nil {
+		return err
+	}
+
+	err = c.db.Init(&pb.Release{})
 	if err != nil {
 		return err
 	}
