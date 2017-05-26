@@ -19,6 +19,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
+	"github.com/asdine/storm/q"
 	"github.com/pressly/warpdrive/helper"
 	pb "github.com/pressly/warpdrive/proto"
 )
@@ -74,40 +75,6 @@ type commandServer struct {
 	db *storm.DB
 }
 
-func (c *commandServer) CreateApp(ctx context.Context, app *pb.App) (*pb.App, error) {
-	err := c.db.Save(app)
-	if err != nil {
-		return nil, err
-	}
-
-	return app, nil
-}
-
-func (c *commandServer) GetAllApps(_ *pb.Empty, stream pb.Command_GetAllAppsServer) error {
-	var apps []pb.App
-	err := c.db.All(&apps)
-	if err != nil {
-		return err
-	}
-
-	for _, app := range apps {
-		if err = stream.Send(&app); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (c *commandServer) RemoveApp(ctx context.Context, app *pb.App) (*pb.Empty, error) {
-	err := c.db.Remove(app)
-	if err != nil {
-		return nil, err
-	}
-
-	return nil, nil
-}
-
 func (c *commandServer) CreateRelease(ctx context.Context, release *pb.Release) (*pb.Release, error) {
 	err := c.db.Save(release)
 	if err != nil {
@@ -117,13 +84,25 @@ func (c *commandServer) CreateRelease(ctx context.Context, release *pb.Release) 
 	return release, nil
 }
 
-func (c *commandServer) GetRelease(ctx context.Context, release *pb.Release) (*pb.Release, error) {
-	err := c.db.Find("id", release.Id, release)
-	if err != nil {
-		return nil, err
+// if Release.Id is provided, then only the matched one returns.
+// if Release.App is provided, then it returns all the releases for that app
+// Release.Rollout is also need to be provided
+func (c *commandServer) GetRelease(release *pb.Release, stream pb.Command_GetReleaseServer) error {
+	if release.Id != 0 {
+		err := c.db.One("id", release.Id, release)
+		if err != nil {
+			return err
+		}
+
+		stream.Send(release)
+	} else {
+		c.db.Select(q.Eq("App", release.App), q.Eq("RolloutAt", release.RolloutAt)).Each(new(pb.Release), func(record interface{}) error {
+			stream.Send(record.(*pb.Release))
+			return nil
+		})
 	}
 
-	return release, nil
+	return nil
 }
 
 func (c *commandServer) UpdateRelease(ctx context.Context, release *pb.Release) (*pb.Release, error) {
@@ -218,10 +197,6 @@ func (c *commandServer) UploadRelease(upload pb.Command_UploadReleaseServer) err
 	}
 
 	// initialize buckets
-	err = c.db.Init(&pb.App{})
-	if err != nil {
-		return err
-	}
 
 	err = c.db.Init(&pb.Release{})
 	if err != nil {
@@ -257,7 +232,7 @@ type queryServer struct {
 	db *storm.DB
 }
 
-func (q *queryServer) GetUpgrade(context.Context, *pb.Upgrade) (*pb.Release, error) {
+func (q *queryServer) GetUpgrade(ctx context.Context, release *pb.Release) (*pb.Release, error) {
 	return nil, nil
 }
 

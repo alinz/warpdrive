@@ -361,11 +361,11 @@ type CommandClient interface {
 	// if Release.Id is provided, then only the matched one returns.
 	// if Release.App is provided, then it returns all the releases for that app
 	GetRelease(ctx context.Context, in *Release, opts ...grpc.CallOption) (Command_GetReleaseClient, error)
-	// once the release.lock set to true, Release can not be updated anymore, only `nextReleaseId` can be changed
-	// under the following condition:
+	// once the release.lock set to true, Release can not be updated anymore,
+	// only `nextReleaseId` can be changed under the following condition:
 	// nextReleaseId must not set or `lock` has to be false
 	UpdateRelease(ctx context.Context, in *Release, opts ...grpc.CallOption) (*Release, error)
-	// UplaodRelease upload won't work unless ReleaseId exists
+	// UplaodRelease won't work unless ReleaseId exists
 	UploadRelease(ctx context.Context, opts ...grpc.CallOption) (Command_UploadReleaseClient, error)
 }
 
@@ -468,11 +468,11 @@ type CommandServer interface {
 	// if Release.Id is provided, then only the matched one returns.
 	// if Release.App is provided, then it returns all the releases for that app
 	GetRelease(*Release, Command_GetReleaseServer) error
-	// once the release.lock set to true, Release can not be updated anymore, only `nextReleaseId` can be changed
-	// under the following condition:
+	// once the release.lock set to true, Release can not be updated anymore,
+	// only `nextReleaseId` can be changed under the following condition:
 	// nextReleaseId must not set or `lock` has to be false
 	UpdateRelease(context.Context, *Release) (*Release, error)
-	// UplaodRelease upload won't work unless ReleaseId exists
+	// UplaodRelease won't work unless ReleaseId exists
 	UploadRelease(Command_UploadReleaseServer) error
 }
 

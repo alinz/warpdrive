@@ -37,7 +37,7 @@ enum Platform {
 // it needs to be pushed again to be rollout as production. behind the scene both records are
 // using the same bundle binary but they are tragetign two sets of people.
 message Release {
-  // @inject_tag: storm:"id"
+  // @inject_tag: storm:"id,increment"
   uint64 id = 1;
   // @inject_tag: storm:"index"
   string app = 2;
@@ -58,7 +58,9 @@ message Release {
   // if the lock value is true, it means that this release can not be ultered or modified.
   // this is used to make sure the production doesn't download the unlock one.
   bool lock = 9;
+  // @inject_tag: storm:"index"
   string createdAt = 10;
+  // @inject_tag: storm:"index"
   string updatedAt = 11;
 }
 
