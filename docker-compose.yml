@@ -15,7 +15,9 @@ services:
       - COMMAND_CA=/cert/ca-command.crt
       - COMMAND_CRT=/cert/command.crt
       - COMMAND_KEY=/cert/command.key
+      - COMMAND_PORT=54321
       - QUERY_CA=/cert/ca-query.crt
       - QUERY_CRT=/cert/query.crt
       - QUERY_KEY=/cert/query.key
+      - QUERY_PORT=54322
 

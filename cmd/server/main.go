@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net"
 
 	context "golang.org/x/net/context"
 
@@ -14,6 +15,8 @@ import (
 	"github.com/kelseyhightower/envconfig"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+
+	"time"
 
 	pb "github.com/pressly/warpdrive/proto"
 )
@@ -87,6 +90,10 @@ func (c *commandServer) UpdateRelease(context.Context, *pb.Release) (*pb.Release
 	return nil, nil
 }
 
+func (c *commandServer) UploadRelease(upload pb.Command_UploadReleaseServer) error {
+	return nil
+}
+
 type queryServer struct {
 }
 
@@ -94,11 +101,16 @@ func (q *queryServer) GetUpgrade(context.Context, *pb.Upgrade) (*pb.Release, err
 	return nil, nil
 }
 
+func (q *queryServer) DownloadRelease(release *pb.Release, query pb.Query_DownloadReleaseServer) error {
+	return nil
+}
+
 func main() {
 	commandEnv := &struct {
-		CA  string `require:"true"`
-		Crt string `require:"true"`
-		Key string `require:"true"`
+		CA   string `require:"true"`
+		Crt  string `require:"true"`
+		Key  string `require:"true"`
+		Port string `require:"true"`
 	}{}
 
 	err := envconfig.Process("command", commandEnv)
@@ -107,9 +119,10 @@ func main() {
 	}
 
 	queryEnv := &struct {
-		CA  string `require:"true"`
-		Crt string `require:"true"`
-		Key string `require:"true"`
+		CA   string `require:"true"`
+		Crt  string `require:"true"`
+		Key  string `require:"true"`
+		Port string `require:"true"`
 	}{}
 
 	err = envconfig.Process("query", queryEnv)
@@ -142,11 +155,46 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
+	pb.RegisterCommandServer(grpcCommandServer, &commandServer{})
+	lnCommand, err := net.Listen("tcp", fmt.Sprintf(":%s", commandEnv.Port))
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	pb.RegisterQueryServer(grpcQueryServer, &queryServer{})
+	lnQuery, err := net.Listen("tcp", fmt.Sprintf(":%s", queryEnv.Port))
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	commandCloseChan := make(chan error)
 	go func() {
-		pb.RegisterCommandServer(grpcCommandServer, &commandServer{})
+		err := grpcCommandServer.Serve(lnCommand)
+		commandCloseChan <- err
 	}()
 
+	queryCloseChan := make(chan error)
 	go func() {
-		pb.RegisterQueryServer(grpcQueryServer, &queryServer{})
+		var err error
+		if err == nil {
+			time.Sleep(5 * time.Second)
+			queryCloseChan <- fmt.Errorf("hahahaha")
+			return
+		}
+		err = grpcQueryServer.Serve(lnQuery)
+		queryCloseChan <- err
 	}()
+
+	select {
+	case err := <-commandCloseChan:
+		if err != nil {
+			log.Print(err.Error())
+		}
+		grpcQueryServer.GracefulStop()
+	case err := <-queryCloseChan:
+		if err != nil {
+			log.Print(err.Error())
+		}
+		grpcCommandServer.GracefulStop()
+	}
 }

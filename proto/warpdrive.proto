@@ -11,16 +11,17 @@ service Command {
   rpc CreateRelease(Release) returns (Release);
   rpc GetRelease(Release) returns (Release);
   rpc UpdateRelease(Release) returns (Release);
+
+  rpc UploadRelease(stream Chunck) returns (Release);
 }
 
 // only being used by mobile devices
 service Query {
   rpc GetUpgrade(Upgrade) returns (Release);
+  rpc DownloadRelease(Release) returns (stream Chunck);
 }
 
-message Empty {
-
-}
+message Empty {}
 
 message App {
   // @inject_tag: storm:"id"
@@ -62,4 +63,20 @@ message Upgrade {
   // so if shouldBeLock is `true`, then we only retern locked releases.
   // if it's `false`, we are returning locked and unlocked releases
   bool shouldBeLock = 2;
+}
+
+message Chunck {
+  message Header {
+    uint64 releaseId = 1;
+    int64 total = 2;
+  }
+
+  message Body {
+    bytes data = 1;
+  }
+
+  oneof value {
+    Header header = 1;
+    Body body = 2;
+  }
 }
