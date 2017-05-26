@@ -1,0 +1,21 @@
+version: "3"
+
+services:
+  warpdrive:
+    image: warpdrive
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+
+    volumes:
+      - ./db:/db
+      - ./bundles:/bundles
+
+    environment:
+      - COMMAND_CA=/cert/ca-command.crt
+      - COMMAND_CRT=/cert/command.crt
+      - COMMAND_KEY=/cert/command.key
+      - QUERY_CA=/cert/ca-query.crt
+      - QUERY_CRT=/cert/query.crt
+      - QUERY_KEY=/cert/query.key
+

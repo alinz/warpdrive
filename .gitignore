@@ -12,6 +12,8 @@ etc/warpdrive.conf
 WarpFile
 .warp
 cert
+db
+bundles
 
 ##
 ## client build

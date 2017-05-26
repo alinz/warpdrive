@@ -9,6 +9,8 @@ import (
 
 	context "golang.org/x/net/context"
 
+	"github.com/asdine/storm"
+	"github.com/asdine/storm/codec/protobuf"
 	"github.com/kelseyhightower/envconfig"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -52,6 +54,15 @@ func newGrpcConfig(ca, crt, key string) (*grpcConfig, error) {
 	}
 
 	return &grpcConfig{certPool, certificate}, nil
+}
+
+func openDB(path string) (*storm.DB, error) {
+	db, err := storm.Open(path, storm.Codec(protobuf.Codec))
+	if err != nil {
+		return nil, err
+	}
+
+	return db, nil
 }
 
 type commandServer struct {
@@ -122,6 +133,11 @@ func main() {
 	}
 
 	grpcQueryServer, err := grpcQueryConfig.createServer()
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	_, err = openDB("/db/warpdrive.db")
 	if err != nil {
 		log.Fatal(err.Error())
 	}

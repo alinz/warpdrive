@@ -1,7 +1,5 @@
 FROM alpine
 
-ARG SERVICE
-
 RUN apk add --no-cache ca-certificates
 
 # copy all the certificate requires to load the server
