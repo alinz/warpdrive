@@ -10,9 +10,7 @@ It is generated from these files:
 
 It has these top-level messages:
 	Empty
-	App
 	Release
-	Upgrade
 	Chunck
 */
 package warpdrive
@@ -66,48 +64,29 @@ func (m *Empty) String() string            { return proto.CompactTextString(m) }
 func (*Empty) ProtoMessage()               {}
 func (*Empty) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
 
-type App struct {
-	// @inject_tag: storm:"id"
-	Id uint64 `protobuf:"varint,1,opt,name=id" json:"id,omitempty" storm:"id"`
-	// @inject_tag: storm:"unique"
-	Name string `protobuf:"bytes,2,opt,name=name" json:"name,omitempty" storm:"unique"`
-}
-
-func (m *App) Reset()                    { *m = App{} }
-func (m *App) String() string            { return proto.CompactTextString(m) }
-func (*App) ProtoMessage()               {}
-func (*App) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
-
-func (m *App) GetId() uint64 {
-	if m != nil {
-		return m.Id
-	}
-	return 0
-}
-
-func (m *App) GetName() string {
-	if m != nil {
-		return m.Name
-	}
-	return ""
-}
-
+// Release can be duplicate for different rollout.
+// for example, bundle can be released under beta for App1 and then
+// it needs to be pushed again to be rollout as production. behind the scene both records are
+// using the same bundle binary but they are tragetign two sets of people.
 type Release struct {
 	// @inject_tag: storm:"id"
-	Id    uint64 `protobuf:"varint,1,opt,name=id" json:"id,omitempty" storm:"id"`
-	AppId uint64 `protobuf:"varint,2,opt,name=appId" json:"appId,omitempty"`
+	Id uint64 `protobuf:"varint,1,opt,name=id" json:"id,omitempty" storm:"id"`
+	// @inject_tag: storm:"index"
+	App string `protobuf:"bytes,2,opt,name=app" json:"app,omitempty" storm:"index"`
 	// this is just for label. it's not unique
 	// becuase you might want to rollback
-	Version  string   `protobuf:"bytes,3,opt,name=version" json:"version,omitempty" `
+	// @inject_tag: storm:"index"
+	Version  string   `protobuf:"bytes,3,opt,name=version" json:"version,omitempty" storm:"index"`
 	Notes    string   `protobuf:"bytes,4,opt,name=notes" json:"notes,omitempty"`
 	Platform Platform `protobuf:"varint,5,opt,name=platform,enum=warpdrive.Platform" json:"platform,omitempty"`
 	// this is list of releases that can safely upgrade to this
-	// version
-	UpgradableReleases []uint64 `protobuf:"varint,6,rep,packed,name=upgradableReleases" json:"upgradableReleases,omitempty" `
+	// version.
+	NextReleaseId uint64 `protobuf:"varint,6,opt,name=nextReleaseId" json:"nextReleaseId,omitempty" `
 	// this is used as what kind of release is. As an example `beta`
 	RolloutAt string `protobuf:"bytes,7,opt,name=rolloutAt" json:"rolloutAt,omitempty" `
 	// this is the hash value of bundle package
-	Bundle string `protobuf:"bytes,8,opt,name=bundle" json:"bundle,omitempty" `
+	// @inject_tag: storm:"index"
+	Bundle string `protobuf:"bytes,8,opt,name=bundle" json:"bundle,omitempty" storm:"index"`
 	// if the lock value is true, it means that this release can not be ultered or modified.
 	// this is used to make sure the production doesn't download the unlock one.
 	Lock      bool   `protobuf:"varint,9,opt,name=lock" json:"lock,omitempty" `
@@ -118,7 +97,7 @@ type Release struct {
 func (m *Release) Reset()                    { *m = Release{} }
 func (m *Release) String() string            { return proto.CompactTextString(m) }
 func (*Release) ProtoMessage()               {}
-func (*Release) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
+func (*Release) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
 
 func (m *Release) GetId() uint64 {
 	if m != nil {
@@ -127,11 +106,11 @@ func (m *Release) GetId() uint64 {
 	return 0
 }
 
-func (m *Release) GetAppId() uint64 {
+func (m *Release) GetApp() string {
 	if m != nil {
-		return m.AppId
+		return m.App
 	}
-	return 0
+	return ""
 }
 
 func (m *Release) GetVersion() string {
@@ -155,11 +134,11 @@ func (m *Release) GetPlatform() Platform {
 	return Platform_IOS
 }
 
-func (m *Release) GetUpgradableReleases() []uint64 {
+func (m *Release) GetNextReleaseId() uint64 {
 	if m != nil {
-		return m.UpgradableReleases
+		return m.NextReleaseId
 	}
-	return nil
+	return 0
 }
 
 func (m *Release) GetRolloutAt() string {
@@ -197,32 +176,6 @@ func (m *Release) GetUpdatedAt() string {
 	return ""
 }
 
-type Upgrade struct {
-	ReleaseId uint64 `protobuf:"varint,1,opt,name=releaseId" json:"releaseId,omitempty"`
-	// so if shouldBeLock is `true`, then we only retern locked releases.
-	// if it's `false`, we are returning locked and unlocked releases
-	ShouldBeLock bool `protobuf:"varint,2,opt,name=shouldBeLock" json:"shouldBeLock,omitempty" `
-}
-
-func (m *Upgrade) Reset()                    { *m = Upgrade{} }
-func (m *Upgrade) String() string            { return proto.CompactTextString(m) }
-func (*Upgrade) ProtoMessage()               {}
-func (*Upgrade) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{3} }
-
-func (m *Upgrade) GetReleaseId() uint64 {
-	if m != nil {
-		return m.ReleaseId
-	}
-	return 0
-}
-
-func (m *Upgrade) GetShouldBeLock() bool {
-	if m != nil {
-		return m.ShouldBeLock
-	}
-	return false
-}
-
 type Chunck struct {
 	// Types that are valid to be assigned to Value:
 	//	*Chunck_Header_
@@ -233,7 +186,7 @@ type Chunck struct {
 func (m *Chunck) Reset()                    { *m = Chunck{} }
 func (m *Chunck) String() string            { return proto.CompactTextString(m) }
 func (*Chunck) ProtoMessage()               {}
-func (*Chunck) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{4} }
+func (*Chunck) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
 
 type isChunck_Value interface {
 	isChunck_Value()
@@ -352,7 +305,7 @@ type Chunck_Header struct {
 func (m *Chunck_Header) Reset()                    { *m = Chunck_Header{} }
 func (m *Chunck_Header) String() string            { return proto.CompactTextString(m) }
 func (*Chunck_Header) ProtoMessage()               {}
-func (*Chunck_Header) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{4, 0} }
+func (*Chunck_Header) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2, 0} }
 
 func (m *Chunck_Header) GetReleaseId() uint64 {
 	if m != nil {
@@ -375,7 +328,7 @@ type Chunck_Body struct {
 func (m *Chunck_Body) Reset()                    { *m = Chunck_Body{} }
 func (m *Chunck_Body) String() string            { return proto.CompactTextString(m) }
 func (*Chunck_Body) ProtoMessage()               {}
-func (*Chunck_Body) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{4, 1} }
+func (*Chunck_Body) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2, 1} }
 
 func (m *Chunck_Body) GetData() []byte {
 	if m != nil {
@@ -386,9 +339,7 @@ func (m *Chunck_Body) GetData() []byte {
 
 func init() {
 	proto.RegisterType((*Empty)(nil), "warpdrive.Empty")
-	proto.RegisterType((*App)(nil), "warpdrive.App")
 	proto.RegisterType((*Release)(nil), "warpdrive.Release")
-	proto.RegisterType((*Upgrade)(nil), "warpdrive.Upgrade")
 	proto.RegisterType((*Chunck)(nil), "warpdrive.Chunck")
 	proto.RegisterType((*Chunck_Header)(nil), "warpdrive.Chunck.Header")
 	proto.RegisterType((*Chunck_Body)(nil), "warpdrive.Chunck.Body")
@@ -406,12 +357,15 @@ const _ = grpc.SupportPackageIsVersion4
 // Client API for Command service
 
 type CommandClient interface {
-	CreateApp(ctx context.Context, in *App, opts ...grpc.CallOption) (*App, error)
-	GetAllApps(ctx context.Context, in *Empty, opts ...grpc.CallOption) (Command_GetAllAppsClient, error)
-	RemoveApp(ctx context.Context, in *App, opts ...grpc.CallOption) (*Empty, error)
 	CreateRelease(ctx context.Context, in *Release, opts ...grpc.CallOption) (*Release, error)
-	GetRelease(ctx context.Context, in *Release, opts ...grpc.CallOption) (*Release, error)
+	// if Release.Id is provided, then only the matched one returns.
+	// if Release.App is provided, then it returns all the releases for that app
+	GetRelease(ctx context.Context, in *Release, opts ...grpc.CallOption) (Command_GetReleaseClient, error)
+	// once the release.lock set to true, Release can not be updated anymore, only `nextReleaseId` can be changed
+	// under the following condition:
+	// nextReleaseId must not set or `lock` has to be false
 	UpdateRelease(ctx context.Context, in *Release, opts ...grpc.CallOption) (*Release, error)
+	// UplaodRelease upload won't work unless ReleaseId exists
 	UploadRelease(ctx context.Context, opts ...grpc.CallOption) (Command_UploadReleaseClient, error)
 }
 
@@ -423,56 +377,6 @@ func NewCommandClient(cc *grpc.ClientConn) CommandClient {
 	return &commandClient{cc}
 }
 
-func (c *commandClient) CreateApp(ctx context.Context, in *App, opts ...grpc.CallOption) (*App, error) {
-	out := new(App)
-	err := grpc.Invoke(ctx, "/warpdrive.Command/CreateApp", in, out, c.cc, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *commandClient) GetAllApps(ctx context.Context, in *Empty, opts ...grpc.CallOption) (Command_GetAllAppsClient, error) {
-	stream, err := grpc.NewClientStream(ctx, &_Command_serviceDesc.Streams[0], c.cc, "/warpdrive.Command/GetAllApps", opts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &commandGetAllAppsClient{stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
-}
-
-type Command_GetAllAppsClient interface {
-	Recv() (*App, error)
-	grpc.ClientStream
-}
-
-type commandGetAllAppsClient struct {
-	grpc.ClientStream
-}
-
-func (x *commandGetAllAppsClient) Recv() (*App, error) {
-	m := new(App)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-func (c *commandClient) RemoveApp(ctx context.Context, in *App, opts ...grpc.CallOption) (*Empty, error) {
-	out := new(Empty)
-	err := grpc.Invoke(ctx, "/warpdrive.Command/RemoveApp", in, out, c.cc, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *commandClient) CreateRelease(ctx context.Context, in *Release, opts ...grpc.CallOption) (*Release, error) {
 	out := new(Release)
 	err := grpc.Invoke(ctx, "/warpdrive.Command/CreateRelease", in, out, c.cc, opts...)
@@ -482,13 +386,36 @@ func (c *commandClient) CreateRelease(ctx context.Context, in *Release, opts ...
 	return out, nil
 }
 
-func (c *commandClient) GetRelease(ctx context.Context, in *Release, opts ...grpc.CallOption) (*Release, error) {
-	out := new(Release)
-	err := grpc.Invoke(ctx, "/warpdrive.Command/GetRelease", in, out, c.cc, opts...)
+func (c *commandClient) GetRelease(ctx context.Context, in *Release, opts ...grpc.CallOption) (Command_GetReleaseClient, error) {
+	stream, err := grpc.NewClientStream(ctx, &_Command_serviceDesc.Streams[0], c.cc, "/warpdrive.Command/GetRelease", opts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &commandGetReleaseClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Command_GetReleaseClient interface {
+	Recv() (*Release, error)
+	grpc.ClientStream
+}
+
+type commandGetReleaseClient struct {
+	grpc.ClientStream
+}
+
+func (x *commandGetReleaseClient) Recv() (*Release, error) {
+	m := new(Release)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 func (c *commandClient) UpdateRelease(ctx context.Context, in *Release, opts ...grpc.CallOption) (*Release, error) {
@@ -537,74 +464,20 @@ func (x *commandUploadReleaseClient) CloseAndRecv() (*Empty, error) {
 // Server API for Command service
 
 type CommandServer interface {
-	CreateApp(context.Context, *App) (*App, error)
-	GetAllApps(*Empty, Command_GetAllAppsServer) error
-	RemoveApp(context.Context, *App) (*Empty, error)
 	CreateRelease(context.Context, *Release) (*Release, error)
-	GetRelease(context.Context, *Release) (*Release, error)
+	// if Release.Id is provided, then only the matched one returns.
+	// if Release.App is provided, then it returns all the releases for that app
+	GetRelease(*Release, Command_GetReleaseServer) error
+	// once the release.lock set to true, Release can not be updated anymore, only `nextReleaseId` can be changed
+	// under the following condition:
+	// nextReleaseId must not set or `lock` has to be false
 	UpdateRelease(context.Context, *Release) (*Release, error)
+	// UplaodRelease upload won't work unless ReleaseId exists
 	UploadRelease(Command_UploadReleaseServer) error
 }
 
 func RegisterCommandServer(s *grpc.Server, srv CommandServer) {
 	s.RegisterService(&_Command_serviceDesc, srv)
-}
-
-func _Command_CreateApp_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(App)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CommandServer).CreateApp(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/warpdrive.Command/CreateApp",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CommandServer).CreateApp(ctx, req.(*App))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Command_GetAllApps_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(Empty)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
-	}
-	return srv.(CommandServer).GetAllApps(m, &commandGetAllAppsServer{stream})
-}
-
-type Command_GetAllAppsServer interface {
-	Send(*App) error
-	grpc.ServerStream
-}
-
-type commandGetAllAppsServer struct {
-	grpc.ServerStream
-}
-
-func (x *commandGetAllAppsServer) Send(m *App) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-func _Command_RemoveApp_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(App)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CommandServer).RemoveApp(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/warpdrive.Command/RemoveApp",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CommandServer).RemoveApp(ctx, req.(*App))
-	}
-	return interceptor(ctx, in, info, handler)
 }
 
 func _Command_CreateRelease_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -625,22 +498,25 @@ func _Command_CreateRelease_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Command_GetRelease_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Release)
-	if err := dec(in); err != nil {
-		return nil, err
+func _Command_GetRelease_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(Release)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
 	}
-	if interceptor == nil {
-		return srv.(CommandServer).GetRelease(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/warpdrive.Command/GetRelease",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CommandServer).GetRelease(ctx, req.(*Release))
-	}
-	return interceptor(ctx, in, info, handler)
+	return srv.(CommandServer).GetRelease(m, &commandGetReleaseServer{stream})
+}
+
+type Command_GetReleaseServer interface {
+	Send(*Release) error
+	grpc.ServerStream
+}
+
+type commandGetReleaseServer struct {
+	grpc.ServerStream
+}
+
+func (x *commandGetReleaseServer) Send(m *Release) error {
+	return x.ServerStream.SendMsg(m)
 }
 
 func _Command_UpdateRelease_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -692,20 +568,8 @@ var _Command_serviceDesc = grpc.ServiceDesc{
 	HandlerType: (*CommandServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "CreateApp",
-			Handler:    _Command_CreateApp_Handler,
-		},
-		{
-			MethodName: "RemoveApp",
-			Handler:    _Command_RemoveApp_Handler,
-		},
-		{
 			MethodName: "CreateRelease",
 			Handler:    _Command_CreateRelease_Handler,
-		},
-		{
-			MethodName: "GetRelease",
-			Handler:    _Command_GetRelease_Handler,
 		},
 		{
 			MethodName: "UpdateRelease",
@@ -714,8 +578,8 @@ var _Command_serviceDesc = grpc.ServiceDesc{
 	},
 	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "GetAllApps",
-			Handler:       _Command_GetAllApps_Handler,
+			StreamName:    "GetRelease",
+			Handler:       _Command_GetRelease_Handler,
 			ServerStreams: true,
 		},
 		{
@@ -730,7 +594,10 @@ var _Command_serviceDesc = grpc.ServiceDesc{
 // Client API for Query service
 
 type QueryClient interface {
-	GetUpgrade(ctx context.Context, in *Upgrade, opts ...grpc.CallOption) (*Release, error)
+	// the folowing four fields must be presented in Release object
+	// `Release.id`, `Release.app`, `Release.platform`, `Release.rolloutAt`
+	// when client need to know the next Release
+	GetUpgrade(ctx context.Context, in *Release, opts ...grpc.CallOption) (*Release, error)
 	DownloadRelease(ctx context.Context, in *Release, opts ...grpc.CallOption) (Query_DownloadReleaseClient, error)
 }
 
@@ -742,7 +609,7 @@ func NewQueryClient(cc *grpc.ClientConn) QueryClient {
 	return &queryClient{cc}
 }
 
-func (c *queryClient) GetUpgrade(ctx context.Context, in *Upgrade, opts ...grpc.CallOption) (*Release, error) {
+func (c *queryClient) GetUpgrade(ctx context.Context, in *Release, opts ...grpc.CallOption) (*Release, error) {
 	out := new(Release)
 	err := grpc.Invoke(ctx, "/warpdrive.Query/GetUpgrade", in, out, c.cc, opts...)
 	if err != nil {
@@ -786,7 +653,10 @@ func (x *queryDownloadReleaseClient) Recv() (*Chunck, error) {
 // Server API for Query service
 
 type QueryServer interface {
-	GetUpgrade(context.Context, *Upgrade) (*Release, error)
+	// the folowing four fields must be presented in Release object
+	// `Release.id`, `Release.app`, `Release.platform`, `Release.rolloutAt`
+	// when client need to know the next Release
+	GetUpgrade(context.Context, *Release) (*Release, error)
 	DownloadRelease(*Release, Query_DownloadReleaseServer) error
 }
 
@@ -795,7 +665,7 @@ func RegisterQueryServer(s *grpc.Server, srv QueryServer) {
 }
 
 func _Query_GetUpgrade_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Upgrade)
+	in := new(Release)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -807,7 +677,7 @@ func _Query_GetUpgrade_Handler(srv interface{}, ctx context.Context, dec func(in
 		FullMethod: "/warpdrive.Query/GetUpgrade",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).GetUpgrade(ctx, req.(*Upgrade))
+		return srv.(QueryServer).GetUpgrade(ctx, req.(*Release))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -855,41 +725,36 @@ var _Query_serviceDesc = grpc.ServiceDesc{
 func init() { proto.RegisterFile("proto/warpdrive.proto", fileDescriptor0) }
 
 var fileDescriptor0 = []byte{
-	// 570 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x54, 0x5f, 0x6f, 0xd3, 0x3e,
-	0x14, 0x6d, 0xda, 0xb4, 0x69, 0x6f, 0xb7, 0xfd, 0xf6, 0x33, 0x63, 0xb2, 0x2a, 0x1e, 0xaa, 0x3c,
-	0x95, 0x7f, 0xdd, 0x14, 0x90, 0x86, 0x10, 0x2f, 0xd9, 0x86, 0x58, 0x05, 0x62, 0x60, 0xb4, 0x0f,
-	0xe0, 0xce, 0x86, 0x55, 0x73, 0x62, 0x2b, 0x71, 0x3a, 0xf5, 0x0b, 0xf2, 0xc6, 0x07, 0xe2, 0x0d,
-	0xe5, 0x26, 0x69, 0xc3, 0x52, 0x09, 0xed, 0xcd, 0xf7, 0x9c, 0x73, 0xcf, 0x3d, 0xb9, 0x71, 0x02,
-	0x8f, 0x4d, 0xa2, 0xad, 0x3e, 0xba, 0xe3, 0x89, 0x11, 0xc9, 0x62, 0x29, 0xa7, 0x58, 0x93, 0xc1,
-	0x1a, 0xf0, 0x3d, 0xe8, 0xbe, 0x8f, 0x8c, 0x5d, 0xf9, 0x4f, 0xa1, 0x13, 0x1a, 0x43, 0xf6, 0xa0,
-	0xbd, 0x10, 0xd4, 0x19, 0x3b, 0x13, 0x97, 0xb5, 0x17, 0x82, 0x10, 0x70, 0x63, 0x1e, 0x49, 0xda,
-	0x1e, 0x3b, 0x93, 0x01, 0xc3, 0xb3, 0xff, 0xb3, 0x0d, 0x1e, 0x93, 0x4a, 0xf2, 0x54, 0x36, 0xf4,
-	0x07, 0xd0, 0xe5, 0xc6, 0xcc, 0x04, 0x36, 0xb8, 0xac, 0x28, 0x08, 0x05, 0x6f, 0x29, 0x93, 0x74,
-	0xa1, 0x63, 0xda, 0x41, 0xa3, 0xaa, 0xcc, 0xf5, 0xb1, 0xb6, 0x32, 0xa5, 0x2e, 0xe2, 0x45, 0x41,
-	0x8e, 0xa0, 0x6f, 0x14, 0xb7, 0xdf, 0x75, 0x12, 0xd1, 0xee, 0xd8, 0x99, 0xec, 0x05, 0x8f, 0xa6,
-	0x9b, 0x87, 0xf8, 0x52, 0x52, 0x6c, 0x2d, 0x22, 0x53, 0x20, 0x99, 0xf9, 0x91, 0x70, 0xc1, 0xe7,
-	0x4a, 0x96, 0xd9, 0x52, 0xda, 0x1b, 0x77, 0x26, 0x2e, 0xdb, 0xc2, 0x90, 0x27, 0x30, 0x48, 0xb4,
-	0x52, 0x3a, 0xb3, 0xa1, 0xa5, 0x1e, 0x8e, 0xde, 0x00, 0xe4, 0x10, 0x7a, 0xf3, 0x2c, 0x16, 0x4a,
-	0xd2, 0x3e, 0x52, 0x65, 0x95, 0x2f, 0x43, 0xe9, 0xeb, 0x5b, 0x3a, 0x18, 0x3b, 0x93, 0x3e, 0xc3,
-	0x73, 0xee, 0x74, 0x9d, 0x48, 0x6e, 0xa5, 0x08, 0x2d, 0x85, 0xc2, 0x69, 0x0d, 0xe4, 0x6c, 0x66,
-	0x44, 0xc9, 0x0e, 0x0b, 0x76, 0x0d, 0xf8, 0x1f, 0xc1, 0xbb, 0xc2, 0x6c, 0x12, 0x03, 0x15, 0xe1,
-	0x66, 0xd5, 0x3a, 0x37, 0x00, 0xf1, 0x61, 0x27, 0xbd, 0xd1, 0x99, 0x12, 0xa7, 0xf2, 0x53, 0x1e,
-	0xa0, 0x8d, 0x01, 0xfe, 0xc2, 0xfc, 0x5f, 0x0e, 0xf4, 0xce, 0x6e, 0xb2, 0xf8, 0xfa, 0x96, 0x04,
-	0xd0, 0xbb, 0x91, 0x5c, 0xc8, 0x04, 0x9d, 0x86, 0x01, 0xad, 0x2d, 0xaf, 0x90, 0x4c, 0x2f, 0x90,
-	0xbf, 0x68, 0xb1, 0x52, 0x49, 0x5e, 0x80, 0x3b, 0xd7, 0x62, 0x85, 0xd6, 0xc3, 0xe0, 0xb0, 0xd9,
-	0x71, 0xaa, 0xc5, 0xea, 0xa2, 0xc5, 0x50, 0x35, 0x7a, 0x07, 0xbd, 0xc2, 0xe1, 0x1f, 0xc1, 0x0f,
-	0xa0, 0x6b, 0xb5, 0xe5, 0x0a, 0x6d, 0x3b, 0xac, 0x28, 0x46, 0x23, 0x70, 0x73, 0xb7, 0x7c, 0x9f,
-	0x82, 0x5b, 0x8e, 0x6d, 0x3b, 0x0c, 0xcf, 0xa7, 0x1e, 0x74, 0x97, 0x5c, 0x65, 0xf2, 0xd9, 0x18,
-	0xfa, 0xd5, 0x8b, 0x26, 0x1e, 0x74, 0x66, 0x97, 0xdf, 0xf6, 0x5b, 0x64, 0x08, 0x5e, 0xf8, 0xf9,
-	0x9c, 0x5d, 0xce, 0xce, 0xf7, 0x9d, 0xe0, 0x77, 0x1b, 0xbc, 0x33, 0x1d, 0x45, 0x3c, 0x16, 0xe4,
-	0x39, 0x0c, 0xce, 0x70, 0xeb, 0x78, 0x89, 0x6b, 0xe9, 0x43, 0x63, 0x46, 0xf7, 0x6a, 0x72, 0x0c,
-	0xf0, 0x41, 0xda, 0x50, 0xa9, 0xd0, 0x98, 0x94, 0xec, 0xd7, 0x58, 0xfc, 0x16, 0xee, 0xeb, 0x8f,
-	0x1d, 0xf2, 0x12, 0x06, 0x4c, 0x46, 0x7a, 0xb9, 0xd5, 0xbe, 0x61, 0x40, 0x4e, 0x60, 0xb7, 0x48,
-	0x53, 0x7d, 0x26, 0xa4, 0x26, 0x29, 0xb1, 0xd1, 0x16, 0x8c, 0xbc, 0xc6, 0x64, 0x0f, 0xed, 0x3a,
-	0x81, 0xdd, 0x2b, 0xbc, 0x54, 0x0f, 0x6d, 0x7c, 0x93, 0x37, 0x2a, 0xcd, 0x45, 0x05, 0xfc, 0xdf,
-	0x78, 0xef, 0xcd, 0xa7, 0xf3, 0x5b, 0x13, 0x27, 0x58, 0x41, 0xf7, 0x6b, 0x26, 0x93, 0x55, 0x99,
-	0xb8, 0xba, 0xc6, 0xf5, 0x21, 0x25, 0xb6, 0x75, 0xf0, 0x5b, 0xf8, 0xef, 0x5c, 0xdf, 0xc5, 0xf5,
-	0xd1, 0xdb, 0x32, 0x37, 0xe3, 0x1c, 0x3b, 0xf3, 0x1e, 0xfe, 0xc4, 0x5e, 0xfd, 0x09, 0x00, 0x00,
-	0xff, 0xff, 0x5d, 0x1b, 0x56, 0x7e, 0xdd, 0x04, 0x00, 0x00,
+	// 485 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x53, 0xcd, 0x8e, 0x12, 0x4d,
+	0x14, 0xa5, 0xa0, 0x7f, 0xe0, 0xf2, 0x31, 0x1f, 0x96, 0x3a, 0xa9, 0x74, 0x5c, 0x74, 0x88, 0x8b,
+	0x8e, 0x31, 0x8c, 0x69, 0x13, 0xa3, 0xc9, 0x6c, 0x18, 0x30, 0xc2, 0xc6, 0xd1, 0x32, 0x3c, 0x40,
+	0x41, 0x95, 0x0e, 0x99, 0xa6, 0xab, 0x53, 0x54, 0x33, 0xb2, 0xf0, 0xbd, 0x7c, 0x09, 0x9f, 0xc6,
+	0x17, 0x30, 0x7d, 0xbb, 0x69, 0x30, 0xcc, 0x66, 0xdc, 0xdd, 0x7b, 0xce, 0xfd, 0x3d, 0xb7, 0x0a,
+	0x9e, 0x66, 0x46, 0x5b, 0x7d, 0x71, 0x27, 0x4c, 0x26, 0xcd, 0x6a, 0xab, 0x86, 0xe8, 0xd3, 0x4e,
+	0x0d, 0x0c, 0x7c, 0x70, 0xdf, 0xaf, 0x33, 0xbb, 0x1b, 0xfc, 0x6c, 0x82, 0xcf, 0x55, 0xa2, 0xc4,
+	0x46, 0xd1, 0x33, 0x68, 0xae, 0x24, 0x23, 0x21, 0x89, 0x1c, 0xde, 0x5c, 0x49, 0xda, 0x87, 0x96,
+	0xc8, 0x32, 0xd6, 0x0c, 0x49, 0xd4, 0xe1, 0x85, 0x49, 0x19, 0xf8, 0x5b, 0x65, 0x36, 0x2b, 0x9d,
+	0xb2, 0x16, 0xa2, 0x7b, 0x97, 0x3e, 0x01, 0x37, 0xd5, 0x56, 0x6d, 0x98, 0x83, 0x78, 0xe9, 0xd0,
+	0x0b, 0x68, 0x67, 0x89, 0xb0, 0x5f, 0xb5, 0x59, 0x33, 0x37, 0x24, 0xd1, 0x59, 0xfc, 0x78, 0x78,
+	0x98, 0xea, 0x53, 0x45, 0xf1, 0x3a, 0x88, 0x3e, 0x87, 0x5e, 0xaa, 0xbe, 0xdb, 0x6a, 0xa2, 0x99,
+	0x64, 0x1e, 0x4e, 0xf3, 0x37, 0x48, 0x9f, 0x41, 0xc7, 0xe8, 0x24, 0xd1, 0xb9, 0x1d, 0x59, 0xe6,
+	0x63, 0xc3, 0x03, 0x40, 0xcf, 0xc1, 0x5b, 0xe4, 0xa9, 0x4c, 0x14, 0x6b, 0x23, 0x55, 0x79, 0x94,
+	0x82, 0x93, 0xe8, 0xe5, 0x2d, 0xeb, 0x84, 0x24, 0x6a, 0x73, 0xb4, 0x8b, 0x4a, 0x4b, 0xa3, 0x84,
+	0x55, 0x72, 0x64, 0x19, 0x94, 0x95, 0x6a, 0xa0, 0x60, 0xf3, 0x4c, 0x56, 0x6c, 0xb7, 0x64, 0x6b,
+	0x60, 0xf0, 0x8b, 0x80, 0x37, 0xbe, 0xc9, 0xd3, 0xe5, 0x2d, 0x8d, 0xc1, 0xbb, 0x51, 0x42, 0x2a,
+	0x83, 0xea, 0x75, 0x63, 0x76, 0xb4, 0x65, 0x19, 0x32, 0x9c, 0x22, 0x3f, 0x6d, 0xf0, 0x2a, 0x92,
+	0xbe, 0x04, 0x67, 0xa1, 0xe5, 0x0e, 0xe5, 0xed, 0xc6, 0xe7, 0xa7, 0x19, 0x57, 0x5a, 0xee, 0xa6,
+	0x0d, 0x8e, 0x51, 0xc1, 0x25, 0x78, 0x65, 0x05, 0x5c, 0xbe, 0x96, 0xa7, 0x3c, 0xd6, 0x01, 0x28,
+	0xee, 0x60, 0xb5, 0x15, 0x09, 0x96, 0x6d, 0xf1, 0xd2, 0x09, 0x02, 0x70, 0x8a, 0x6a, 0x85, 0x04,
+	0x52, 0x58, 0x81, 0x69, 0xff, 0x71, 0xb4, 0xaf, 0x7c, 0x70, 0xb7, 0x22, 0xc9, 0xd5, 0x8b, 0x10,
+	0xda, 0xfb, 0x8b, 0x50, 0x1f, 0x5a, 0xb3, 0xeb, 0x2f, 0xfd, 0x06, 0xed, 0x82, 0x3f, 0xfa, 0x38,
+	0xe1, 0xd7, 0xb3, 0x49, 0x9f, 0xc4, 0xbf, 0x09, 0xf8, 0x63, 0xbd, 0x5e, 0x8b, 0x54, 0xd2, 0x77,
+	0xd0, 0x1b, 0xa3, 0x50, 0xfb, 0xd7, 0x43, 0x8f, 0x36, 0xa8, 0xb0, 0xe0, 0x1e, 0x6c, 0xd0, 0xa0,
+	0x6f, 0x01, 0x3e, 0x28, 0xfb, 0xe0, 0xbc, 0x57, 0xa4, 0x68, 0x3a, 0x47, 0xfd, 0xff, 0xa5, 0x69,
+	0x6f, 0x9e, 0x25, 0x5a, 0xc8, 0x7d, 0xea, 0xa3, 0x13, 0xc5, 0x83, 0xfe, 0x11, 0x54, 0x7e, 0x8f,
+	0x46, 0x44, 0xe2, 0x1f, 0xe0, 0x7e, 0xce, 0x95, 0xd9, 0xd1, 0x37, 0x38, 0xf7, 0x3c, 0xfb, 0x66,
+	0x84, 0x7c, 0x48, 0xeb, 0x4b, 0xf8, 0x7f, 0xa2, 0xef, 0xd2, 0xe3, 0xe6, 0xf7, 0x25, 0x9f, 0x0e,
+	0x54, 0xec, 0xbc, 0xf0, 0xf0, 0xf3, 0xbe, 0xfe, 0x13, 0x00, 0x00, 0xff, 0xff, 0xa9, 0x40, 0x83,
+	0x1c, 0xd5, 0x03, 0x00, 0x00,
 }

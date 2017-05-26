@@ -8,11 +8,11 @@ service Command {
   // if Release.Id is provided, then only the matched one returns.
   // if Release.App is provided, then it returns all the releases for that app
   rpc GetRelease(Release) returns (stream Release){}
-  // once the release.lock set to true, Release can not be updated anymore, only `nextReleaseId` can be changed 
-  // under the following condition:
+  // once the release.lock set to true, Release can not be updated anymore, 
+  // only `nextReleaseId` can be changed under the following condition:
   // nextReleaseId must not set or `lock` has to be false
   rpc UpdateRelease(Release) returns (Release){}
-  // UplaodRelease upload won't work unless ReleaseId exists
+  // UplaodRelease won't work unless ReleaseId exists
   rpc UploadRelease(stream Chunck) returns (Empty){}
 }
 
