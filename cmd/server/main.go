@@ -85,7 +85,7 @@ func (c *commandServer) UploadRelease(upload pb.Command_UploadReleaseServer) err
 	var moved bool
 
 	filename := uuid.NewV4().String()
-	path := fmt.Sprintf("/tmp/%s", filename)
+	path := fmt.Sprintf("/bundles/%s", filename)
 
 	file, err := os.Create(path)
 	if err != nil {
@@ -93,12 +93,9 @@ func (c *commandServer) UploadRelease(upload pb.Command_UploadReleaseServer) err
 	}
 
 	defer func() {
-		log.Println("closing file")
-		log.Println(err.Error())
 		file.Close()
 		// if there is an error, the tmp file should be cleaned up
 		if err != nil {
-
 			// it means that the file has already moved to bundle so clean
 			// that one instead
 			if moved {
@@ -108,18 +105,18 @@ func (c *commandServer) UploadRelease(upload pb.Command_UploadReleaseServer) err
 			err = os.Remove(path)
 			if err != nil {
 				log.Println(err.Error())
-				log.Printf("hash '%s' value related to above \n", hash)
 			}
 		}
 	}()
 
 	for {
 		chunck, err = upload.Recv()
-		if err != nil {
-			if err == io.EOF {
-				break
-			}
+		if err == io.EOF {
 
+			break
+		}
+
+		if err != nil {
 			return err
 		}
 
@@ -127,16 +124,12 @@ func (c *commandServer) UploadRelease(upload pb.Command_UploadReleaseServer) err
 		body := chunck.GetBody()
 
 		if header != nil {
-			fmt.Println("received header", header.ReleaseId)
 			if releaseID != 0 {
 				err = fmt.Errorf("chunck header sent multiple times")
 				return err
 			}
 			releaseID = header.ReleaseId
-			//total = header.Total
 		} else if body != nil {
-			fmt.Println("received body", len(body.Data))
-			//receivedBytes += int64(len(body.Data))
 			file.Write(body.Data)
 		}
 	}
@@ -146,11 +139,6 @@ func (c *commandServer) UploadRelease(upload pb.Command_UploadReleaseServer) err
 		return err
 	}
 
-	// if receivedBytes != total {
-	// 	err = fmt.Errorf("the total amount is not matched")
-	// 	return err
-	// }
-
 	// calculate the hash value
 	hash, err = helper.HashFile(path)
 	if err != nil {
@@ -159,14 +147,7 @@ func (c *commandServer) UploadRelease(upload pb.Command_UploadReleaseServer) err
 
 	release := pb.Release{}
 
-	err = c.db.One("id", releaseID, &release)
-	if err != nil {
-		return err
-	}
-
-	// initialize buckets
-
-	err = c.db.Init(&pb.Release{})
+	err = c.db.One("Id", releaseID, &release)
 	if err != nil {
 		return err
 	}
@@ -178,14 +159,13 @@ func (c *commandServer) UploadRelease(upload pb.Command_UploadReleaseServer) err
 	defer tx.Rollback()
 
 	release.Bundle = hash
-	err = tx.Save(release)
+	err = tx.Save(&release)
 	if err != nil {
 		return err
 	}
 
-	log.Println("moved", path, bundlePath(&release))
-
-	// move the file to bundles folder
+	// rename the bundle in the same folder.
+	// NOTE: if you don't, you will get `invalid cross-device link` error
 	err = os.Rename(path, bundlePath(&release))
 	if err != nil {
 		return err
@@ -196,7 +176,10 @@ func (c *commandServer) UploadRelease(upload pb.Command_UploadReleaseServer) err
 
 	err = tx.Commit()
 
-	log.Println("before returnin error:", err.Error())
+	if err == nil {
+		err = upload.SendAndClose(&release)
+	}
+
 	return err
 }
 
@@ -269,17 +252,10 @@ func (qs *queryServer) DownloadRelease(release *pb.Release, stream pb.Query_Down
 
 	defer file.Close()
 
-	// we need to send the header first
-	info, err := file.Stat()
-	if err != nil {
-		return err
-	}
-
 	chunck := &pb.Chunck{
 		Value: &pb.Chunck_Header_{
 			Header: &pb.Chunck_Header{
 				ReleaseId: release.Id,
-				Total:     info.Size(),
 			},
 		},
 	}

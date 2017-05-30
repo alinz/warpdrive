@@ -96,7 +96,6 @@ var publishCmd = &cobra.Command{
 
 		reader, writer := io.Pipe()
 		go func() {
-			log.Println("start sending data")
 			// sending header
 			err := upload.Send(&warpdrive.Chunck{
 				Value: &warpdrive.Chunck_Header_{
@@ -115,29 +114,31 @@ var publishCmd = &cobra.Command{
 			buffer := make([]byte, 1000)
 			for {
 				n, err := reader.Read(buffer)
-				log.Println("data sent", n)
-				//time.Sleep(100 * time.Millisecond)
+
+				if err == io.EOF {
+					log.Println("io closed")
+					reader.Close()
+					break
+				}
 
 				if err != nil {
-					if err == io.EOF {
-						log.Println("io closed")
-						reader.Close()
-						break
-					}
+					log.Println(err.Error())
+					reader.CloseWithError(err)
+					return
+				}
 
-					err = upload.Send(&warpdrive.Chunck{
-						Value: &warpdrive.Chunck_Body_{
-							Body: &warpdrive.Chunck_Body{
-								Data: buffer[:n],
-							},
+				err = upload.Send(&warpdrive.Chunck{
+					Value: &warpdrive.Chunck_Body_{
+						Body: &warpdrive.Chunck_Body{
+							Data: buffer[:n],
 						},
-					})
+					},
+				})
 
-					if err != nil {
-						log.Println("close during sending data", err.Error())
-						reader.CloseWithError(err)
-						return
-					}
+				if err != nil {
+					log.Println("close during sending data", err.Error())
+					reader.CloseWithError(err)
+					return
 				}
 			}
 		}()
@@ -147,10 +148,12 @@ var publishCmd = &cobra.Command{
 			log.Fatal(err.Error())
 		}
 
-		err = upload.CloseSend()
+		release, err = upload.CloseAndRecv()
 		if err != nil {
 			log.Fatal(err.Error())
 		}
+
+		log.Println(release)
 	},
 }
 
