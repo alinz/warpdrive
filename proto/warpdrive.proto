@@ -28,8 +28,9 @@ service Query {
 message Empty {}
 
 enum Platform {
-  IOS = 0;
-  ANDROID = 1;
+  UNKNOWN = 0;
+  IOS = 1;
+  ANDROID = 2;
 }
 
 // Release can be duplicate for different rollout.

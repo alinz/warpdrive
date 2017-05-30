@@ -10,6 +10,10 @@ services:
     volumes:
       - ./db:/db
       - ./bundles:/bundles
+      - ./tmp:/tmp
+
+    ports:
+      - "10000:54321"
 
     environment:
       - COMMAND_CA=/cert/ca-command.crt

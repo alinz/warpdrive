@@ -14,7 +14,11 @@ create-service-certificates:
 	@certstrap --depot-path "cert" request-cert --passphrase "" --common-name "query" &&								\
 	certstrap --depot-path "cert" sign "query" --CA "ca-query" &&																				\
 	certstrap --depot-path "cert" request-cert --passphrase "" --common-name "command" &&								\
-	certstrap --depot-path "cert" sign "command" --CA "ca-command";	
+	certstrap --depot-path "cert" sign "command" --CA "ca-command";
+
+create-cli-certificate:
+	@certstrap --depot-path "cert" request-cert --passphrase "" --common-name "cli" &&									\
+	certstrap --depot-path "cert" sign "cli" --CA "ca-command";
 
 # follwing command will generate certificate for mobile which let's them connect to
 # query service
@@ -37,3 +41,10 @@ compile-server-linux: compile-protobuf
 
 build-docker: compile-server-linux
 	docker build -t warpdrive .
+
+build-cli: compile-protobuf
+	@export GOGC=off;																																										\
+	export GOOS=darwin;																																									\
+	export GOARCH=amd64;																																								\
+	go build -ldflags "$(LDFLAGS)" 																																			\
+	-o ./bin/cli/warp ./cmd/warp;	

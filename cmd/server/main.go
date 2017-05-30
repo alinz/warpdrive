@@ -1,11 +1,8 @@
 package main
 
 import (
-	"crypto/tls"
-	"crypto/x509"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net"
 	"os"
@@ -16,51 +13,11 @@ import (
 	"github.com/asdine/storm/codec/protobuf"
 	"github.com/kelseyhightower/envconfig"
 	uuid "github.com/satori/go.uuid"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 
 	"github.com/asdine/storm/q"
 	"github.com/pressly/warpdrive/helper"
 	pb "github.com/pressly/warpdrive/proto"
 )
-
-type grpcConfig struct {
-	certPool    *x509.CertPool
-	certificate tls.Certificate
-}
-
-func (g *grpcConfig) createServer() (*grpc.Server, error) {
-	tlsConfig := &tls.Config{
-		ClientAuth:   tls.RequireAndVerifyClientCert,
-		Certificates: []tls.Certificate{g.certificate},
-		ClientCAs:    g.certPool,
-	}
-
-	serverOption := grpc.Creds(credentials.NewTLS(tlsConfig))
-	server := grpc.NewServer(serverOption)
-
-	return server, nil
-}
-
-func newGrpcConfig(ca, crt, key string) (*grpcConfig, error) {
-	certificate, err := tls.LoadX509KeyPair(
-		crt,
-		key,
-	)
-
-	certPool := x509.NewCertPool()
-	bs, err := ioutil.ReadFile(ca)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read client ca cert: %s", err)
-	}
-
-	ok := certPool.AppendCertsFromPEM(bs)
-	if !ok {
-		return nil, fmt.Errorf("failed to append client certs")
-	}
-
-	return &grpcConfig{certPool, certificate}, nil
-}
 
 func openDB(path string) (*storm.DB, error) {
 	db, err := storm.Open(path, storm.Codec(protobuf.Codec))
@@ -69,6 +26,10 @@ func openDB(path string) (*storm.DB, error) {
 	}
 
 	return db, nil
+}
+
+func bundlePath(release *pb.Release) string {
+	return fmt.Sprintf("/bundles/%s", release.Bundle)
 }
 
 type commandServer struct {
@@ -116,8 +77,8 @@ func (c *commandServer) UpdateRelease(ctx context.Context, release *pb.Release) 
 
 func (c *commandServer) UploadRelease(upload pb.Command_UploadReleaseServer) error {
 	var releaseID uint64
-	var total int64
-	var receivedBytes int64
+	//var total int64
+	//var receivedBytes int64
 	var err error
 	var hash string
 	var chunck *pb.Chunck
@@ -132,9 +93,14 @@ func (c *commandServer) UploadRelease(upload pb.Command_UploadReleaseServer) err
 	}
 
 	defer func() {
+		log.Println("closing file")
+		log.Println(err.Error())
 		file.Close()
 		// if there is an error, the tmp file should be cleaned up
 		if err != nil {
+
+			// it means that the file has already moved to bundle so clean
+			// that one instead
 			if moved {
 				path = fmt.Sprintf("/bundles/%s", hash)
 			}
@@ -161,27 +127,29 @@ func (c *commandServer) UploadRelease(upload pb.Command_UploadReleaseServer) err
 		body := chunck.GetBody()
 
 		if header != nil {
-			if releaseID != 0 || total != 0 {
+			fmt.Println("received header", header.ReleaseId)
+			if releaseID != 0 {
 				err = fmt.Errorf("chunck header sent multiple times")
 				return err
 			}
 			releaseID = header.ReleaseId
-			total = header.Total
+			//total = header.Total
 		} else if body != nil {
-			receivedBytes += int64(len(body.Data))
+			fmt.Println("received body", len(body.Data))
+			//receivedBytes += int64(len(body.Data))
 			file.Write(body.Data)
 		}
 	}
 
-	if total == 0 || releaseID == 0 {
+	if releaseID == 0 {
 		err = fmt.Errorf("header is not sent")
 		return err
 	}
 
-	if receivedBytes != total {
-		err = fmt.Errorf("the total amount is not matched")
-		return err
-	}
+	// if receivedBytes != total {
+	// 	err = fmt.Errorf("the total amount is not matched")
+	// 	return err
+	// }
 
 	// calculate the hash value
 	hash, err = helper.HashFile(path)
@@ -215,8 +183,10 @@ func (c *commandServer) UploadRelease(upload pb.Command_UploadReleaseServer) err
 		return err
 	}
 
+	log.Println("moved", path, bundlePath(&release))
+
 	// move the file to bundles folder
-	err = os.Rename(path, fmt.Sprintf("/bundles/%s", hash))
+	err = os.Rename(path, bundlePath(&release))
 	if err != nil {
 		return err
 	}
@@ -225,6 +195,8 @@ func (c *commandServer) UploadRelease(upload pb.Command_UploadReleaseServer) err
 	moved = true
 
 	err = tx.Commit()
+
+	log.Println("before returnin error:", err.Error())
 	return err
 }
 
@@ -232,11 +204,118 @@ type queryServer struct {
 	db *storm.DB
 }
 
-func (q *queryServer) GetUpgrade(ctx context.Context, release *pb.Release) (*pb.Release, error) {
-	return nil, nil
+func (qs *queryServer) GetUpgrade(ctx context.Context, release *pb.Release) (*pb.Release, error) {
+	if release.Id == 0 {
+		return nil, fmt.Errorf("release.id is missing")
+	}
+
+	if release.App == "" {
+		return nil, fmt.Errorf("release.App is missing")
+	}
+
+	if release.Platform == pb.Platform_UNKNOWN {
+		return nil, fmt.Errorf("release.Platform is missing")
+	}
+
+	if release.RolloutAt == "" {
+		return nil, fmt.Errorf("release.RolloutAt is missing")
+	}
+
+	// we need to load release object so we can access to
+	//
+	err := qs.db.Select(q.And(
+		q.Eq("id", release.Id),
+		q.Eq("app", release.App),
+		q.Eq("platform", release.Platform),
+		q.Eq("rolloutat", release.RolloutAt),
+		q.Eq("lock", true),
+	)).First(release)
+	if err != nil {
+		return nil, err
+	}
+
+	// we need to find the latest one
+	for {
+		err = qs.db.Select(q.And(
+			q.Eq("id", release.NextReleaseId),
+			q.Eq("app", release.App),
+			q.Eq("platform", release.Platform),
+			q.Eq("rolloutat", release.RolloutAt),
+			q.Eq("lock", true),
+		)).First(release)
+		if err != nil {
+			return nil, err
+		}
+
+		if release.NextReleaseId == 0 {
+			break
+		}
+	}
+
+	return release, nil
 }
 
-func (q *queryServer) DownloadRelease(release *pb.Release, query pb.Query_DownloadReleaseServer) error {
+func (qs *queryServer) DownloadRelease(release *pb.Release, stream pb.Query_DownloadReleaseServer) error {
+	err := qs.db.One("id", release.Id, release)
+	if err != nil {
+		return err
+	}
+
+	path := bundlePath(release)
+	file, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+
+	defer file.Close()
+
+	// we need to send the header first
+	info, err := file.Stat()
+	if err != nil {
+		return err
+	}
+
+	chunck := &pb.Chunck{
+		Value: &pb.Chunck_Header_{
+			Header: &pb.Chunck_Header{
+				ReleaseId: release.Id,
+				Total:     info.Size(),
+			},
+		},
+	}
+
+	err = stream.Send(chunck)
+	if err != nil {
+		return err
+	}
+
+	// the buffer is 10kb which means
+	// for sending 10mb we need to send 1000 messages
+	buffer := make([]byte, 10000)
+	var n int
+
+	for {
+		n, err = file.Read(buffer)
+		if err != io.EOF {
+			break
+		}
+
+		if n > 0 {
+			chunck = &pb.Chunck{
+				Value: &pb.Chunck_Body_{
+					Body: &pb.Chunck_Body{
+						Data: buffer,
+					},
+				},
+			}
+
+			err = stream.Send(chunck)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
 	return nil
 }
 
@@ -265,22 +344,22 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	grpcCommandConfig, err := newGrpcConfig(commandEnv.CA, commandEnv.Crt, commandEnv.Key)
+	grpcCommandConfig, err := helper.NewGrpcConfig(commandEnv.CA, commandEnv.Crt, commandEnv.Key)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	grpcQueryConfig, err := newGrpcConfig(queryEnv.CA, queryEnv.Crt, queryEnv.Key)
+	grpcQueryConfig, err := helper.NewGrpcConfig(queryEnv.CA, queryEnv.Crt, queryEnv.Key)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	grpcCommandServer, err := grpcCommandConfig.createServer()
+	grpcCommandServer, err := grpcCommandConfig.CreateServer()
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	grpcQueryServer, err := grpcQueryConfig.createServer()
+	grpcQueryServer, err := grpcQueryConfig.CreateServer()
 	if err != nil {
 		log.Fatal(err.Error())
 	}
