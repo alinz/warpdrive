@@ -48,3 +48,17 @@ build-cli: compile-protobuf
 	export GOARCH=amd64;																																								\
 	go build -ldflags "$(LDFLAGS)" 																																			\
 	-o ./bin/cli/warp ./cmd/warp;	
+
+clean-ios:
+	@rm -rf ./client/ios/Warpdrive.framework
+
+build-ios: clean-ios
+	@cd ./cmd/warpdrive && gomobile bind -target=ios -ldflags="-s -w" . && mv -f Warpdrive.framework ../../client/ios
+
+clean-android:
+	@rm -rf client/android/lib/warpdrive.aar
+
+build-android: clean-android
+	@cd ./cmd/warpdrive && gomobile bind -target=android -ldflags="-s -w" . && mv -f warpdrive.aar ../../client/android/lib
+
+build-clients: build-ios build-android

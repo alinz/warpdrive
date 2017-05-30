@@ -19,8 +19,9 @@ node_modules
 ##
 ## client build
 ##
-warpify.framework
-warpify.aar
+warpdrive.framework
+warpdrive.aar
+client/ios
 .bundles
 .test
 warp
