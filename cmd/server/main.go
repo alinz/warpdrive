@@ -232,8 +232,8 @@ type queryServer struct {
 }
 
 func (qs *queryServer) GetUpgrade(ctx context.Context, release *pb.Release) (*pb.Release, error) {
-	if release.Id == 0 {
-		return nil, fmt.Errorf("release.id is missing")
+	if release.Version == "" {
+		return nil, fmt.Errorf("release.Version is missing")
 	}
 
 	if release.App == "" {
@@ -251,11 +251,11 @@ func (qs *queryServer) GetUpgrade(ctx context.Context, release *pb.Release) (*pb
 	// we need to load release object so we can access to
 	//
 	err := qs.db.Select(q.And(
-		q.Eq("id", release.Id),
-		q.Eq("app", release.App),
-		q.Eq("platform", release.Platform),
-		q.Eq("rolloutat", release.RolloutAt),
-		q.Eq("lock", true),
+		q.Eq("App", release.App),
+		q.Eq("Platform", release.Platform),
+		q.Eq("RolloutAt", release.RolloutAt),
+		q.Eq("Version", release.Version),
+		q.Eq("Lock", true),
 	)).First(release)
 	if err != nil {
 		return nil, err
@@ -264,11 +264,11 @@ func (qs *queryServer) GetUpgrade(ctx context.Context, release *pb.Release) (*pb
 	// we need to find the latest one
 	for {
 		err = qs.db.Select(q.And(
-			q.Eq("id", release.NextReleaseId),
-			q.Eq("app", release.App),
-			q.Eq("platform", release.Platform),
-			q.Eq("rolloutat", release.RolloutAt),
-			q.Eq("lock", true),
+			q.Eq("Id", release.NextReleaseId),
+			q.Eq("App", release.App),
+			q.Eq("Platform", release.Platform),
+			q.Eq("RolloutAt", release.RolloutAt),
+			q.Eq("Lock", true),
 		)).First(release)
 		if err != nil {
 			return nil, err
@@ -309,9 +309,7 @@ func (qs *queryServer) DownloadRelease(release *pb.Release, stream pb.Query_Down
 		return err
 	}
 
-	// the buffer is 10kb which means
-	// for sending 10mb we need to send 1000 messages
-	buffer := make([]byte, 10000)
+	buffer := make([]byte, 1000)
 	var n int
 
 	for {
@@ -320,11 +318,15 @@ func (qs *queryServer) DownloadRelease(release *pb.Release, stream pb.Query_Down
 			break
 		}
 
+		if err != nil {
+			return err
+		}
+
 		if n > 0 {
 			chunck = &pb.Chunck{
 				Value: &pb.Chunck_Body_{
 					Body: &pb.Chunck_Body{
-						Data: buffer,
+						Data: buffer[:n],
 					},
 				},
 			}

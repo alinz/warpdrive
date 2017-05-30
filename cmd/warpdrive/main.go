@@ -1,46 +1,128 @@
 package warpdrive
 
-import "github.com/asdine/storm"
-import "path/filepath"
-import "os"
+import (
+	"context"
+	"io/ioutil"
+	"os"
+	"path/filepath"
 
-var (
-	_bundlePath    string
-	_documentPath  string
-	_warpdrivePath string
-	_platform      string
-	_deviceCert    string
-	_deviceKey     string
-	_caCert        string
-	_db            *storm.DB
+	"github.com/pressly/warpdrive/helper"
+	pb "github.com/pressly/warpdrive/proto"
 )
 
-type currentRelease struct {
-	ID uint64 `storm:"id,increment"`
+var config = struct {
+	bundlePath     string
+	documentPath   string
+	warpdrivePath  string
+	platform       pb.Platform
+	app            string
+	rollout        string
+	bundleVersion  string
+	currentVersion string
+	addr           string
+	grpcClient     *helper.GrpcConfig
+}{}
+
+func update() (*pb.Release, error) {
+	clientConn, err := config.grpcClient.CreateClient("warpdrive", config.addr)
+	if err != nil {
+		return nil, err
+	}
+
+	query := pb.NewQueryClient(clientConn)
+	release, err := query.GetUpgrade(context.Background(), &pb.Release{
+		App:       config.app,
+		Version:   config.currentVersion,
+		RolloutAt: config.rollout,
+		Platform:  config.platform,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return release, nil
 }
 
-func dbPath() string {
-	return filepath.Join(_warpdrivePath, "/warpdrive.db")
-}
-
-// Init initialize warpdrive
-func Init(bundlePath, documentPath, platform, deviceCert, deviceKey, caCert string) error {
-	_bundlePath = bundlePath
-	_documentPath = documentPath
-	_platform = platform
-	_deviceCert = deviceCert
-	_deviceKey = deviceKey
-	_caCert = caCert
-
-	_warpdrivePath = filepath.Join(_documentPath, "/warpdrive")
-	os.MkdirAll(_warpdrivePath, os.ModePerm)
-
-	db, err := storm.Open(dbPath())
+func upgrade(release *pb.Release) error {
+	clientConn, err := config.grpcClient.CreateClient("warpdrive", config.addr)
 	if err != nil {
 		return err
 	}
 
-	_db = db
+	query := pb.NewQueryClient(clientConn)
+
+	stream, err := query.DownloadRelease(context.Background(), release)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func saveCurrentVersion(version string) error {
+	path := filepath.Join(config.warpdrivePath, "current.warpdrive")
+	file, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+
+	defer file.Close()
+
+	file.WriteString(version)
+	file.Sync()
+
+	return nil
+}
+
+func loadCurrentVersion() (string, error) {
+	path := filepath.Join(config.warpdrivePath, "current.warpdrive")
+	content, err := ioutil.ReadFile(path)
+	if err != nil {
+		return "", err
+	}
+
+	return string(content), nil
+}
+
+// Init initialize warpdrive
+func Init(bundlePath, documentPath, platform, app, rollout, bundleVersion, addr, deviceCert, deviceKey, caCert string) error {
+	var err error
+
+	config.bundlePath = bundlePath
+	config.documentPath = documentPath
+	switch platform {
+	case "ios":
+		config.platform = pb.Platform_IOS
+	case "android":
+		config.platform = pb.Platform_ANDROID
+	default:
+		config.platform = pb.Platform_UNKNOWN
+	}
+
+	config.app = app
+	config.rollout = rollout
+	config.bundleVersion = bundleVersion
+	config.addr = addr
+	config.grpcClient, err = helper.NewGrpcConfig(caCert, deviceCert, deviceKey)
+	if err != nil {
+		return err
+	}
+
+	// NOTE: we are using bundleVersion for active warpdrive folder
+	// now if a new version of app publishes to app store, the app starts fresh if the user updates
+	// the app and read from the new fresh folder.
+	config.warpdrivePath = filepath.Join(config.documentPath, "/warpdrive", bundleVersion)
+	err = os.MkdirAll(config.warpdrivePath, os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	// set the current version based on previously saved one or
+	// bundleVersion
+	config.currentVersion, err = loadCurrentVersion()
+	if err != nil {
+		config.currentVersion = bundleVersion
+	}
 
 	return nil
 }
