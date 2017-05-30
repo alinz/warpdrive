@@ -32,12 +32,57 @@ func bundlePath(release *pb.Release) string {
 	return fmt.Sprintf("/bundles/%s", release.Bundle)
 }
 
+func mustDefineStringValue(name, value string) error {
+	if value == "" {
+		return fmt.Errorf("%s must have a value", name)
+	}
+	return nil
+}
+
 type commandServer struct {
 	db *storm.DB
 }
 
 func (c *commandServer) CreateRelease(ctx context.Context, release *pb.Release) (*pb.Release, error) {
-	err := c.db.Save(release)
+	// we need to check for coupld of conditions
+	// 1 - `App`, `version`, `rolloutAt` and `platform` must have a value
+	// 2 - combining `App`, `version`, `rolloutAt` and `platform` must be unique
+	err := mustDefineStringValue("app", release.App)
+	if err != nil {
+		return nil, err
+	}
+
+	err = mustDefineStringValue("version", release.Version)
+	if err != nil {
+		return nil, err
+	}
+
+	err = mustDefineStringValue("rolloutAt", release.RolloutAt)
+	if err != nil {
+		return nil, err
+	}
+
+	if release.Platform == pb.Platform_UNKNOWN {
+		return nil, fmt.Errorf("platform must be defined")
+	}
+
+	var releases []pb.Release
+	err = c.db.Select(q.And(
+		q.Eq("App", release.App),
+		q.Eq("Version", release.Version),
+		q.Eq("RolloutAt", release.RolloutAt),
+		q.Eq("Platform", release.Platform),
+	)).Find(&releases)
+
+	if err != nil && err != storm.ErrNotFound {
+		return nil, err
+	}
+
+	if len(releases) > 0 {
+		return nil, fmt.Errorf("version must be changed for this app")
+	}
+
+	err = c.db.Save(release)
 	if err != nil {
 		return nil, err
 	}
@@ -112,7 +157,6 @@ func (c *commandServer) UploadRelease(upload pb.Command_UploadReleaseServer) err
 	for {
 		chunck, err = upload.Recv()
 		if err == io.EOF {
-
 			break
 		}
 
