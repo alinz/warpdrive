@@ -50,15 +50,18 @@ build-cli: compile-protobuf
 	-o ./bin/cli/warp ./cmd/warp;	
 
 clean-ios:
-	@rm -rf ./client/ios/Warpdrive.framework
+	@rm -rf ./client/ios/framework/Warpdrive.framework;																									\
+	mkdir -p ./client/ios/framework;
 
 build-ios: clean-ios
-	@cd ./cmd/warpdrive && gomobile bind -target=ios -ldflags="-s -w" . && mv -f Warpdrive.framework ../../client/ios
+	@cd ./cmd/warpdrive && gomobile bind -target=ios -ldflags="-s -w" . && 															\
+	mv -f Warpdrive.framework ../../client/ios/framework;
 
 clean-android:
 	@rm -rf client/android/lib/warpdrive.aar
 
 build-android: clean-android
-	@cd ./cmd/warpdrive && gomobile bind -target=android -ldflags="-s -w" . && mv -f warpdrive.aar ../../client/android/lib
+	@cd ./cmd/warpdrive && gomobile bind -target=android -ldflags="-s -w" . && 													\
+	mv -f warpdrive.aar ../../client/android/lib;
 
 build-clients: build-ios build-android

@@ -9,7 +9,7 @@ cert
 node_modules
 warpdrive.framework
 warpdrive.aar
-client/ios
+client/ios/framework
 .bundles
 old
 
