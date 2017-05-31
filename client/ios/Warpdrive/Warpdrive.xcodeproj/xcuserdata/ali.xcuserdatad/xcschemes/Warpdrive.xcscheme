@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "41AE90DD1EDF477A005809B9"
+               BlueprintIdentifier = "41EDB36C1EDF4C9C004C0E93"
                BuildableName = "libWarpdrive.a"
                BlueprintName = "Warpdrive"
                ReferencedContainer = "container:Warpdrive.xcodeproj">
@@ -45,7 +45,7 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "41AE90DD1EDF477A005809B9"
+            BlueprintIdentifier = "41EDB36C1EDF4C9C004C0E93"
             BuildableName = "libWarpdrive.a"
             BlueprintName = "Warpdrive"
             ReferencedContainer = "container:Warpdrive.xcodeproj">
@@ -63,7 +63,7 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "41AE90DD1EDF477A005809B9"
+            BlueprintIdentifier = "41EDB36C1EDF4C9C004C0E93"
             BuildableName = "libWarpdrive.a"
             BlueprintName = "Warpdrive"
             ReferencedContainer = "container:Warpdrive.xcodeproj">

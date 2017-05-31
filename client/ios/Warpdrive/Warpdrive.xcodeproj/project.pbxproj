@@ -7,31 +7,29 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		41AE90E31EDF477A005809B9 /* WarpdriveManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 41AE90E21EDF477A005809B9 /* WarpdriveManager.m */; };
-		41AE90E41EDF477A005809B9 /* WarpdriveManager.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 41AE90E11EDF477A005809B9 /* WarpdriveManager.h */; };
+		41EDB37B1EDF4E08004C0E93 /* WarpdriveManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 41EDB37A1EDF4E08004C0E93 /* WarpdriveManager.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		41AE90DC1EDF477A005809B9 /* CopyFiles */ = {
+		41EDB36B1EDF4C9C004C0E93 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "include/$(PRODUCT_NAME)";
 			dstSubfolderSpec = 16;
 			files = (
-				41AE90E41EDF477A005809B9 /* WarpdriveManager.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		41AE90DE1EDF477A005809B9 /* libWarpdrive.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libWarpdrive.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		41AE90E11EDF477A005809B9 /* WarpdriveManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WarpdriveManager.h; sourceTree = "<group>"; };
-		41AE90E21EDF477A005809B9 /* WarpdriveManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WarpdriveManager.m; sourceTree = "<group>"; };
+		41EDB36D1EDF4C9C004C0E93 /* libWarpdrive.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libWarpdrive.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		41EDB3791EDF4E08004C0E93 /* WarpdriveManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WarpdriveManager.h; sourceTree = SOURCE_ROOT; };
+		41EDB37A1EDF4E08004C0E93 /* WarpdriveManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WarpdriveManager.m; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		41AE90DB1EDF477A005809B9 /* Frameworks */ = {
+		41EDB36A1EDF4C9C004C0E93 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -41,27 +39,27 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		41AE90D51EDF477A005809B9 = {
+		41EDB3641EDF4C9C004C0E93 = {
 			isa = PBXGroup;
 			children = (
-				41AE90E01EDF477A005809B9 /* Warpdrive */,
-				41AE90DF1EDF477A005809B9 /* Products */,
+				41EDB36F1EDF4C9C004C0E93 /* Warpdrive */,
+				41EDB36E1EDF4C9C004C0E93 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		41AE90DF1EDF477A005809B9 /* Products */ = {
+		41EDB36E1EDF4C9C004C0E93 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				41AE90DE1EDF477A005809B9 /* libWarpdrive.a */,
+				41EDB36D1EDF4C9C004C0E93 /* libWarpdrive.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		41AE90E01EDF477A005809B9 /* Warpdrive */ = {
+		41EDB36F1EDF4C9C004C0E93 /* Warpdrive */ = {
 			isa = PBXGroup;
 			children = (
-				41AE90E11EDF477A005809B9 /* WarpdriveManager.h */,
-				41AE90E21EDF477A005809B9 /* WarpdriveManager.m */,
+				41EDB3791EDF4E08004C0E93 /* WarpdriveManager.h */,
+				41EDB37A1EDF4E08004C0E93 /* WarpdriveManager.m */,
 			);
 			path = Warpdrive;
 			sourceTree = "<group>";
@@ -69,13 +67,13 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		41AE90DD1EDF477A005809B9 /* Warpdrive */ = {
+		41EDB36C1EDF4C9C004C0E93 /* Warpdrive */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 41AE90E71EDF477A005809B9 /* Build configuration list for PBXNativeTarget "Warpdrive" */;
+			buildConfigurationList = 41EDB3761EDF4C9C004C0E93 /* Build configuration list for PBXNativeTarget "Warpdrive" */;
 			buildPhases = (
-				41AE90DA1EDF477A005809B9 /* Sources */,
-				41AE90DB1EDF477A005809B9 /* Frameworks */,
-				41AE90DC1EDF477A005809B9 /* CopyFiles */,
+				41EDB3691EDF4C9C004C0E93 /* Sources */,
+				41EDB36A1EDF4C9C004C0E93 /* Frameworks */,
+				41EDB36B1EDF4C9C004C0E93 /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -83,54 +81,54 @@
 			);
 			name = Warpdrive;
 			productName = Warpdrive;
-			productReference = 41AE90DE1EDF477A005809B9 /* libWarpdrive.a */;
+			productReference = 41EDB36D1EDF4C9C004C0E93 /* libWarpdrive.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		41AE90D61EDF477A005809B9 /* Project object */ = {
+		41EDB3651EDF4C9C004C0E93 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 0830;
 				ORGANIZATIONNAME = "Ali Najafizadeh";
 				TargetAttributes = {
-					41AE90DD1EDF477A005809B9 = {
+					41EDB36C1EDF4C9C004C0E93 = {
 						CreatedOnToolsVersion = 8.3.2;
 						ProvisioningStyle = Automatic;
 					};
 				};
 			};
-			buildConfigurationList = 41AE90D91EDF477A005809B9 /* Build configuration list for PBXProject "Warpdrive" */;
+			buildConfigurationList = 41EDB3681EDF4C9C004C0E93 /* Build configuration list for PBXProject "Warpdrive" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 			);
-			mainGroup = 41AE90D51EDF477A005809B9;
-			productRefGroup = 41AE90DF1EDF477A005809B9 /* Products */;
+			mainGroup = 41EDB3641EDF4C9C004C0E93;
+			productRefGroup = 41EDB36E1EDF4C9C004C0E93 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				41AE90DD1EDF477A005809B9 /* Warpdrive */,
+				41EDB36C1EDF4C9C004C0E93 /* Warpdrive */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
-		41AE90DA1EDF477A005809B9 /* Sources */ = {
+		41EDB3691EDF4C9C004C0E93 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				41AE90E31EDF477A005809B9 /* WarpdriveManager.m in Sources */,
+				41EDB37B1EDF4E08004C0E93 /* WarpdriveManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		41AE90E51EDF477A005809B9 /* Debug */ = {
+		41EDB3741EDF4C9C004C0E93 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -178,7 +176,7 @@
 			};
 			name = Debug;
 		};
-		41AE90E61EDF477A005809B9 /* Release */ = {
+		41EDB3751EDF4C9C004C0E93 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -220,7 +218,7 @@
 			};
 			name = Release;
 		};
-		41AE90E81EDF477A005809B9 /* Debug */ = {
+		41EDB3771EDF4C9C004C0E93 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				OTHER_LDFLAGS = "-ObjC";
@@ -229,7 +227,7 @@
 			};
 			name = Debug;
 		};
-		41AE90E91EDF477A005809B9 /* Release */ = {
+		41EDB3781EDF4C9C004C0E93 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				OTHER_LDFLAGS = "-ObjC";
@@ -241,24 +239,24 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		41AE90D91EDF477A005809B9 /* Build configuration list for PBXProject "Warpdrive" */ = {
+		41EDB3681EDF4C9C004C0E93 /* Build configuration list for PBXProject "Warpdrive" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				41AE90E51EDF477A005809B9 /* Debug */,
-				41AE90E61EDF477A005809B9 /* Release */,
+				41EDB3741EDF4C9C004C0E93 /* Debug */,
+				41EDB3751EDF4C9C004C0E93 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		41AE90E71EDF477A005809B9 /* Build configuration list for PBXNativeTarget "Warpdrive" */ = {
+		41EDB3761EDF4C9C004C0E93 /* Build configuration list for PBXNativeTarget "Warpdrive" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				41AE90E81EDF477A005809B9 /* Debug */,
-				41AE90E91EDF477A005809B9 /* Release */,
+				41EDB3771EDF4C9C004C0E93 /* Debug */,
+				41EDB3781EDF4C9C004C0E93 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = 41AE90D61EDF477A005809B9 /* Project object */;
+	rootObject = 41EDB3651EDF4C9C004C0E93 /* Project object */;
 }
