@@ -1,8 +1,6 @@
 package warpdrive
 
 import (
-	"archive/tar"
-	"compress/gzip"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -122,67 +120,9 @@ func download(release *pb.Release) error {
 		}
 	}()
 
-	fileReader, err := gzip.NewReader(reader)
-	if err != nil {
-		// we need this to terminate the above go-routine, we will catch it at (###1)
-		reader.CloseWithError(err)
-		return err
-	}
-
-	defer fileReader.Close()
-
-	tarReader := tar.NewReader(fileReader)
-
 	dstPath := releasePath(release)
 
-	for {
-		tarHeader, err := tarReader.Next()
-		if err != nil {
-			if err == io.EOF {
-				break
-			}
-			return err
-		}
-
-		filename := filepath.Join(dstPath, tarHeader.Name)
-
-		switch tarHeader.Typeflag {
-		case tar.TypeDir:
-			// handle directory
-			err = os.MkdirAll(filename, os.ModePerm)
-			if err != nil {
-				return err
-			}
-
-		case tar.TypeReg, tar.TypeRegA:
-			// we need to make sure the folder exists
-			dir := filepath.Dir(filename)
-			err = os.MkdirAll(dir, os.ModePerm)
-			if err != nil {
-				return err
-			}
-
-			// handle normal file
-			writer, err := os.Create(filename)
-			if err != nil {
-				return err
-			}
-
-			io.Copy(writer, tarReader)
-
-			err = os.Chmod(filename, os.ModePerm)
-			if err != nil {
-				return err
-			}
-
-			writer.Close()
-
-		default:
-			return fmt.Errorf("Unable to untar type : %c in file %s", tarHeader.Typeflag, filename)
-		}
-	}
-
-	return nil
+	return helper.BundleUncompress(reader, dstPath)
 }
 
 func saveCurrentVersion(release *pb.Release) error {
