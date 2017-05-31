@@ -2,27 +2,15 @@
 
 *.DS_Store
 
-.tags
-.tags1
-
 bin
 tmp
-temp
-etc/warpdrive.conf
-WarpFile
-.warp
 cert
-db
-bundles
-node_modules
 
-##
-## client build
-##
+node_modules
 warpdrive.framework
 warpdrive.aar
 client/ios
 .bundles
-.test
-warp
 old
+
+warp

@@ -8,8 +8,8 @@ services:
       dockerfile: ./Dockerfile
 
     volumes:
-      - ./db:/db
-      - ./bundles:/bundles
+      - ./tmp/db:/db
+      - ./tmp/bundles:/bundles
 
     ports:
       - "10000:54321"
