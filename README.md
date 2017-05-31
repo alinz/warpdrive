@@ -1,5 +1,7 @@
 # Warpdrive
 
+ COMMAND_CA=cert/ca-command.crt COMMAND_CRT=cert/cli.crt COMMAND_KEY=cert/cli.key COMMAND_ADDR=command:10000 ./warp publish -a share -p ios -r dev -v 1.1.3 -n test
+
 # Dev Setup
 
 in order to compile the code for android and ios, you need to have gomobile install

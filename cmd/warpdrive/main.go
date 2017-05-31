@@ -1,10 +1,15 @@
 package warpdrive
 
 import (
+	"archive/tar"
+	"compress/gzip"
 	"context"
-	"io/ioutil"
+	"encoding/json"
+	"fmt"
+	"io"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/pressly/warpdrive/helper"
 	pb "github.com/pressly/warpdrive/proto"
@@ -44,6 +49,20 @@ func update() (*pb.Release, error) {
 }
 
 func upgrade(release *pb.Release) error {
+	err := download(release)
+	if err != nil {
+		return err
+	}
+
+	err = saveCurrentVersion(release)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func download(release *pb.Release) error {
 	clientConn, err := config.grpcClient.CreateClient("warpdrive", config.addr)
 	if err != nil {
 		return err
@@ -56,32 +75,156 @@ func upgrade(release *pb.Release) error {
 		return err
 	}
 
+	// need to read the header first
+	chunck, err := stream.Recv()
+	if err != nil {
+		return err
+	}
+
+	header := chunck.GetHeader()
+	if header == nil {
+		return fmt.Errorf("header is not sent")
+	}
+
+	if header.ReleaseId != release.Id {
+		return fmt.Errorf("release id mismatched")
+	}
+
+	reader, writer := io.Pipe()
+
+	// this go-routine reads the bytes from grpc services and pump it to
+	// io.Pipe. In this way, we don't need to save the tar file and we can
+	// extract the data from stream of bytes.
+	go func() {
+		for {
+			chunck, err := stream.Recv()
+			if err == io.EOF {
+				writer.Close()
+				break
+			}
+
+			if err != nil {
+				writer.CloseWithError(err)
+				return
+			}
+
+			body := chunck.GetBody()
+			if body == nil {
+				writer.CloseWithError(fmt.Errorf("body is empty"))
+				return
+			}
+
+			// ###1
+			_, err = writer.Write(body.Data)
+			if err != nil {
+				return
+			}
+		}
+	}()
+
+	fileReader, err := gzip.NewReader(reader)
+	if err != nil {
+		// we need this to terminate the above go-routine, we will catch it at (###1)
+		reader.CloseWithError(err)
+		return err
+	}
+
+	defer fileReader.Close()
+
+	tarReader := tar.NewReader(fileReader)
+
+	dstPath := releasePath(release)
+
+	for {
+		tarHeader, err := tarReader.Next()
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			return err
+		}
+
+		filename := filepath.Join(dstPath, tarHeader.Name)
+
+		switch tarHeader.Typeflag {
+		case tar.TypeDir:
+			// handle directory
+			err = os.MkdirAll(filename, os.ModePerm)
+			if err != nil {
+				return err
+			}
+
+		case tar.TypeReg, tar.TypeRegA:
+			// we need to make sure the folder exists
+			dir := filepath.Dir(filename)
+			err = os.MkdirAll(dir, os.ModePerm)
+			if err != nil {
+				return err
+			}
+
+			// handle normal file
+			writer, err := os.Create(filename)
+			if err != nil {
+				return err
+			}
+
+			io.Copy(writer, tarReader)
+
+			err = os.Chmod(filename, os.ModePerm)
+			if err != nil {
+				return err
+			}
+
+			writer.Close()
+
+		default:
+			return fmt.Errorf("Unable to untar type : %c in file %s", tarHeader.Typeflag, filename)
+		}
+	}
+
 	return nil
 }
 
-func saveCurrentVersion(version string) error {
-	path := filepath.Join(config.warpdrivePath, "current.warpdrive")
-	file, err := os.Create(path)
+func saveCurrentVersion(release *pb.Release) error {
+	file, err := os.Create(currentVersionPath())
 	if err != nil {
 		return err
 	}
 
 	defer file.Close()
 
-	file.WriteString(version)
-	file.Sync()
-
-	return nil
+	return json.NewEncoder(file).Encode(release)
 }
 
-func loadCurrentVersion() (string, error) {
-	path := filepath.Join(config.warpdrivePath, "current.warpdrive")
-	content, err := ioutil.ReadFile(path)
+func loadCurrentVersion() (*pb.Release, error) {
+	file, err := os.Open(currentVersionPath())
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return string(content), nil
+	defer file.Close()
+
+	release := pb.Release{}
+	err = json.NewDecoder(file).Decode(&release)
+	if err != nil {
+		return nil, err
+	}
+
+	return &release, nil
+}
+
+func releasePath(release *pb.Release) string {
+	return releasePathByVersion(release.Version)
+}
+
+func releasePathByVersion(version string) string {
+	version = strings.Replace(version, "/", "-", -1)
+	version = strings.Replace(version, " ", "-", -1)
+	return filepath.Join(config.warpdrivePath, fmt.Sprintf("releases/%s", version))
+}
+
+func currentVersionPath() string {
+	return filepath.Join(config.warpdrivePath, "current.warpdrive")
 }
 
 // Init initialize warpdrive
@@ -119,10 +262,32 @@ func Init(bundlePath, documentPath, platform, app, rollout, bundleVersion, addr,
 
 	// set the current version based on previously saved one or
 	// bundleVersion
-	config.currentVersion, err = loadCurrentVersion()
+	release, err := loadCurrentVersion()
 	if err != nil {
 		config.currentVersion = bundleVersion
+	} else {
+		config.currentVersion = release.Version
+	}
+
+	// when user launches app, the app will pauses until
+	// a new update downloads completely.
+	release, err = update()
+	if err == nil {
+		err = download(release)
+		if err == nil {
+			config.currentVersion = release.Version
+		}
 	}
 
 	return nil
+}
+
+// BundlePath returns the path to bundles which needs to be loaded
+// it returns empty string if there is no update version available
+func BundlePath() string {
+	if config.bundleVersion == config.currentVersion {
+		return ""
+	}
+
+	return releasePathByVersion(config.currentVersion)
 }
