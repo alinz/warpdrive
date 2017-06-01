@@ -64,7 +64,7 @@ RCT_EXPORT_MODULE();
     
     WarpdriveInit(bundlePath, documentPath, platform, app, rolloutAt, bundleVersion, serverAddr, deviceCert, deviceKey, caCert, &error);
     if (error != nil) {
-        NSLog(error);
+        NSLog(@"%@",[error localizedDescription]);
     }
     
     NSString* path = WarpdriveBundlePath();
@@ -72,7 +72,7 @@ RCT_EXPORT_MODULE();
         return nil;
     }
     
-    return [NSURL URLWithString:[path stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+    return [NSURL URLWithString:[path stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLFragmentAllowedCharacterSet]]];
 }
 
 + (void)reloadWithPath:(NSString*)path {

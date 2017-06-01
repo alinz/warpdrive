@@ -27,7 +27,7 @@ var config = struct {
 }{}
 
 func update() (*pb.Release, error) {
-	clientConn, err := config.grpcClient.CreateClient("warpdrive", config.addr)
+	clientConn, err := config.grpcClient.CreateClient("query", config.addr)
 	if err != nil {
 		return nil, err
 	}
@@ -177,8 +177,6 @@ func pathNormalize(path string) string {
 // Init initialize warpdrive
 func Init(bundlePath, documentPath, platform, app, rollout, bundleVersion, addr, deviceCert, deviceKey, caCert string) error {
 	var err error
-
-	fmt.Println("hahahahaha")
 
 	config.bundlePath = pathNormalize(bundlePath)
 	config.documentPath = pathNormalize(documentPath)

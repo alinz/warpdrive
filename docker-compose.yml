@@ -13,6 +13,7 @@ services:
 
     ports:
       - "10000:54321"
+      - "10001:54322"
 
     environment:
       - COMMAND_CA=/cert/ca-command.crt

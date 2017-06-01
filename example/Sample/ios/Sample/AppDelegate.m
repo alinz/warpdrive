@@ -19,18 +19,17 @@
 {
   NSURL *jsCodeLocation;
   
+  jsCodeLocation = [WarpdriveManager sourceBundleForApp:(NSString*)@"example"
+                                           andRolloutAt:(NSString*)@"beta"
+                                           andGroupName:(NSString*)nil
+                                          andServerAddr:(NSString*)@"localhost:10001"
+                                          andDeviceCert:(NSString*)@"device"
+                                           andDeviceKey:(NSString*)@"device"
+                                                  andCA:(NSString*)@"ca"];
   
-
-  [WarpdriveManager sourceBundleForApp:(NSString*)@"example"
-                          andRolloutAt:(NSString*)@"beta"
-                          andGroupName:(NSString*)nil
-                         andServerAddr:(NSString*)@"localhost:10000"
-                         andDeviceCert:(NSString*)@"device"
-                          andDeviceKey:(NSString*)@"device"
-                                 andCA:(NSString*)@"ca"];
-  
-  
-  jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index.ios" fallbackResource:nil];
+  if (jsCodeLocation == nil) {
+    jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index.ios" fallbackResource:nil];
+  }
 
   RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:jsCodeLocation
                                                       moduleName:@"Sample"
