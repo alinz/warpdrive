@@ -36,6 +36,9 @@
 		2DCD954D1E0B4F2C00145EB5 /* SampleTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* SampleTests.m */; };
 		41C1F3E91EE04858009209F1 /* Warpdrive.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 41C1F3E81EE04858009209F1 /* Warpdrive.framework */; };
 		41C1F3F01EE04889009209F1 /* libWarpdrive.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 41C1F3EF1EE0486F009209F1 /* libWarpdrive.a */; };
+		41C1F3F41EE0652A009209F1 /* ca.crt in Resources */ = {isa = PBXBuildFile; fileRef = 41C1F3F11EE0652A009209F1 /* ca.crt */; };
+		41C1F3F51EE0652A009209F1 /* device.crt in Resources */ = {isa = PBXBuildFile; fileRef = 41C1F3F21EE0652A009209F1 /* device.crt */; };
+		41C1F3F61EE0652A009209F1 /* device.key in Resources */ = {isa = PBXBuildFile; fileRef = 41C1F3F31EE0652A009209F1 /* device.key */; };
 		5E9157361DD0AC6A00FF2AA8 /* libRCTAnimation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5E9157331DD0AC6500FF2AA8 /* libRCTAnimation.a */; };
 		832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 832341B51AAA6A8300B99B32 /* libRCTText.a */; };
 /* End PBXBuildFile section */
@@ -263,6 +266,9 @@
 		2D02E4901E0B4A5D006451C7 /* Sample-tvOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Sample-tvOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		41C1F3E81EE04858009209F1 /* Warpdrive.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Warpdrive.framework; path = ../../../client/ios/Warpdrive.framework; sourceTree = "<group>"; };
 		41C1F3EA1EE0486F009209F1 /* Warpdrive.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Warpdrive.xcodeproj; path = ../../../client/ios/Warpdrive.xcodeproj; sourceTree = "<group>"; };
+		41C1F3F11EE0652A009209F1 /* ca.crt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ca.crt; path = ../ca.crt; sourceTree = "<group>"; };
+		41C1F3F21EE0652A009209F1 /* device.crt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = device.crt; path = ../device.crt; sourceTree = "<group>"; };
+		41C1F3F31EE0652A009209F1 /* device.key */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = device.key; path = ../device.key; sourceTree = "<group>"; };
 		5E91572D1DD0AC6500FF2AA8 /* RCTAnimation.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTAnimation.xcodeproj; path = "../node_modules/react-native/Libraries/NativeAnimation/RCTAnimation.xcodeproj"; sourceTree = "<group>"; };
 		78C398B01ACF4ADC00677621 /* RCTLinking.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTLinking.xcodeproj; path = "../node_modules/react-native/Libraries/LinkingIOS/RCTLinking.xcodeproj"; sourceTree = "<group>"; };
 		832341B01AAA6A8300B99B32 /* RCTText.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTText.xcodeproj; path = "../node_modules/react-native/Libraries/Text/RCTText.xcodeproj"; sourceTree = "<group>"; };
@@ -402,6 +408,7 @@
 		13B07FAE1A68108700A75B9A /* Sample */ = {
 			isa = PBXGroup;
 			children = (
+				41C1F3F71EE0652F009209F1 /* certificate */,
 				008F07F21AC5B25A0029DE68 /* main.jsbundle */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.m */,
@@ -434,6 +441,16 @@
 				41C1F3EF1EE0486F009209F1 /* libWarpdrive.a */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		41C1F3F71EE0652F009209F1 /* certificate */ = {
+			isa = PBXGroup;
+			children = (
+				41C1F3F31EE0652A009209F1 /* device.key */,
+				41C1F3F21EE0652A009209F1 /* device.crt */,
+				41C1F3F11EE0652A009209F1 /* ca.crt */,
+			);
+			name = certificate;
 			sourceTree = "<group>";
 		};
 		41EDB3AC1EDF4FD7004C0E93 /* Frameworks */ = {
@@ -882,6 +899,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
+				41C1F3F51EE0652A009209F1 /* device.crt in Resources */,
+				41C1F3F61EE0652A009209F1 /* device.key in Resources */,
+				41C1F3F41EE0652A009209F1 /* ca.crt in Resources */,
 				13B07FBD1A68108700A75B9A /* LaunchScreen.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

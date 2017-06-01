@@ -11,13 +11,25 @@
 
 #import <React/RCTBundleURLProvider.h>
 #import <React/RCTRootView.h>
+#import "WarpdriveManager.h"
 
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
   NSURL *jsCodeLocation;
+  
+  
 
+  [WarpdriveManager sourceBundleForApp:(NSString*)@"example"
+                          andRolloutAt:(NSString*)@"beta"
+                          andGroupName:(NSString*)nil
+                         andServerAddr:(NSString*)@"localhost:10000"
+                         andDeviceCert:(NSString*)@"device"
+                          andDeviceKey:(NSString*)@"device"
+                                 andCA:(NSString*)@"ca"];
+  
+  
   jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index.ios" fallbackResource:nil];
 
   RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:jsCodeLocation

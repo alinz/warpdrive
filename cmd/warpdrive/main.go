@@ -167,12 +167,21 @@ func currentVersionPath() string {
 	return filepath.Join(config.warpdrivePath, "current.warpdrive")
 }
 
+func pathNormalize(path string) string {
+	if strings.HasPrefix(path, "file://") {
+		return strings.Replace(path, "file://", "", 1)
+	}
+	return path
+}
+
 // Init initialize warpdrive
 func Init(bundlePath, documentPath, platform, app, rollout, bundleVersion, addr, deviceCert, deviceKey, caCert string) error {
 	var err error
 
-	config.bundlePath = bundlePath
-	config.documentPath = documentPath
+	fmt.Println("hahahahaha")
+
+	config.bundlePath = pathNormalize(bundlePath)
+	config.documentPath = pathNormalize(documentPath)
 	switch platform {
 	case "ios":
 		config.platform = pb.Platform_IOS
@@ -186,7 +195,7 @@ func Init(bundlePath, documentPath, platform, app, rollout, bundleVersion, addr,
 	config.rollout = rollout
 	config.bundleVersion = bundleVersion
 	config.addr = addr
-	config.grpcClient, err = helper.NewGrpcConfig(caCert, deviceCert, deviceKey)
+	config.grpcClient, err = helper.NewGrpcConfig(pathNormalize(caCert), pathNormalize(deviceCert), pathNormalize(deviceKey))
 	if err != nil {
 		return err
 	}
@@ -230,4 +239,9 @@ func BundlePath() string {
 	}
 
 	return releasePathByVersion(config.currentVersion)
+}
+
+func Test(bundlePath, documentPath, platform, app, rollout, bundleVersion, addr, deviceCert, deviceKey, caCert string) error {
+	fmt.Println("hahahaha 2")
+	return nil
 }

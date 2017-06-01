@@ -58,6 +58,10 @@ RCT_EXPORT_MODULE();
     NSString* platform = @"ios";
     NSError* error = nil;
     
+    deviceCert = [[bundle URLForResource:deviceCert withExtension:@"crt"] absoluteString];
+    deviceKey = [[bundle URLForResource:deviceKey withExtension:@"key"] absoluteString];
+    caCert = [[bundle URLForResource:caCert withExtension:@"crt"] absoluteString];
+    
     WarpdriveInit(bundlePath, documentPath, platform, app, rolloutAt, bundleVersion, serverAddr, deviceCert, deviceKey, caCert, &error);
     if (error != nil) {
         NSLog(error);
