@@ -12,8 +12,9 @@
 @interface WarpdriveManager : NSObject <RCTBridgeModule>
 + (NSURL*)sourceBundleForApp:(NSString*)app
                 andRolloutAt:(NSString*)rolloutAt
+                andGroupName:(NSString*)groupName
                andServerAddr:(NSString*)serverAddr
                andDeviceCert:(NSString*)deviceCert
                 andDeviceKey:(NSString*)deviceKey
-                       andCA:(NSString*)cert;
+                       andCA:(NSString*)caCert;
 @end
