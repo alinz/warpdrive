@@ -66,6 +66,7 @@ message Release {
 message Chunck {
   message Header {
     uint64 releaseId = 1;
+    repeated string upgrades = 2;
   }
 
   message Body {

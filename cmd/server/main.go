@@ -95,7 +95,7 @@ func (c *commandServer) CreateRelease(ctx context.Context, release *pb.Release) 
 // Release.Rollout is also need to be provided
 func (c *commandServer) GetRelease(release *pb.Release, stream pb.Command_GetReleaseServer) error {
 	if release.Id != 0 {
-		err := c.db.One("id", release.Id, release)
+		err := c.db.One("Id", release.Id, release)
 		if err != nil {
 			return err
 		}
@@ -120,6 +120,45 @@ func (c *commandServer) UpdateRelease(ctx context.Context, release *pb.Release) 
 	return release, nil
 }
 
+func (c *commandServer) getReleaseByID(id uint64) (*pb.Release, error) {
+	release := &pb.Release{}
+	err := c.db.One("Id", id, release)
+	if err != nil {
+		return nil, err
+	}
+	return release, nil
+}
+
+// getReleases, gets the base release and list of versions, and returns the list of
+// Release objects which matched the given release specification.
+func (c *commandServer) getReleases(release *pb.Release, versions []string) ([]*pb.Release, error) {
+	if len(versions) == 0 {
+		return nil, fmt.Errorf("versions are empty")
+	}
+
+	releases := make([]*pb.Release, 0)
+
+	for _, version := range versions {
+		r := &pb.Release{}
+		err := c.db.Select(q.And(
+			q.Eq("App", release.App),
+			q.Eq("RolloutAt", release.RolloutAt),
+			q.Eq("Platform", release.Platform),
+			q.Eq("Version", version),
+			q.Eq("NextReleaseId", 0),
+			q.Eq("Lock", true),
+		)).First(r)
+
+		if err != nil {
+			return nil, fmt.Errorf("version %s is not compatiable with this release", version)
+		}
+
+		releases = append(releases, r)
+	}
+
+	return releases, nil
+}
+
 func (c *commandServer) UploadRelease(upload pb.Command_UploadReleaseServer) error {
 	var releaseID uint64
 	//var total int64
@@ -128,6 +167,9 @@ func (c *commandServer) UploadRelease(upload pb.Command_UploadReleaseServer) err
 	var hash string
 	var chunck *pb.Chunck
 	var moved bool
+
+	var release *pb.Release
+	var releases []*pb.Release
 
 	filename := uuid.NewV4().String()
 	path := fmt.Sprintf("/bundles/%s", filename)
@@ -173,6 +215,19 @@ func (c *commandServer) UploadRelease(upload pb.Command_UploadReleaseServer) err
 				return err
 			}
 			releaseID = header.ReleaseId
+			upgrades := header.Upgrades
+			if upgrades != nil && len(upgrades) > 0 {
+				// this update is not root, so we need to check all versions exists with the same content
+				release, err = c.getReleaseByID(releaseID)
+				if err != nil {
+					return err
+				}
+
+				releases, err = c.getReleases(release, upgrades)
+				if err != nil {
+					return err
+				}
+			}
 		} else if body != nil {
 			file.Write(body.Data)
 		}
@@ -189,13 +244,6 @@ func (c *commandServer) UploadRelease(upload pb.Command_UploadReleaseServer) err
 		return err
 	}
 
-	release := pb.Release{}
-
-	err = c.db.One("Id", releaseID, &release)
-	if err != nil {
-		return err
-	}
-
 	tx, err := c.db.Begin(true)
 	if err != nil {
 		return err
@@ -203,14 +251,16 @@ func (c *commandServer) UploadRelease(upload pb.Command_UploadReleaseServer) err
 	defer tx.Rollback()
 
 	release.Bundle = hash
-	err = tx.Save(&release)
+	release.Lock = true
+
+	err = tx.Save(release)
 	if err != nil {
 		return err
 	}
 
 	// rename the bundle in the same folder.
 	// NOTE: if you don't, you will get `invalid cross-device link` error
-	err = os.Rename(path, bundlePath(&release))
+	err = os.Rename(path, bundlePath(release))
 	if err != nil {
 		return err
 	}
@@ -218,10 +268,18 @@ func (c *commandServer) UploadRelease(upload pb.Command_UploadReleaseServer) err
 	// this is only to clean up the file either from tmp or bundles folder
 	moved = true
 
+	for _, prev := range releases {
+		prev.NextReleaseId = release.Id
+		err = tx.Save(prev)
+		if err != nil {
+			return err
+		}
+	}
+
 	err = tx.Commit()
 
 	if err == nil {
-		err = upload.SendAndClose(&release)
+		err = upload.SendAndClose(release)
 	}
 
 	return err

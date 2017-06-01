@@ -101,6 +101,7 @@ var publishCmd = &cobra.Command{
 				Value: &warpdrive.Chunck_Header_{
 					Header: &warpdrive.Chunck_Header{
 						ReleaseId: release.Id,
+						Upgrades:  publishFlag.upgrades,
 					},
 				},
 			})
@@ -163,7 +164,7 @@ func initPublishFlags(cmd *cobra.Command) {
 	cmd.Flags().StringVarP(&publishFlag.rollout, "rollout", "r", "", "rollout cycle, could be beta, alpha, etc.")
 	cmd.Flags().StringVarP(&publishFlag.version, "version", "v", "", "version of this bundle")
 	cmd.Flags().StringVarP(&publishFlag.notes, "notes", "n", "", "release notes")
-	cmd.Flags().StringArrayVarP(&publishFlag.upgrades, "upgrades", "u", nil, "list of versions which can upgrade to this version")
+	cmd.Flags().StringArrayVarP(&publishFlag.upgrades, "upgrades", "u", nil, "comma seperate versions which can be upgrade to this version")
 }
 
 func init() {
