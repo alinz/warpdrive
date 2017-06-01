@@ -216,13 +216,14 @@ func (c *commandServer) UploadRelease(upload pb.Command_UploadReleaseServer) err
 			}
 			releaseID = header.ReleaseId
 			upgrades := header.Upgrades
+
+			release, err = c.getReleaseByID(releaseID)
+			if err != nil {
+				return err
+			}
+
 			if upgrades != nil && len(upgrades) > 0 {
 				// this update is not root, so we need to check all versions exists with the same content
-				release, err = c.getReleaseByID(releaseID)
-				if err != nil {
-					return err
-				}
-
 				releases, err = c.getReleases(release, upgrades)
 				if err != nil {
 					return err

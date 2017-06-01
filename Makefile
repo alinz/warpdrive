@@ -50,7 +50,7 @@ build-cli: compile-protobuf
 	-o ./bin/cli/warp ./cmd/warp;	
 
 clean-ios:
-	@rm -rf ./client/ios/Warpdrive.framework;																									\
+	@rm -rf ./client/ios/Warpdrive.framework;																														\
 	mkdir -p ./client/ios;
 
 build-ios: clean-ios
