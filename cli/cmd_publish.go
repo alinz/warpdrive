@@ -94,7 +94,11 @@ var publishCmd = &cobra.Command{
 
 		reader, writer := io.Pipe()
 		go func() {
-			versions := strings.Split(publishFlag.upgrades, " ")
+			var versions []string
+			publishFlag.upgrades = strings.Trim(publishFlag.upgrades, " \t")
+			if publishFlag.upgrades != "" {
+				versions = strings.Split(publishFlag.upgrades, " ")
+			}
 
 			// sending header
 			err := upload.Send(&warpdrive.Chunck{
@@ -107,7 +111,9 @@ var publishCmd = &cobra.Command{
 			})
 
 			if err != nil {
-				log.Println("error sending header", err.Error())
+				if err == io.EOF {
+					_, err = upload.CloseAndRecv()
+				}
 				reader.CloseWithError(err)
 				return
 			}
@@ -117,13 +123,11 @@ var publishCmd = &cobra.Command{
 				n, err := reader.Read(buffer)
 
 				if err == io.EOF {
-					log.Println("io closed")
 					reader.Close()
 					break
 				}
 
 				if err != nil {
-					log.Println(err.Error())
 					reader.CloseWithError(err)
 					return
 				}
@@ -137,7 +141,7 @@ var publishCmd = &cobra.Command{
 				})
 
 				if err != nil {
-					log.Println("close during sending data", err.Error())
+					_, err = upload.CloseAndRecv()
 					reader.CloseWithError(err)
 					return
 				}
@@ -154,13 +158,7 @@ var publishCmd = &cobra.Command{
 			log.Fatal(err.Error())
 		}
 
-		fmt.Printf(`
-		new Release to %s
-
-		Platform: %s
-		Version: %s
-		Rollout: %s
-		`, release.App, release.Platform, release.Version, release.RolloutAt)
+		fmt.Printf("new Release to %s\n\n\tPlatform: %s\n\tVersion: %s\n\tRollout: %s\n\n", release.App, release.Platform, release.Version, release.RolloutAt)
 	},
 }
 

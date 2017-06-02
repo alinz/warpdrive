@@ -47,7 +47,7 @@ build-cli: compile-protobuf
 	export GOOS=darwin;																																									\
 	export GOARCH=amd64;																																								\
 	go build -ldflags "$(LDFLAGS)" 																																			\
-	-o ./bin/cli/warp ./cmd/warp;	
+	-o ./bin/cli/warp ./cmd/warp && mv -f ./bin/cli/warp ./example/Sample/warp; 
 
 clean-ios:
 	@rm -rf ./client/ios/Warpdrive.framework;																														\
@@ -65,3 +65,6 @@ build-android: clean-android
 	mv -f warpdrive.aar ../../client/android/lib;
 
 build-clients: build-ios build-android
+
+server-cleanup:
+	@docker-compose down; docker rmi warpdrive; rm -rf ./tmp; mkdir -p ./tmp/bundles; mkdir -p ./tmp/db;

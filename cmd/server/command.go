@@ -16,6 +16,26 @@ type commandServer struct {
 	db *storm.DB
 }
 
+func (c *commandServer) isUnique(release *pb.Release) bool {
+	var r pb.Release
+	err := c.db.Select(q.And(
+		q.Eq("App", release.App),
+		q.Eq("RolloutAt", release.RolloutAt),
+		q.Eq("Platform", release.Platform),
+		q.Eq("Version", release.Version),
+	)).First(&r)
+
+	if err == storm.ErrNotFound {
+		return true
+	}
+
+	if err != nil {
+
+	}
+
+	return false
+}
+
 // getReleases, gets the base release and list of versions, and returns the list of
 // Release objects which matched the given release specification.
 func (c *commandServer) getReleases(release *pb.Release, versions []string) ([]*pb.Release, error) {
@@ -69,6 +89,11 @@ func (c *commandServer) UploadRelease(upload pb.Command_UploadReleaseServer) err
 		return fmt.Errorf("info about new release not found")
 	}
 
+	// check if newRelease is unique
+	if !c.isUnique(newRelease) {
+		return fmt.Errorf("release already exists")
+	}
+
 	// need to convert Upgrades to releases
 	if len(header.Upgrades) > 0 {
 		releases, err = c.getReleases(newRelease, header.Upgrades)
@@ -87,8 +112,13 @@ func (c *commandServer) UploadRelease(upload pb.Command_UploadReleaseServer) err
 
 	defer func() {
 		file.Close()
-		if moved {
 
+		if err != nil {
+			if moved {
+				os.Remove(bundlePath(newRelease))
+			} else {
+				os.Remove(path)
+			}
 		}
 	}()
 
@@ -143,6 +173,7 @@ func (c *commandServer) UploadRelease(upload pb.Command_UploadReleaseServer) err
 	if err != nil {
 		return err
 	}
+
 	// mark the file has been moved to the new location
 	// so if the error happens, we can delete the file in
 	// the right path
