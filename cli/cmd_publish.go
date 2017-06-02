@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"time"
 
+	"strings"
+
 	"github.com/kelseyhightower/envconfig"
 	"github.com/pressly/warpdrive/helper"
 	warpdrive "github.com/pressly/warpdrive/proto"
@@ -20,7 +22,7 @@ var publishFlag = struct {
 	rollout  string
 	version  string
 	notes    string
-	upgrades []string
+	upgrades string
 }{}
 
 var publishCmd = &cobra.Command{
@@ -96,12 +98,14 @@ var publishCmd = &cobra.Command{
 
 		reader, writer := io.Pipe()
 		go func() {
+			versions := strings.Split(publishFlag.upgrades, " ")
+
 			// sending header
 			err := upload.Send(&warpdrive.Chunck{
 				Value: &warpdrive.Chunck_Header_{
 					Header: &warpdrive.Chunck_Header{
 						ReleaseId: release.Id,
-						Upgrades:  publishFlag.upgrades,
+						Upgrades:  versions,
 					},
 				},
 			})
@@ -154,6 +158,7 @@ var publishCmd = &cobra.Command{
 			log.Fatal(err.Error())
 		}
 
+		// TODO: make the output prettier
 		log.Println(release)
 	},
 }
@@ -164,7 +169,7 @@ func initPublishFlags(cmd *cobra.Command) {
 	cmd.Flags().StringVarP(&publishFlag.rollout, "rollout", "r", "", "rollout cycle, could be beta, alpha, etc.")
 	cmd.Flags().StringVarP(&publishFlag.version, "version", "v", "", "version of this bundle")
 	cmd.Flags().StringVarP(&publishFlag.notes, "notes", "n", "", "release notes")
-	cmd.Flags().StringArrayVarP(&publishFlag.upgrades, "upgrades", "u", nil, "comma seperate versions which can be upgrade to this version")
+	cmd.Flags().StringVarP(&publishFlag.upgrades, "upgrades", "u", "", "space seperate versions which can be upgrade to this version")
 }
 
 func init() {
