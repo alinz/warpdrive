@@ -64,7 +64,8 @@ RCT_EXPORT_MODULE();
     
     WarpdriveInit(bundlePath, documentPath, platform, app, rolloutAt, bundleVersion, serverAddr, deviceCert, deviceKey, caCert, &error);
     if (error != nil) {
-        NSLog(@"%@",[error localizedDescription]);
+        NSString* value = [error localizedDescription];
+        NSLog(@"%@", value);
     }
     
     NSString* path = WarpdriveBundlePath();
