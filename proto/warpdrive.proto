@@ -4,15 +4,8 @@ package warpdrive;
 
 // only being used by cli and/or UI if available
 service Command {
-  rpc CreateRelease(Release) returns (Release){}
-  // if Release.Id is provided, then only the matched one returns.
-  // if Release.App is provided, then it returns all the releases for that app
-  rpc GetRelease(Release) returns (stream Release){}
-  // once the release.lock set to true, Release can not be updated anymore, 
-  // only `nextReleaseId` can be changed under the following condition:
-  // nextReleaseId must not set or `lock` has to be false
-  rpc UpdateRelease(Release) returns (Release){}
-  // UplaodRelease won't work unless ReleaseId exists
+  // UplaodRelease build the release object and send it with header
+  // and sends the list of upgrades.
   rpc UploadRelease(stream Chunck) returns (Release){}
 }
 
@@ -65,7 +58,7 @@ message Release {
 
 message Chunck {
   message Header {
-    uint64 releaseId = 1;
+    Release release = 1;
     repeated string upgrades = 2;
   }
 

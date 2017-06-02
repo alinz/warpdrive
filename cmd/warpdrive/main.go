@@ -84,7 +84,7 @@ func download(release *pb.Release) error {
 		return fmt.Errorf("header is not sent")
 	}
 
-	if header.ReleaseId != release.Id {
+	if header.Release.Id != release.Id {
 		return fmt.Errorf("release id mismatched")
 	}
 
@@ -237,9 +237,4 @@ func BundlePath() string {
 	}
 
 	return releasePathByVersion(config.currentVersion)
-}
-
-func Test(bundlePath, documentPath, platform, app, rollout, bundleVersion, addr, deviceCert, deviceKey, caCert string) error {
-	fmt.Println("hahahaha 2")
-	return nil
 }

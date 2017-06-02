@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io"
-	"log"
 	"os"
 
 	"github.com/asdine/storm"
@@ -11,97 +10,10 @@ import (
 	"github.com/pressly/warpdrive/helper"
 	pb "github.com/pressly/warpdrive/proto"
 	uuid "github.com/satori/go.uuid"
-	context "golang.org/x/net/context"
 )
 
 type commandServer struct {
 	db *storm.DB
-}
-
-func (c *commandServer) CreateRelease(ctx context.Context, release *pb.Release) (*pb.Release, error) {
-	// we need to check for coupld of conditions
-	// 1 - `App`, `version`, `rolloutAt` and `platform` must have a value
-	// 2 - combining `App`, `version`, `rolloutAt` and `platform` must be unique
-	err := mustDefineStringValue("app", release.App)
-	if err != nil {
-		return nil, err
-	}
-
-	err = mustDefineStringValue("version", release.Version)
-	if err != nil {
-		return nil, err
-	}
-
-	err = mustDefineStringValue("rolloutAt", release.RolloutAt)
-	if err != nil {
-		return nil, err
-	}
-
-	if release.Platform == pb.Platform_UNKNOWN {
-		return nil, fmt.Errorf("platform must be defined")
-	}
-
-	var releases []pb.Release
-	err = c.db.Select(q.And(
-		q.Eq("App", release.App),
-		q.Eq("Version", release.Version),
-		q.Eq("RolloutAt", release.RolloutAt),
-		q.Eq("Platform", release.Platform),
-	)).Find(&releases)
-
-	if err != nil && err != storm.ErrNotFound {
-		return nil, err
-	}
-
-	if len(releases) > 0 {
-		return nil, fmt.Errorf("version must be changed for this app")
-	}
-
-	err = c.db.Save(release)
-	if err != nil {
-		return nil, err
-	}
-
-	return release, nil
-}
-
-// if Release.Id is provided, then only the matched one returns.
-// if Release.App is provided, then it returns all the releases for that app
-// Release.Rollout is also need to be provided
-func (c *commandServer) GetRelease(release *pb.Release, stream pb.Command_GetReleaseServer) error {
-	if release.Id != 0 {
-		err := c.db.One("Id", release.Id, release)
-		if err != nil {
-			return err
-		}
-
-		stream.Send(release)
-	} else {
-		c.db.Select(q.Eq("App", release.App), q.Eq("RolloutAt", release.RolloutAt)).Each(new(pb.Release), func(record interface{}) error {
-			stream.Send(record.(*pb.Release))
-			return nil
-		})
-	}
-
-	return nil
-}
-
-func (c *commandServer) UpdateRelease(ctx context.Context, release *pb.Release) (*pb.Release, error) {
-	err := c.db.Save(release)
-	if err != nil {
-		return nil, err
-	}
-
-	return release, nil
-}
-
-func (c *commandServer) getReleaseByID(id uint64) (*pb.Release, error) {
-	release := &pb.Release{}
-	err := c.db.One("Id", id, release)
-	if err != nil {
-		return nil, err
-	}
-	return release, nil
 }
 
 // getReleases, gets the base release and list of versions, and returns the list of
@@ -135,20 +47,39 @@ func (c *commandServer) getReleases(release *pb.Release, versions []string) ([]*
 }
 
 func (c *commandServer) UploadRelease(upload pb.Command_UploadReleaseServer) error {
-	var releaseID uint64
-	//var total int64
-	//var receivedBytes int64
-	var err error
-	var hash string
 	var chunck *pb.Chunck
+	var err error
 	var moved bool
-
-	var release *pb.Release
+	var hash string
+	var newRelease *pb.Release
 	var releases []*pb.Release
 
+	chunck, err = upload.Recv()
+	if err != nil {
+		return err
+	}
+
+	header := chunck.GetHeader()
+	if header == nil {
+		return fmt.Errorf("header is not being sent")
+	}
+
+	newRelease = header.Release
+	if newRelease == nil {
+		return fmt.Errorf("info about new release not found")
+	}
+
+	// need to convert Upgrades to releases
+	if len(header.Upgrades) > 0 {
+		releases, err = c.getReleases(newRelease, header.Upgrades)
+		if err != nil {
+			return err
+		}
+	}
+
+	// file operation
 	filename := uuid.NewV4().String()
 	path := fmt.Sprintf("/bundles/%s", filename)
-
 	file, err := os.Create(path)
 	if err != nil {
 		return err
@@ -156,24 +87,15 @@ func (c *commandServer) UploadRelease(upload pb.Command_UploadReleaseServer) err
 
 	defer func() {
 		file.Close()
-		// if there is an error, the tmp file should be cleaned up
-		if err != nil {
-			// it means that the file has already moved to bundle so clean
-			// that one instead
-			if moved {
-				path = fmt.Sprintf("/bundles/%s", hash)
-			}
+		if moved {
 
-			err = os.Remove(path)
-			if err != nil {
-				log.Println(err.Error())
-			}
 		}
 	}()
 
 	for {
 		chunck, err = upload.Recv()
 		if err == io.EOF {
+			err = nil
 			break
 		}
 
@@ -181,82 +103,66 @@ func (c *commandServer) UploadRelease(upload pb.Command_UploadReleaseServer) err
 			return err
 		}
 
-		header := chunck.GetHeader()
 		body := chunck.GetBody()
+		if body == nil {
+			err = fmt.Errorf("something went wrong with uploading data")
+			return err
+		}
 
-		if header != nil {
-			if releaseID != 0 {
-				err = fmt.Errorf("chunck header sent multiple times")
-				return err
-			}
-			releaseID = header.ReleaseId
-			upgrades := header.Upgrades
-
-			release, err = c.getReleaseByID(releaseID)
-			if err != nil {
-				return err
-			}
-
-			if upgrades != nil && len(upgrades) > 0 {
-				// this update is not root, so we need to check all versions exists with the same content
-				releases, err = c.getReleases(release, upgrades)
-				if err != nil {
-					return err
-				}
-			}
-		} else if body != nil {
-			file.Write(body.Data)
+		_, err = file.Write(body.Data)
+		if err != nil {
+			return err
 		}
 	}
 
-	if releaseID == 0 {
-		err = fmt.Errorf("header is not sent")
-		return err
-	}
-
-	// calculate the hash value
+	// calculate the hash value of uploaded file
 	hash, err = helper.HashFile(path)
 	if err != nil {
 		return err
 	}
 
+	// start the transaction
 	tx, err := c.db.Begin(true)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback()
 
-	release.Bundle = hash
-	release.Lock = true
+	// the logic of transaction goes here
+	/////////////////////////////////////
+	newRelease.Bundle = hash
+	newRelease.Lock = true
 
-	err = tx.Save(release)
+	err = tx.Save(newRelease)
 	if err != nil {
 		return err
 	}
 
-	// rename the bundle in the same folder.
-	// NOTE: if you don't, you will get `invalid cross-device link` error
-	err = os.Rename(path, bundlePath(release))
+	// moved the temp bundle to the bundle section
+	err = os.Rename(path, bundlePath(newRelease))
 	if err != nil {
 		return err
 	}
-
-	// this is only to clean up the file either from tmp or bundles folder
+	// mark the file has been moved to the new location
+	// so if the error happens, we can delete the file in
+	// the right path
 	moved = true
 
-	for _, prev := range releases {
-		prev.NextReleaseId = release.Id
-		err = tx.Save(prev)
+	// connects new release to previous releases
+	for _, release := range releases {
+		release.NextReleaseId = newRelease.Id
+		err = tx.Save(release)
 		if err != nil {
 			return err
 		}
 	}
+	/////////////////////////////////////
 
 	err = tx.Commit()
-
-	if err == nil {
-		err = upload.SendAndClose(release)
+	if err != nil {
+		return err
 	}
 
-	return err
+	// this error is not that important that we need to rollback
+	return upload.SendAndClose(newRelease)
 }

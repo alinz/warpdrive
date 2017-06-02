@@ -67,7 +67,7 @@ func (qs *queryServer) GetUpgrade(ctx context.Context, release *pb.Release) (*pb
 }
 
 func (qs *queryServer) DownloadRelease(release *pb.Release, stream pb.Query_DownloadReleaseServer) error {
-	err := qs.db.One("id", release.Id, release)
+	err := qs.db.One("Id", release.Id, release)
 	if err != nil {
 		return err
 	}
@@ -83,7 +83,7 @@ func (qs *queryServer) DownloadRelease(release *pb.Release, stream pb.Query_Down
 	chunck := &pb.Chunck{
 		Value: &pb.Chunck_Header_{
 			Header: &pb.Chunck_Header{
-				ReleaseId: release.Id,
+				Release: release,
 			},
 		},
 	}

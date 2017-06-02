@@ -72,7 +72,7 @@ var publishCmd = &cobra.Command{
 		ctx := context.Background()
 
 		// First a release entity will be created
-		release, err := command.CreateRelease(ctx, &warpdrive.Release{
+		newRelease := &warpdrive.Release{
 			Id:            0,
 			App:           publishFlag.app,
 			Version:       publishFlag.version,
@@ -84,10 +84,6 @@ var publishCmd = &cobra.Command{
 			Lock:          false,
 			CreatedAt:     createdAt,
 			UpdatedAt:     createdAt,
-		})
-
-		if err != nil {
-			log.Fatal(err.Error())
 		}
 
 		ctx = context.Background()
@@ -104,8 +100,8 @@ var publishCmd = &cobra.Command{
 			err := upload.Send(&warpdrive.Chunck{
 				Value: &warpdrive.Chunck_Header_{
 					Header: &warpdrive.Chunck_Header{
-						ReleaseId: release.Id,
-						Upgrades:  versions,
+						Release:  newRelease,
+						Upgrades: versions,
 					},
 				},
 			})
@@ -153,13 +149,18 @@ var publishCmd = &cobra.Command{
 			log.Fatal(err.Error())
 		}
 
-		release, err = upload.CloseAndRecv()
+		release, err := upload.CloseAndRecv()
 		if err != nil {
 			log.Fatal(err.Error())
 		}
 
-		// TODO: make the output prettier
-		log.Println(release)
+		fmt.Printf(`
+		new Release to %s
+
+		Platform: %s
+		Version: %s
+		Rollout: %s
+		`, release.App, release.Platform, release.Version, release.RolloutAt)
 	},
 }
 
