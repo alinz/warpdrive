@@ -3,6 +3,10 @@ package cli
 import (
 	"fmt"
 
+	"log"
+
+	"strings"
+
 	"github.com/spf13/cobra"
 )
 
@@ -10,6 +14,17 @@ const (
 	bundlePathIOS     = ".bundles/ios"
 	bundlePathAndroid = ".bundles/android"
 )
+
+func logError(err error) {
+	if err != nil {
+		message := err.Error()
+		results := strings.Split(message, "code = Unknown desc = ")
+		if len(results) > 0 {
+			log.Fatal(results[len(results)-1])
+		}
+	}
+	log.Fatal(err.Error())
+}
 
 // RootCmd is the base command for cli
 var RootCmd = &cobra.Command{

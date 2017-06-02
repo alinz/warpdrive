@@ -59,7 +59,8 @@ message Release {
 message Chunck {
   message Header {
     Release release = 1;
-    repeated string upgrades = 2;
+    string root = 2;
+    string upgrade = 3;
   }
 
   message Body {

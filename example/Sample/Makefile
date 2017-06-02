@@ -1,14 +1,23 @@
+publish-root:
+	@./warp publish																																		\
+		--addr 127.0.0.1:10000																													\
+		--ca-path cert/ca-command.crt																										\
+		--cert-path cert/cli.crt																												\
+		--key-path cert/cli.key																													\
+		--app sample																																		\
+		--platform $(platform)																													\
+		--rollout $(rollout)																														\
+		--version $(version);
 
 publish:
-	 @export COMMAND_CA=cert/ca-command.crt;																					\
-	 export COMMAND_CRT=cert/cli.crt;																									\
-	 export COMMAND_KEY=cert/cli.key;																									\
-	 export COMMAND_ADDR=127.0.0.1:10000;																							\
-	 ./warp publish -a sample -p $(platform) -r $(rollout) -v $(version) -u $(upgrades);
-
-publish-root:
-	 @export COMMAND_CA=cert/ca-command.crt;																					\
-	 export COMMAND_CRT=cert/cli.crt;																									\
-	 export COMMAND_KEY=cert/cli.key;																									\
-	 export COMMAND_ADDR=127.0.0.1:10000;																							\
-	 ./warp publish -a sample -p $(platform) -r $(rollout) -v $(version);
+	@./warp publish																																		\
+		--addr 127.0.0.1:10000																													\
+		--ca-path cert/ca-command.crt																										\
+		--cert-path cert/cli.crt																												\
+		--key-path cert/cli.key																													\
+		--app sample																																		\
+		--platform $(platform)																													\
+		--rollout $(rollout)																														\
+		--version $(version)																														\
+		--root $(root)																																	\
+		--upgrade $(upgrade);

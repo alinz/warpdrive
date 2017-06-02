@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
+
+	"log"
 
 	"github.com/asdine/storm"
 	"github.com/asdine/storm/q"
@@ -30,40 +33,54 @@ func (c *commandServer) isUnique(release *pb.Release) bool {
 	}
 
 	if err != nil {
-
+		log.Println("isUnique:", err.Error())
 	}
 
 	return false
 }
 
-// getReleases, gets the base release and list of versions, and returns the list of
-// Release objects which matched the given release specification.
-func (c *commandServer) getReleases(release *pb.Release, versions []string) ([]*pb.Release, error) {
-	if len(versions) == 0 {
-		return nil, fmt.Errorf("versions are empty")
+// getRelease find release based on given release template and version number and rootVersion
+func (c *commandServer) getRelease(release *pb.Release, version, rootVersion string) (*pb.Release, error) {
+	root := &pb.Release{}
+	err := c.db.Select(q.And(
+		q.Eq("App", release.App),
+		q.Eq("RolloutAt", release.RolloutAt),
+		q.Eq("Platform", release.Platform),
+		q.Eq("Version", rootVersion),
+		q.Eq("Lock", true),
+	)).First(root)
+
+	if err != nil {
+		return nil, fmt.Errorf("root version not found")
 	}
 
-	releases := make([]*pb.Release, 0)
+	next := root
+	for {
+		if next.Version == version {
+			if next.NextReleaseId == 0 {
+				return next, nil
+			}
+			return nil, fmt.Errorf("previous version already connected to another version")
+		}
 
-	for _, version := range versions {
-		r := &pb.Release{}
-		err := c.db.Select(q.And(
+		if next.NextReleaseId == 0 {
+			break
+		}
+
+		err = c.db.Select(q.And(
+			q.Eq("Id", next.NextReleaseId),
 			q.Eq("App", release.App),
 			q.Eq("RolloutAt", release.RolloutAt),
 			q.Eq("Platform", release.Platform),
-			q.Eq("Version", version),
-			q.Eq("NextReleaseId", 0),
 			q.Eq("Lock", true),
-		)).First(r)
+		)).First(next)
 
 		if err != nil {
 			return nil, fmt.Errorf("version %s is not compatiable with this release", version)
 		}
-
-		releases = append(releases, r)
 	}
 
-	return releases, nil
+	return nil, fmt.Errorf("previous version not found")
 }
 
 func (c *commandServer) UploadRelease(upload pb.Command_UploadReleaseServer) error {
@@ -72,7 +89,7 @@ func (c *commandServer) UploadRelease(upload pb.Command_UploadReleaseServer) err
 	var moved bool
 	var hash string
 	var newRelease *pb.Release
-	var releases []*pb.Release
+	var prevRelease *pb.Release
 
 	chunck, err = upload.Recv()
 	if err != nil {
@@ -94,9 +111,16 @@ func (c *commandServer) UploadRelease(upload pb.Command_UploadReleaseServer) err
 		return fmt.Errorf("release already exists")
 	}
 
-	// need to convert Upgrades to releases
-	if len(header.Upgrades) > 0 {
-		releases, err = c.getReleases(newRelease, header.Upgrades)
+	// need to find previous version
+	header.Root = strings.Trim(header.Root, " \t")
+	header.Upgrade = strings.Trim(header.Upgrade, " \t")
+	if header.Root != "" {
+		if header.Upgrade == "" {
+			log.Println("root:", header.Root, "upgrade:", header.Upgrade)
+			return fmt.Errorf("upgrade is missing since root version is provided")
+		}
+
+		prevRelease, err = c.getRelease(newRelease, header.Upgrade, header.Root)
 		if err != nil {
 			return err
 		}
@@ -179,10 +203,10 @@ func (c *commandServer) UploadRelease(upload pb.Command_UploadReleaseServer) err
 	// the right path
 	moved = true
 
-	// connects new release to previous releases
-	for _, release := range releases {
-		release.NextReleaseId = newRelease.Id
-		err = tx.Save(release)
+	// connects new release to previous release
+	if prevRelease != nil {
+		prevRelease.NextReleaseId = newRelease.Id
+		err = tx.Save(prevRelease)
 		if err != nil {
 			return err
 		}

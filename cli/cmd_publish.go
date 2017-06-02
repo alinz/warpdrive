@@ -3,26 +3,27 @@ package cli
 import (
 	"context"
 	"io"
-	"log"
 
 	"fmt"
 	"time"
 
-	"strings"
-
-	"github.com/kelseyhightower/envconfig"
 	"github.com/pressly/warpdrive/helper"
 	warpdrive "github.com/pressly/warpdrive/proto"
 	"github.com/spf13/cobra"
 )
 
 var publishFlag = struct {
+	caPath   string
+	certPath string
+	keyPath  string
+	addr     string
 	app      string
 	platform string
 	rollout  string
 	version  string
 	notes    string
-	upgrades string
+	upgrade  string
+	root     string
 }{}
 
 var publishCmd = &cobra.Command{
@@ -30,26 +31,15 @@ var publishCmd = &cobra.Command{
 	Short: "publish react-native to server",
 	Long:  `publish react-native project for both ios and android`,
 	Run: func(cmd *cobra.Command, args []string) {
-		commandEnv := &struct {
-			CA   string `require:"true"`
-			Crt  string `require:"true"`
-			Key  string `require:"true"`
-			Addr string `require:"true"`
-		}{}
 
-		err := envconfig.Process("command", commandEnv)
+		grpcConfig, err := helper.NewGrpcConfig(publishFlag.caPath, publishFlag.certPath, publishFlag.keyPath)
 		if err != nil {
-			log.Fatal(err.Error())
+			logError(err)
 		}
 
-		grpcConfig, err := helper.NewGrpcConfig(commandEnv.CA, commandEnv.Crt, commandEnv.Key)
+		clientConn, err := grpcConfig.CreateClient("command", publishFlag.addr)
 		if err != nil {
-			log.Fatal(err.Error())
-		}
-
-		clientConn, err := grpcConfig.CreateClient("command", commandEnv.Addr)
-		if err != nil {
-			log.Fatal(err.Error())
+			logError(err)
 		}
 
 		var platform warpdrive.Platform
@@ -62,7 +52,7 @@ var publishCmd = &cobra.Command{
 			platform = warpdrive.Platform_ANDROID
 			bundlePath = bundlePathAndroid
 		default:
-			log.Fatal(fmt.Errorf("unknown platform '%s'", publishFlag.platform))
+			logError(fmt.Errorf("unknown platform '%s'", publishFlag.platform))
 		}
 
 		createdAt := time.Now().Format("Mon Jan 2 15:04:05 MST 2006")
@@ -89,23 +79,18 @@ var publishCmd = &cobra.Command{
 		ctx = context.Background()
 		upload, err := command.UploadRelease(ctx)
 		if err != nil {
-			log.Fatal(err.Error())
+			logError(err)
 		}
 
 		reader, writer := io.Pipe()
 		go func() {
-			var versions []string
-			publishFlag.upgrades = strings.Trim(publishFlag.upgrades, " \t")
-			if publishFlag.upgrades != "" {
-				versions = strings.Split(publishFlag.upgrades, " ")
-			}
-
 			// sending header
 			err := upload.Send(&warpdrive.Chunck{
 				Value: &warpdrive.Chunck_Header_{
 					Header: &warpdrive.Chunck_Header{
-						Release:  newRelease,
-						Upgrades: versions,
+						Release: newRelease,
+						Root:    publishFlag.root,
+						Upgrade: publishFlag.upgrade,
 					},
 				},
 			})
@@ -150,12 +135,12 @@ var publishCmd = &cobra.Command{
 
 		err = helper.BundleCompress(bundlePath, writer)
 		if err != nil {
-			log.Fatal(err.Error())
+			logError(err)
 		}
 
 		release, err := upload.CloseAndRecv()
 		if err != nil {
-			log.Fatal(err.Error())
+			logError(err)
 		}
 
 		fmt.Printf("new Release to %s\n\n\tPlatform: %s\n\tVersion: %s\n\tRollout: %s\n\n", release.App, release.Platform, release.Version, release.RolloutAt)
@@ -163,12 +148,17 @@ var publishCmd = &cobra.Command{
 }
 
 func initPublishFlags(cmd *cobra.Command) {
+	cmd.Flags().StringVarP(&publishFlag.caPath, "ca-path", "", "", "path to CA certificate file")
+	cmd.Flags().StringVarP(&publishFlag.certPath, "cert-path", "", "", "path to certificate file")
+	cmd.Flags().StringVarP(&publishFlag.keyPath, "key-path", "", "", "path to certificate's key file")
+	cmd.Flags().StringVarP(&publishFlag.addr, "addr", "", "", "warpdrive server address. e.g. 127.0.0.1:1000")
 	cmd.Flags().StringVarP(&publishFlag.app, "app", "a", "", "project app name")
 	cmd.Flags().StringVarP(&publishFlag.platform, "platform", "p", "all", "target platform, `ios` or `android`")
 	cmd.Flags().StringVarP(&publishFlag.rollout, "rollout", "r", "", "rollout cycle, could be beta, alpha, etc.")
 	cmd.Flags().StringVarP(&publishFlag.version, "version", "v", "", "version of this bundle")
 	cmd.Flags().StringVarP(&publishFlag.notes, "notes", "n", "", "release notes")
-	cmd.Flags().StringVarP(&publishFlag.upgrades, "upgrades", "u", "", "space seperate versions which can be upgrade to this version")
+	cmd.Flags().StringVarP(&publishFlag.upgrade, "upgrade", "", "", "previous version which can upgrade to this version")
+	cmd.Flags().StringVarP(&publishFlag.root, "root", "", "", "the very first version of this chain")
 }
 
 func init() {
