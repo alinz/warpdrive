@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -47,6 +48,8 @@ func update() (*pb.Release, error) {
 }
 
 func upgrade(release *pb.Release) error {
+	log.Println("upgrading to", release.Version)
+
 	err := download(release)
 	if err != nil {
 		return err
@@ -61,7 +64,7 @@ func upgrade(release *pb.Release) error {
 }
 
 func download(release *pb.Release) error {
-	clientConn, err := config.grpcClient.CreateClient("warpdrive", config.addr)
+	clientConn, err := config.grpcClient.CreateClient("query", config.addr)
 	if err != nil {
 		return err
 	}
@@ -216,13 +219,18 @@ func Init(bundlePath, documentPath, platform, app, rollout, bundleVersion, addr,
 		config.currentVersion = release.Version
 	}
 
+	log.Println("current version:", config.currentVersion)
+
 	// when user launches app, the app will pauses until
 	// a new update downloads completely.
 	release, err = update()
 	if err == nil {
-		err = download(release)
+		err = upgrade(release)
 		if err == nil {
 			config.currentVersion = release.Version
+			log.Println("upgraded to", release.Version)
+		} else {
+			log.Println(err.Error())
 		}
 	}
 
@@ -236,5 +244,5 @@ func BundlePath() string {
 		return ""
 	}
 
-	return releasePathByVersion(config.currentVersion)
+	return filepath.Join(releasePathByVersion(config.currentVersion), "main.jsbundle")
 }

@@ -19,8 +19,8 @@
 {
   NSURL *jsCodeLocation;
   
-  jsCodeLocation = [WarpdriveManager sourceBundleForApp:(NSString*)@"example"
-                                           andRolloutAt:(NSString*)@"beta"
+  jsCodeLocation = [WarpdriveManager sourceBundleForApp:(NSString*)@"sample"
+                                           andRolloutAt:(NSString*)@"dev"
                                            andGroupName:(NSString*)nil
                                           andServerAddr:(NSString*)@"localhost:10001"
                                           andDeviceCert:(NSString*)@"device"

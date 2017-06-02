@@ -98,7 +98,7 @@ func (qs *queryServer) DownloadRelease(release *pb.Release, stream pb.Query_Down
 
 	for {
 		n, err = file.Read(buffer)
-		if err != io.EOF {
+		if err == io.EOF {
 			break
 		}
 
