@@ -62,3 +62,15 @@ Alternatively, you can ignore this exception and read other information from the
 ```
 
 then you should do this, go to `File / Settings/ Build, Execution, Deployment / Instant Run.` and Uncheck `Enable Instant Run to hot swap code...`
+
+
+```java
+UiThreadUtil.runOnUiThread(
+  new Runnable() {
+    @Override
+    public void run() {
+      mReactInstanceCommandsHandler.onJSBundleLoadedFromServer();
+    }
+  }
+);
+```

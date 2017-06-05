@@ -20,4 +20,5 @@ publish:
 		--rollout $(rollout)																														\
 		--version $(version)																														\
 		--root $(root)																																	\
-		--upgrade $(upgrade);
+		--upgrade $(upgrade)																														\
+		--notes $(notes);

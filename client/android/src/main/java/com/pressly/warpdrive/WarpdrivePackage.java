@@ -1,14 +1,20 @@
 package com.pressly.warpdrive;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.Handler;
+import android.os.Looper;
 
 import com.facebook.react.ReactPackage;
+import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.JavaScriptModule;
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
+import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.uimanager.ViewManager;
 
 import java.io.File;
@@ -131,7 +137,6 @@ public class WarpdrivePackage implements ReactPackage {
         return total;
     }
 
-
     class WarpdriveModule extends ReactContextBaseJavaModule {
         public WarpdriveModule(final ReactApplicationContext reactContext) {
             super(reactContext);
@@ -140,6 +145,52 @@ public class WarpdrivePackage implements ReactPackage {
         @Override
         public String getName() {
             return "WarpdriveManager";
+        }
+
+        @ReactMethod
+        public void isAnyUpdate(Callback cb) {
+            String release = Warpdrive.isAnyUpdate();
+            cb.invoke(release);
+        }
+
+        @ReactMethod
+        public void update(Callback cb) {
+            try {
+                Warpdrive.update();
+                cb.invoke();
+            } catch (Exception e) {
+                cb.invoke(e.getMessage());
+            }
+        }
+
+        @ReactMethod
+        public void reload() {
+            final Activity currentActivity = getCurrentActivity();
+            if (currentActivity != null) {
+
+//                new Handler(Looper.getMainLooper()).post(new Runnable() {
+//                    @Override
+//                    public void run() {
+//
+//                    }
+//                });
+
+
+                currentActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Intent intent = currentActivity.getIntent();
+                        currentActivity.finish();
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        currentActivity.startActivity(intent);
+                        currentActivity.recreate();
+                    }
+                });
+            }
         }
     }
 }

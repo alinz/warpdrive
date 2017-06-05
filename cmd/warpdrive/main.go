@@ -246,3 +246,46 @@ func BundlePath() string {
 
 	return filepath.Join(releasePathByVersion(config.currentVersion), "main.jsbundle")
 }
+
+// IsAnyUpdate try to see if there is an update available
+// returns empty string if there is no update
+func IsAnyUpdate() string {
+	release, err := update()
+	if err != nil {
+		return ""
+	}
+
+	message, err := json.Marshal(&struct {
+		Version string `json:"version"`
+		Notes   string `json:"notes"`
+		At      string `json:"at"`
+	}{
+		release.Version,
+		release.Notes,
+		release.CreatedAt,
+	})
+
+	if err != nil {
+		return ""
+	}
+
+	return string(message)
+}
+
+// Update will trigger update and if there is an update, it will
+// download and make it ready.
+func Update() error {
+	release, err := update()
+	if err != nil {
+		return fmt.Errorf("no updates")
+	}
+
+	err = upgrade(release)
+	if err != nil {
+		return err
+	}
+
+	config.currentVersion = release.Version
+
+	return nil
+}
