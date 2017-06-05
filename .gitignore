@@ -14,3 +14,7 @@ client/ios/framework
 old
 
 warp
+build
+*.crt
+*.key
+*.iml
