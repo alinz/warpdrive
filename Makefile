@@ -62,6 +62,7 @@ clean-android:
 
 build-android: clean-android
 	@cd ./cmd/warpdrive && gomobile bind -target=android -ldflags="-s -w" . && 													\
+	mkdir -p ../../client/android/lib &&																																\
 	mv -f warpdrive.aar ../../client/android/lib;
 
 build-clients: build-ios build-android
