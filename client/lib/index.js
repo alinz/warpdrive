@@ -21,11 +21,13 @@ export const isAnyUpdate = (cb: (release: ?Release) => void) => {
 }
 
 export const update = (cb: (err: ?Error) => void) => {
-  typeof cb === 'function' && WarpdriveManager.update((err? string) => {
+  typeof cb === 'function' && WarpdriveManager.update((err:?string) => {
     cb(err ? new Error(err) : null)
   })
 }
 
 export const reload = () => {
-  WarpdriveManager.reload()
+  setTimeout(() => {
+    WarpdriveManager.reload()
+  }, 0)
 }

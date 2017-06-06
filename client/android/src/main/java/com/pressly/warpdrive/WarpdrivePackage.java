@@ -5,8 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.os.Handler;
-import android.os.Looper;
+import android.os.Build;
 
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.Callback;
@@ -39,6 +38,7 @@ public class WarpdrivePackage implements ReactPackage {
         deviceCert = joinPath(bundlePath, deviceCert);
         deviceKey = joinPath(bundlePath, deviceKey);
         caCert = joinPath(bundlePath, caCert);
+
 
         try {
             Warpdrive.init(bundlePath, documentPath, platform, app, rolloutAt, bundleVersion, serverAddr, deviceCert, deviceKey, caCert);
@@ -167,27 +167,19 @@ public class WarpdrivePackage implements ReactPackage {
         public void reload() {
             final Activity currentActivity = getCurrentActivity();
             if (currentActivity != null) {
-
-//                new Handler(Looper.getMainLooper()).post(new Runnable() {
-//                    @Override
-//                    public void run() {
-//
-//                    }
-//                });
-
-
                 currentActivity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Intent intent = currentActivity.getIntent();
-                        currentActivity.finish();
-                        try {
-                            Thread.sleep(1000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
+                        if (Build.VERSION.SDK_INT >= 11) {
+                            currentActivity.recreate();
+                        } else {
+                            final Intent intent = currentActivity.getIntent();
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                            currentActivity.finish();
+                            currentActivity.overridePendingTransition(0, 0);
+                            currentActivity.startActivity(intent);
+                            currentActivity.overridePendingTransition(0, 0);
                         }
-                        currentActivity.startActivity(intent);
-                        currentActivity.recreate();
                     }
                 });
             }
