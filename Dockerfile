@@ -14,7 +14,7 @@ ADD ./cert/query.crt /cert
 ADD ./cert/query.key /cert
 
 # copy the executable to root path
-COPY ./bin/server/warpdrive-server /
+COPY ./bin/server/warpdrive-linux-server /
 
 # running the code
-CMD ["/warpdrive-server"]
+CMD ["/warpdrive-linux-server"]

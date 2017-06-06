@@ -32,22 +32,54 @@ compile-protobuf:
 	@protoc --go_out=plugins=grpc:. ./proto/*.proto;													  										 		\
 	protoc-go-inject-tag -input=./proto/warpdrive.pb.go;
 
-compile-server-linux: compile-protobuf
+#
+# Warpdrive Server
+#
+
+build-linux-server: compile-protobuf
 	@export GOGC=off;																																										\
 	export GOOS=linux;																																									\
 	export GOARCH=amd64;																																								\
 	go build -ldflags "$(LDFLAGS)" 																																			\
-	-o ./bin/server/warpdrive-server ./cmd/server;	
+	-o ./bin/server/warpdrive-linux-server ./cmd/server;	
 
-build-docker: compile-server-linux
+build-windows-server: compile-protobuf
+	@export GOGC=off;																																										\
+	export GOOS=windows;																																								\
+	export GOARCH=amd64;																																								\
+	go build -ldflags "$(LDFLAGS)" 																																			\
+	-o ./bin/server/warpdrive-windows-server ./cmd/server;
+
+build-darwin-server: compile-protobuf
+	@export GOGC=off;																																										\
+	export GOOS=darwin;																																									\
+	export GOARCH=amd64;																																								\
+	go build -ldflags "$(LDFLAGS)" 																																			\
+	-o ./bin/server/warpdrive-darwin-server ./cmd/server;	
+
+build-servers: build-linux-server build-windows-server build-darwin-server
+
+#
+# Docker
+#
+
+build-docker: build-linux-server
 	docker build -t warpdrive .
+
+#
+# Warpdrive cli (warp)
+#
 
 build-cli: compile-protobuf
 	@export GOGC=off;																																										\
 	export GOOS=darwin;																																									\
 	export GOARCH=amd64;																																								\
 	go build -ldflags "$(LDFLAGS)" 																																			\
-	-o ./bin/cli/warp ./cmd/warp && mv -f ./bin/cli/warp ./example/Sample/warp; 
+	-o ./bin/cli/warp ./cmd/warp; 
+
+#
+# Warpdrive clients
+#
 
 clean-ios:
 	@rm -rf ./client/ios/Warpdrive.framework;																														\
@@ -66,6 +98,3 @@ build-android: clean-android
 	mv -f warpdrive.aar ../../client/android/lib;
 
 build-clients: build-ios build-android
-
-server-cleanup:
-	@docker-compose down; docker rmi warpdrive; rm -rf ./tmp; mkdir -p ./tmp/bundles; mkdir -p ./tmp/db;
