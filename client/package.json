@@ -1,0 +1,30 @@
+{
+  "name": "react-native-warpdrive",
+  "version": "0.0.0",
+  "description": "Complete Solution for Updating React-Native Apps",
+  "main": "lib",
+  "files": [
+    "ios/",
+    "android/",
+    "lib/",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:pressly/warpdrive.git"
+  },
+  "keywords": [
+    "react-native",
+    "warpdrive"
+  ],
+  "author": "Ali Najafizadeh",
+  "license": "BSD",
+  "bugs": {
+    "url": "https://github.com/pressly/warpdrive/issues"
+  },
+  "homepage": "http://pressly.github.io/warpdrive/"
+}
