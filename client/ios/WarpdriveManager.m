@@ -82,4 +82,31 @@ RCT_EXPORT_MODULE();
     [bridge reload];
 }
 
+RCT_EXPORT_METHOD(isAnyUpdate:(RCTResponseSenderBlock)callback) {
+    NSString* release = WarpdriveIsAnyUpdate();
+    if (release != nil) {
+        callback(@[release]);
+    } else {
+        callback(@[[NSNull null]]);
+    }
+}
+
+RCT_EXPORT_METHOD(update:(RCTResponseSenderBlock)callback) {
+    NSError *err;
+    WarpdriveUpdate(&err);
+    if (err != nil) {
+        callback(@[[err localizedDescription]]);
+    } else {
+        callback(@[[NSNull null]]);
+    }
+}
+
+RCT_EXPORT_METHOD(reload) {
+    NSString *path = WarpdriveBundlePath();
+    if (path != nil && ![path isEqualToString:@""]) {
+        [WarpdriveManager reloadWithPath:path];
+    }
+}
+
+
 @end
