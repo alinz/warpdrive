@@ -1,3 +1,9 @@
+//
+//  WarpdrivePackage.java
+//
+//  Created by Ali Najafizadeh.
+//  Copyright © 2017 Pressly Inc. All rights reserved.
+//
 package com.pressly.warpdrive;
 
 import android.app.Activity;

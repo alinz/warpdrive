@@ -1,76 +1,27 @@
 # Warpdrive
 
- COMMAND_CA=cert/ca-command.crt COMMAND_CRT=cert/cli.crt COMMAND_KEY=cert/cli.key COMMAND_ADDR=command:10000 ./warp publish -a share -p ios -r dev -v 1.1.3 -n test
+This is a single repo containg all the pieces required to build a Wardrive pipeline. It has been rebuilt from ground up for 2 main reasons
 
-# Dev Setup
+1 - Performance
+  - using GRPC to transfer data safe and fast, with HTTP2 by default
+  - using Golang to unlock stream power for both android and ios in one language and compile to multiple os such as darwin, windows and linux
 
-in order to compile the code for android and ios, you need to have gomobile install
+2 - Simplicity
+  - using Golang allow us to maintain one code base and write less code. The entire server side is around 500 loc and the client which does decryption, download, file management is around 300 loc.
 
-first install the gomobile
+# Usage
 
-```
-go get -u golang.org/x/mobile/cmd/gomobile 
-```
+The warpdrive project consitsts of 3 main components,
 
-make sure you have install ndk as well if you are not sure, look into this tutorial
+  1 - Warpdrive Server
+  2 - Warpdrive Client
+  3 - Warpdrive Cli aka `warp`
 
-``` 
-https://developer.android.com/ndk/guides/index.html
-```
+### Warpdrive Server
 
-then you have to initialize gomobile. this is one time operation
+This is the Server component of the pipeline. Behind the scene we are using `storm` which uses `boltdb` under the hood to power our database system. Because of the simplicity reason we decided to go with key/valu store system.
+For security reasons, we are using certificate approach as a pose to tradtional username/password. This makes it easy, secure on none HTTPS server and compatiable with GRPC. Also it removes the headache of maintain users list.
 
-```
-gomobile init
-gomobile init -ndk ~/Library/Android/sdk/ndk-bundle/
-```
+### Warpdrive Client
 
-### Postgres Setup
-
-before running warpdrive, make sure you have a right role and database. you can run the follwoing sql in Postgres terminal
-
-```bash
-CREATE USER warpdrive WITH PASSWORD 'warpdrive';
-CREATE DATABASE warpdrivedb;
-```
-
-and make sure to set the correct username, password and database in warpdrive.conf.
-
-# Warpfile
-
-server:
-  addr: 192.168.0.1:3000
-cycles:
-  production:
-    build: react-native build $PLATFORM
-
-
-
-# Rollback
-you have to unlock those version that you don't want
-
-
-# Android
-
-if you getting an error in Android Studio
-
-```
-Unsupported method: AndroidProject.getPluginGeneration().
-The version of Gradle you connect to does not support that method.
-To resolve the problem you can change/upgrade the target version of Gradle you connect to.
-Alternatively, you can ignore this exception and read other information from the model.
-```
-
-then you should do this, go to `File / Settings/ Build, Execution, Deployment / Instant Run.` and Uncheck `Enable Instant Run to hot swap code...`
-
-
-```java
-UiThreadUtil.runOnUiThread(
-  new Runnable() {
-    @Override
-    public void run() {
-      mReactInstanceCommandsHandler.onJSBundleLoadedFromServer();
-    }
-  }
-);
-```
+### Warpdrive Cli
