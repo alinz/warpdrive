@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"fmt"
@@ -8,11 +8,14 @@ import (
 	"github.com/asdine/storm"
 	"github.com/asdine/storm/q"
 	pb "github.com/pressly/warpdrive/proto"
+	"github.com/pressly/warpdrive/server/config"
 	context "golang.org/x/net/context"
+	"path/filepath"
 )
 
 type queryServer struct {
-	db *storm.DB
+	db   *storm.DB
+	conf *config.Config
 }
 
 func (qs *queryServer) GetUpgrade(ctx context.Context, release *pb.Release) (*pb.Release, error) {
@@ -72,7 +75,7 @@ func (qs *queryServer) DownloadRelease(release *pb.Release, stream pb.Query_Down
 		return err
 	}
 
-	path := bundlePath(release)
+	path := filepath.Join(qs.conf.BundlePath, release.Bundle)
 	file, err := os.Open(path)
 	if err != nil {
 		return err
@@ -123,4 +126,9 @@ func (qs *queryServer) DownloadRelease(release *pb.Release, stream pb.Query_Down
 	}
 
 	return nil
+}
+
+// NewQueryServer creates a query server
+func NewQueryServer(db *storm.DB, conf *config.Config) pb.QueryServer {
+	return &queryServer{db, conf}
 }

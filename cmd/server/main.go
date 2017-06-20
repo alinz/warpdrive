@@ -1,46 +1,51 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"net"
+	"os"
 
-	"github.com/kelseyhightower/envconfig"
+	"github.com/asdine/storm"
 	"github.com/pressly/warpdrive/helper"
 	pb "github.com/pressly/warpdrive/proto"
+	"github.com/pressly/warpdrive/server"
+	"github.com/pressly/warpdrive/server/config"
 )
 
+const usagestr = `
+Usage: server [options]
+
+server Options:
+    -c, --config <filename>     warpdrive server's configuration
+`
+
+func usage() {
+	fmt.Printf("%s\n", usagestr)
+	os.Exit(0)
+}
+
 func main() {
-	commandEnv := &struct {
-		CA   string `require:"true"`
-		Crt  string `require:"true"`
-		Key  string `require:"true"`
-		Port string `require:"true"`
-	}{}
+	var configPath string
+	flag.StringVar(&configPath, "config", "", "service configuration file")
+	flag.Parse()
 
-	err := envconfig.Process("command", commandEnv)
+	conf := &config.Config{}
+	err := helper.ConfigFile(configPath, conf)
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Fatal(err)
 	}
 
-	queryEnv := &struct {
-		CA   string `require:"true"`
-		Crt  string `require:"true"`
-		Key  string `require:"true"`
-		Port string `require:"true"`
-	}{}
-
-	err = envconfig.Process("query", queryEnv)
+	// open database connection
+	db, err := storm.Open(conf.DBPath)
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Fatal(err)
 	}
 
-	grpcCommandConfig, err := helper.NewGrpcConfig(commandEnv.CA, commandEnv.Crt, commandEnv.Key)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	grpcQueryConfig, err := helper.NewGrpcConfig(queryEnv.CA, queryEnv.Crt, queryEnv.Key)
+	// create grpc server for Command Service
+	cmdConf := conf.Command
+	grpcCommandConfig, err := helper.NewGrpcConfig(cmdConf.CAPath, cmdConf.CertPath, cmdConf.KeyPath)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -50,28 +55,31 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
+	pb.RegisterCommandServer(grpcCommandServer, server.NewCommandServer(db, conf))
+	lnCommand, err := net.Listen("tcp", cmdConf.Addr)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	// create grpc for Query Service
+	qryConf := conf.Query
+	grpcQueryConfig, err := helper.NewGrpcConfig(qryConf.CAPath, qryConf.CertPath, qryConf.KeyPath)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
 	grpcQueryServer, err := grpcQueryConfig.CreateServer()
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	db, err := openDB("/db/warpdrive.db")
+	pb.RegisterQueryServer(grpcQueryServer, server.NewQueryServer(db, conf))
+	lnQuery, err := net.Listen("tcp", qryConf.Addr)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	pb.RegisterCommandServer(grpcCommandServer, &commandServer{db})
-	lnCommand, err := net.Listen("tcp", fmt.Sprintf(":%s", commandEnv.Port))
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	pb.RegisterQueryServer(grpcQueryServer, &queryServer{db})
-	lnQuery, err := net.Listen("tcp", fmt.Sprintf(":%s", queryEnv.Port))
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
+	// run both Command and Query services in their own goroutines
 	commandCloseChan := make(chan error)
 	go func() {
 		commandCloseChan <- grpcCommandServer.Serve(lnCommand)

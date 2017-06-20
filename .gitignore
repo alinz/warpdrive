@@ -12,8 +12,8 @@ warpdrive.aar
 client/ios/framework
 .bundles
 old
+example/Sample/warp
 
-warp
 build
 *.crt
 *.key

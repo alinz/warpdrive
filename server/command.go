@@ -1,22 +1,24 @@
-package main
+package server
 
 import (
 	"fmt"
 	"io"
-	"os"
-	"strings"
-
 	"log"
+	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/asdine/storm"
 	"github.com/asdine/storm/q"
 	"github.com/pressly/warpdrive/helper"
 	pb "github.com/pressly/warpdrive/proto"
+	"github.com/pressly/warpdrive/server/config"
 	uuid "github.com/satori/go.uuid"
 )
 
 type commandServer struct {
-	db *storm.DB
+	db   *storm.DB
+	conf *config.Config
 }
 
 func (c *commandServer) isUnique(release *pb.Release) bool {
@@ -139,7 +141,7 @@ func (c *commandServer) UploadRelease(upload pb.Command_UploadReleaseServer) err
 
 		if err != nil {
 			if moved {
-				os.Remove(bundlePath(newRelease))
+				os.Remove(filepath.Join(c.conf.BundlePath, newRelease.Bundle))
 			} else {
 				os.Remove(path)
 			}
@@ -193,7 +195,7 @@ func (c *commandServer) UploadRelease(upload pb.Command_UploadReleaseServer) err
 	}
 
 	// moved the temp bundle to the bundle section
-	err = os.Rename(path, bundlePath(newRelease))
+	err = os.Rename(path, filepath.Join(c.conf.BundlePath, newRelease.Bundle))
 	if err != nil {
 		return err
 	}
@@ -220,4 +222,9 @@ func (c *commandServer) UploadRelease(upload pb.Command_UploadReleaseServer) err
 
 	// this error is not that important that we need to rollback
 	return upload.SendAndClose(newRelease)
+}
+
+// NewCommandServer creates a Command server
+func NewCommandServer(db *storm.DB, conf *config.Config) pb.CommandServer {
+	return &commandServer{db, conf}
 }

@@ -8,20 +8,13 @@ services:
       dockerfile: ./Dockerfile
 
     volumes:
+      - ./etc:/conf:ro
+      - ./cert:/cert:ro
       - ./tmp/db:/db
       - ./tmp/bundles:/bundles
 
+    command: --config /conf/config.conf
+
     ports:
-      - "10000:54321"
-      - "10001:54322"
-
-    environment:
-      - COMMAND_CA=/cert/ca-command.crt
-      - COMMAND_CRT=/cert/command.crt
-      - COMMAND_KEY=/cert/command.key
-      - COMMAND_PORT=54321
-      - QUERY_CA=/cert/ca-query.crt
-      - QUERY_CRT=/cert/query.crt
-      - QUERY_KEY=/cert/query.key
-      - QUERY_PORT=54322
-
+      - "10000:10000"
+      - "10001:10001"
