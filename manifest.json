@@ -1,12 +1,12 @@
 {
     "dependencies": {
+        "github.com/BurntSushi/toml": {
+            "branch": "master"
+        },
         "github.com/asdine/storm": {
             "branch": "master"
         },
         "github.com/golang/protobuf": {
-            "branch": "master"
-        },
-        "github.com/kelseyhightower/envconfig": {
             "branch": "master"
         },
         "github.com/satori/go.uuid": {

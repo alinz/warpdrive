@@ -1,6 +1,14 @@
 {
-    "memo": "1b5de5e4aa2caef289ea0e946a443f85cff9609d715759029908bf8cf49bccfe",
+    "memo": "9e6b8482ec11b8463ad7f2068bca4ba2cd115cfc05dabe7f132df1fe8851502b",
     "projects": [
+        {
+            "name": "github.com/BurntSushi/toml",
+            "branch": "master",
+            "revision": "d94612f9fc140360834f9742158c70b5c5b5535b",
+            "packages": [
+                "."
+            ]
+        },
         {
             "name": "github.com/asdine/storm",
             "branch": "master",
@@ -9,7 +17,6 @@
                 ".",
                 "codec",
                 "codec/json",
-                "codec/protobuf",
                 "index",
                 "internal",
                 "q"
@@ -47,14 +54,6 @@
             "name": "github.com/inconshreveable/mousetrap",
             "branch": "master",
             "revision": "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75",
-            "packages": [
-                "."
-            ]
-        },
-        {
-            "name": "github.com/kelseyhightower/envconfig",
-            "branch": "master",
-            "revision": "b6fde1625d631a48340817849a547164f395d9eb",
             "packages": [
                 "."
             ]
@@ -100,7 +99,7 @@
         {
             "name": "golang.org/x/sys",
             "branch": "master",
-            "revision": "b90f89a1e7a9c1f6b918820b3daa7f08488c8594",
+            "revision": "fb4cac33e3196ff7f507ab9b2d2a44b0142f5b5a",
             "packages": [
                 "unix"
             ]
