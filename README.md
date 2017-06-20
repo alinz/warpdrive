@@ -1,27 +1,29 @@
 # Warpdrive
 
-This is a single repo containg all the pieces required to build a Wardrive pipeline. It has been rebuilt from ground up for 2 main reasons
+this is a single repo contains all the required and missing pieces for setup a system for updating react-native apps just like `Code-Push` or `AppHub`. 
 
-1 - Performance
-  - using GRPC to transfer data safe and fast, with HTTP2 by default
-  - using Golang to unlock stream power for both android and ios in one language and compile to multiple os such as darwin, windows and linux
+So Why a new system? 
 
-2 - Simplicity
-  - using Golang allow us to maintain one code base and write less code. The entire server side is around 500 loc and the client which does decryption, download, file management is around 300 loc.
+`Code-Push` is missing server component, `Walmart lab` is open sourced the server side but you always have to make sure the new release of `Code-Push` is compatiable by server side. Also for now `Code-Push` is free and we hope it stays that way but who knows what happens next in the future.
 
-# Usage
+`AppHub` has the same probelm as `Code-Push` and also it cost money.
 
-The warpdrive project consitsts of 3 main components,
+`Warpdrive` solves all of the above plus it uses `golang` under the hood. `golang` is a mature language and has been used for server side for quite a while and as soon as `gomobile` releases we decided to power `warpdrive` for both `android` and `ios`.
 
-  1 - Warpdrive Server
-  2 - Warpdrive Client
-  3 - Warpdrive Cli aka `warp`
+it has couple of major benefits:
 
-### Warpdrive Server
+- it has a powerful streaming capability which enables us to do zip and unzip over network on the fly. (good luck trying to implement it on both `Java` and `Objective-c`)
+- low memory foot print
+- one code base for both android and ios
+- share code between server and client
 
-This is the Server component of the pipeline. Behind the scene we are using `storm` which uses `boltdb` under the hood to power our database system. Because of the simplicity reason we decided to go with key/valu store system.
-For security reasons, we are using certificate approach as a pose to tradtional username/password. This makes it easy, secure on none HTTPS server and compatiable with GRPC. Also it removes the headache of maintain users list.
 
-### Warpdrive Client
+We think Gopher can have a react-native tato as well!
 
-### Warpdrive Cli
+<p align="center">
+    <img width="200" src="https://raw.githubusercontent.com/pressly/warpdrive/master/docs/assets/gopher-tattoo.jpg" />
+</p>
+
+Cheers,
+Pressly - Team
+
