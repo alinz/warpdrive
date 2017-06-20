@@ -17,11 +17,11 @@ it has couple of major benefits:
 - one code base for both android and ios
 - share code between server and client
 
-
-
 <p align="center">
-We think Gopher can have a react-native tattoo as well!
-    <img width="200" src="https://raw.githubusercontent.com/pressly/warpdrive/master/docs/assets/gopher-tattoo.jpg" />
+  We think Gopher can have a react-native tattoo as well!
+</p>
+<p align="center">
+  <img width="200" src="https://raw.githubusercontent.com/pressly/warpdrive/master/docs/assets/gopher-tattoo.jpg" />
 </p>
 
 Cheers,
