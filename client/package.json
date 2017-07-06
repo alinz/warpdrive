@@ -1,23 +1,17 @@
 {
   "name": "react-native-warpdrive",
-  "version": "3.0.0-beta1",
+  "version": "3.0.0-beta3",
   "description": "Complete Solution for Updating React-Native Apps",
   "main": "lib",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "postinstall": "cd ios/Warpdrive.framework && ln -s Versions/A/Modules Modules && ln -s Versions/A/Resources Resources && ln -s Versions/A/Headers Headers && ln -s Versions/A/Warpdrive Warpdrive"
+    "postinstall": "cd ios/Warpdrive.framework; ln -sfn Versions/A/Modules Modules; ln -sfn Versions/A/Resources Resources; ln -sfn Versions/A/Headers Headers; ln -sfn Versions/A/Warpdrive Warpdrive"
   },
   "repository": {
     "type": "git",
     "url": "git@github.com:pressly/warpdrive.git"
   },
-  "keywords": [
-    "react-native",
-    "warpdrive",
-    "golang",
-    "ios",
-    "android"
-  ],
+  "keywords": ["react-native", "warpdrive", "golang", "ios", "android"],
   "author": "Ali Najafizadeh",
   "license": "BSD",
   "bugs": {
