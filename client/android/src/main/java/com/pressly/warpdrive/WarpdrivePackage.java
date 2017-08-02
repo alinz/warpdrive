@@ -68,7 +68,7 @@ public class WarpdrivePackage implements ReactPackage {
         return modules;
     }
 
-    @Override
+    // react-native v47 removed this method. for compatibility reason, I keep this method
     public List<Class<? extends JavaScriptModule>> createJSModules() {
         return Collections.emptyList();
     }
