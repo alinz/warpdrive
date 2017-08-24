@@ -1,5 +1,0 @@
-rootProject.name = 'Sample'
-
-include ':app', ':warpdrive', ':react-native-warpdrive'
-
-project(':react-native-warpdrive').projectDir = new File(rootProject.projectDir, '../../../client/android')

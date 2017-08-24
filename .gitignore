@@ -4,6 +4,7 @@
 
 bin
 tmp
+temp
 cert
 
 node_modules
