@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+package warpdrive;
+
+service Warpdrive {
+  rpc setupApp(Credential) returns (Certificate) {}
+  rpc setupReleaseAdminCertificate(Release) returns (Certificate) {}
+  rpc setupReleaseUserCertificate(Release) returns (Certificate) {}
+  rpc publish(stream Chunck) returns (Bundle) {}
+  rpc download(Release) returns (stream Chunck){}
+}
+
+message Credential {
+  string username = 1;
+  string password = 2;
+  string appName = 3;
+}
+
+message Certificate {
+  // token is signed jwt of Token message
+  string token = 1;
+  string cert = 2;
+}
+
+message Token {
+  bool admin = 1;
+  uint64 appId = 2;
+  uint64 releaseId = 3;
+}
+
+message App {
+  // @inject_tag: storm:"id,increment"
+  uint64 id = 1;
+  // @inject_tag: storm:"unique"
+  string name = 2;
+}
+
+message Release {
+  // @inject_tag: storm:"id,increment"
+  uint64 id = 1;
+  // @inject_tag: storm:"index"
+  uint64 appId = 2;
+  string name = 3;
+}
+
+enum Platform {
+  UNKNOWN = 0;
+  IOS = 1;
+  ANDROID = 2;
+}
+
+message Bundle {
+  // @inject_tag: storm:"id,increment"
+  uint64 id = 1;
+  // @inject_tag: storm:"index"
+  uint64 releaseId = 2;
+  // @inject_tag: storm:"index"
+  uint64 next = 3;
+  Platform platform = 4;
+  string version = 5;
+}
+
+message Chunck {
+  oneof value {
+    Bundle bundle = 1;
+    bytes data = 2;
+  }
+}
