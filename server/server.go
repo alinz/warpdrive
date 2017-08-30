@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net"
-	"os"
 
 	"github.com/BurntSushi/toml"
 	"github.com/asdine/storm"
@@ -23,14 +22,14 @@ import (
 )
 
 type Server struct {
-	config     *config.Config
+	Conf       *config.Config
 	privateKey *rsa.PrivateKey
 	publicKey  *rsa.PublicKey
 	db         *storm.DB
 }
 
 func (s *Server) SetupApp(ctx context.Context, credential *pb.Credential) (*pb.Certificate, error) {
-	adminConfig := s.config.Admin
+	adminConfig := s.Conf.Admin
 	if adminConfig.Username != credential.Username ||
 		bcrypt.CompareHashAndPassword([]byte(adminConfig.Password), []byte(credential.Password)) != nil {
 		return nil, fmt.Errorf("username is not correct")
@@ -128,18 +127,18 @@ func (s *Server) Download(release *pb.Release, stream pb.Warpdrive_DownloadServe
 	return nil
 }
 
-func (s *Server) Start() error {
+func (s *Server) SetupServer() (func(net.Listener) error, error) {
 	cleanup, err := s.setup()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	defer cleanup()
 
-	tlsConfig := s.config.TLS
+	tlsConfig := s.Conf.TLS
 	creds, err := credentials.NewServerTLSFromFile(tlsConfig.CA, tlsConfig.Private)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	grpcServer := grpc.NewServer(grpc.Creds(creds))
@@ -150,16 +149,18 @@ func (s *Server) Start() error {
 	pb.RegisterWarpdriveServer(grpcServer, s)
 
 	// start listening to the network
-	ln, err := net.Listen("tcp", s.config.Server.Addr)
-	if err != nil {
-		return err
-	}
+	// ln, err := net.Listen("tcp", s.Conf.Server.Addr)
+	// if err != nil {
+	// 	return err
+	// }
 
-	return grpcServer.Serve(ln)
+	return func(ln net.Listener) error {
+		return grpcServer.Serve(ln)
+	}, nil
 }
 
 func (s *Server) loadKeys() error {
-	tlsConfig := s.config.TLS
+	tlsConfig := s.Conf.TLS
 
 	// load public key
 	data, err := ioutil.ReadFile(tlsConfig.Public)
@@ -198,7 +199,7 @@ func (s *Server) setup() (func(), error) {
 	}
 
 	// load db
-	s.db, err = storm.Open(s.config.DB.Path)
+	s.db, err = storm.Open(s.Conf.DB.Path)
 	if err != nil {
 		return nil, err
 	}
@@ -247,13 +248,13 @@ func (s *Server) genCertificate(appID, releaseID uint64, admin bool) (*pb.Certif
 		return nil, err
 	}
 
-	cert, err := ioutil.ReadFile(s.config.TLS.CA)
+	cert, err := ioutil.ReadFile(s.Conf.TLS.CA)
 	if err != nil {
 		return nil, err
 	}
 
 	return &pb.Certificate{
-		Addr:  s.config.Server.PublicAddr,
+		Addr:  s.Conf.Server.PublicAddr,
 		Token: token,
 		Cert:  string(cert),
 	}, nil
@@ -275,19 +276,15 @@ func (s *Server) transaction(fn func(tx storm.Node) error) error {
 
 // New creates new Server with given config file
 func New(configPath string) (*Server, error) {
-	_, err := os.Stat(configPath)
-	if err != nil {
-		return nil, err
-	}
-
 	config := config.Config{}
-	_, err = toml.DecodeFile(configPath, &config)
+
+	_, err := toml.DecodeFile(configPath, &config)
 	if err != nil {
 		return nil, err
 	}
 
 	server := Server{
-		config: &config,
+		Conf: &config,
 	}
 
 	return &server, nil

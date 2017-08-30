@@ -14,7 +14,7 @@ type Config struct {
 	TLS struct {
 		CA      string `toml:"ca"`
 		Private string `toml:"private"`
-		Public  string `toml:"string"`
+		Public  string `toml:"public"`
 	} `toml:"tls"`
 
 	Admin struct {
