@@ -20,6 +20,7 @@ message Certificate {
   // token is signed jwt of Token message
   string token = 1;
   string cert = 2;
+  string addr = 3;
 }
 
 message Token {

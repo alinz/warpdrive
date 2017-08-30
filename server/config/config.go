@@ -1,7 +1,11 @@
 package config
 
 type Config struct {
-	Addr string `toml:"addr"`
+	Server struct {
+		Addr       string `toml:"addr"`
+		PublicAddr string `toml:"public_addr"`
+		BundlesDir string `toml:"bundles_dir"`
+	} `toml:"server"`
 
 	DB struct {
 		Path string `toml:"path"`
