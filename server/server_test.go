@@ -5,7 +5,6 @@ import (
 	"net"
 	"os"
 	"path/filepath"
-	"testing"
 
 	"github.com/pressly/warpdrive/server/config"
 )
@@ -49,18 +48,15 @@ var testTLS = struct {
 	-----END PUBLIC KEY-----`),
 }
 
-func createTempDir(t *testing.T) (string, func()) {
+func createTempDir() (string, func() error, error) {
 	path, err := ioutil.TempDir("", "test")
 	if err != nil {
-		t.Fatal(err)
+		return "", nil, err
 	}
 
-	return path, func() {
-		err := os.Remove(path)
-		if err != nil {
-			t.Fatal(err)
-		}
-	}
+	return path, func() error {
+		return os.Remove(path)
+	}, nil
 }
 
 func createTempTLSfiles(config *config.Config) error {
@@ -82,30 +78,22 @@ func createTempTLSfiles(config *config.Config) error {
 	return nil
 }
 
-func createTestServer(t *testing.T, config *config.Config) (*Server, func() error, error) {
+func createTestServer(config *config.Config) (*Server, func() error, error) {
 	// create a temporary folder
-	path, cleanTempDir := createTempDir(t)
+	path, cleanTempDir, err := createTempDir()
 
 	config.TLS.CA = filepath.Join(path, config.TLS.CA)
 	config.TLS.Public = filepath.Join(path, config.TLS.Public)
 	config.TLS.Private = filepath.Join(path, config.TLS.Private)
 
-	err := createTempTLSfiles(config)
+	err = createTempTLSfiles(config)
 	if err != nil {
 		cleanTempDir()
-		t.Fatal(err)
+		return nil, nil, err
 	}
 
 	config.DB.Path = filepath.Join(path, config.DB.Path)
 	config.Server.BundlesDir = filepath.Join(path, config.Server.BundlesDir)
-
-	ln, err := net.Listen("tcp", "127.0.0.1:0")
-	if err != nil {
-		cleanTempDir()
-		t.Fatal(err)
-	}
-
-	config.Server.Addr = ln.Addr().String()
 
 	return &Server{
 			Conf: config,
@@ -115,6 +103,26 @@ func createTestServer(t *testing.T, config *config.Config) (*Server, func() erro
 		}, nil
 }
 
-func startTestServer(t *testing.T, server *Server) {
+func startTestServer(server *Server) (func(), error) {
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		return nil, err
+	}
 
+	server.Conf.Server.Addr = ln.Addr().String()
+	start, err := server.SetupServer()
+	if err != nil {
+		ln.Close()
+		return nil, err
+	}
+
+	err = start(ln)
+	if err != nil {
+		ln.Close()
+		return nil, err
+	}
+
+	return func() {
+		ln.Close()
+	}, nil
 }
