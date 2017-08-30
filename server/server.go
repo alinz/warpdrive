@@ -2,6 +2,7 @@ package server
 
 import (
 	"crypto/rsa"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net"
@@ -12,9 +13,12 @@ import (
 	jwt "github.com/dgrijalva/jwt-go"
 	pb "github.com/pressly/warpdrive/proto"
 	"github.com/pressly/warpdrive/server/config"
+	"github.com/pressly/warpdrive/token"
 	context "golang.org/x/net/context"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/metadata"
 )
 
 type Server struct {
@@ -24,6 +28,11 @@ type Server struct {
 }
 
 func (s *Server) SetupApp(ctx context.Context, credential *pb.Credential) (*pb.Certificate, error) {
+	token, err := s.token(ctx)
+	if err != nil {
+		return nil, grpc.Errorf(codes.Unauthenticated, err.Error())
+	}
+
 	return nil, nil
 }
 
@@ -44,34 +53,20 @@ func (s *Server) Download(release *pb.Release, stream pb.Warpdrive_DownloadServe
 }
 
 func (s *Server) Start() error {
+	cleanup, err := s.setup()
+	if err != nil {
+		return err
+	}
+
+	defer cleanup()
+
 	tlsConfig := s.config.TLS
 	creds, err := credentials.NewServerTLSFromFile(tlsConfig.CA, tlsConfig.Private)
 	if err != nil {
-		log.Fatalln(err)
+		return err
 	}
 
 	grpcServer := grpc.NewServer(grpc.Creds(creds))
-
-	// load public key for validating JWT
-	pubKeyData, err := ioutil.ReadFile(tlsConfig.Public)
-	if err != nil {
-		return err
-	}
-
-	publickey, err := jwt.ParseRSAPublicKeyFromPEM(pubKeyData)
-	if err != nil {
-		return err
-	}
-
-	s.jwtPublicKey = publickey
-
-	// load db
-	s.db, err = storm.Open(s.config.DB.Path)
-	if err != nil {
-		return err
-	}
-
-	defer s.db.Close()
 
 	log.Println("server has started")
 
@@ -85,6 +80,47 @@ func (s *Server) Start() error {
 	}
 
 	return grpcServer.Serve(ln)
+}
+
+func (s *Server) setup() (func(), error) {
+	tlsConfig := s.config.TLS
+
+	// load public key for validating JWT
+	pubKeyData, err := ioutil.ReadFile(tlsConfig.Public)
+	if err != nil {
+		return nil, err
+	}
+
+	publickey, err := jwt.ParseRSAPublicKeyFromPEM(pubKeyData)
+	if err != nil {
+		return nil, err
+	}
+
+	s.jwtPublicKey = publickey
+
+	// load db
+	s.db, err = storm.Open(s.config.DB.Path)
+	if err != nil {
+		return nil, err
+	}
+
+	return func() {
+		s.db.Close()
+	}, nil
+}
+
+func (s *Server) token(ctx context.Context) (*pb.Token, error) {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("invalid token")
+	}
+
+	authorization, ok := md["authorization"]
+	if !ok || len(authorization) != 1 {
+		return nil, fmt.Errorf("invalid token")
+	}
+
+	token.NewJwtToken(authorization[0])
 }
 
 func New(configPath string) (*Server, error) {
