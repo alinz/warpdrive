@@ -10,8 +10,11 @@ import (
 
 	pb "github.com/pressly/warpdrive/proto"
 	"github.com/pressly/warpdrive/server/config"
+	"github.com/pressly/warpdrive/token"
 	"github.com/stretchr/testify/assert"
 	context "golang.org/x/net/context"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 var tlsTest = struct {
@@ -177,8 +180,26 @@ func startServerTest(server *Server) (func(), error) {
 	}, nil
 }
 
-func createClientTest() {
+func createClientTest(config *config.Config, tokValue string) (*grpc.ClientConn, error) {
+	var dialOptions []grpc.DialOption
 
+	creds, err := credentials.NewClientTLSFromFile(config.TLS.CA, "warpdrive")
+	if err != nil {
+		return nil, err
+	}
+
+	dialOptions = append(dialOptions, grpc.WithTransportCredentials(creds))
+
+	if tokValue != "" {
+		authorization, err := token.NewAuthorizationWithToken(tokValue)
+		if err != nil {
+			return nil, err
+		}
+
+		dialOptions = append(dialOptions, grpc.WithPerRPCCredentials(authorization))
+	}
+
+	return grpc.Dial(config.Server.Addr, dialOptions...)
 }
 
 func TestBasicServer(t *testing.T) {
@@ -233,6 +254,13 @@ func TestSetupApp(t *testing.T) {
 
 	defer cleanupListener()
 
-	_, err = server.SetupApp(context.Background(), &pb.Credential{Username: "admin", Password: "admin", AppName: "My Awesome App"})
+	conn, err := createClientTest(&conf, "")
+	assert.Nil(t, err)
+
+	defer conn.Close()
+
+	client := pb.NewWarpdriveClient(conn)
+
+	_, err = client.SetupApp(context.Background(), &pb.Credential{Username: "admin", Password: "admin", AppName: "My Awesome App"})
 	assert.Nil(t, err)
 }
