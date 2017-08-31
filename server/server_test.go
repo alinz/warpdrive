@@ -11,9 +11,10 @@ import (
 	pb "github.com/pressly/warpdrive/proto"
 	"github.com/pressly/warpdrive/server/config"
 	"github.com/stretchr/testify/assert"
+	context "golang.org/x/net/context"
 )
 
-var testTLS = struct {
+var tlsTest = struct {
 	CA      []byte
 	Private []byte
 	Public  []byte
@@ -52,7 +53,7 @@ EKeLJ74xTXlgULdJjQIDAQAB
 -----END PUBLIC KEY-----`),
 }
 
-func createTempDir() (string, func() error, error) {
+func createTempDirTest() (string, func() error, error) {
 	path, err := ioutil.TempDir("", "test")
 	if err != nil {
 		return "", nil, err
@@ -67,18 +68,18 @@ func createTempDir() (string, func() error, error) {
 	}, nil
 }
 
-func createTempTLSfiles(config *config.Config) error {
-	err := ioutil.WriteFile(config.TLS.CA, testTLS.CA, os.ModePerm)
+func createTempTLSfilesTest(config *config.Config) error {
+	err := ioutil.WriteFile(config.TLS.CA, tlsTest.CA, os.ModePerm)
 	if err != nil {
 		return err
 	}
 
-	err = ioutil.WriteFile(config.TLS.Private, testTLS.Private, os.ModePerm)
+	err = ioutil.WriteFile(config.TLS.Private, tlsTest.Private, os.ModePerm)
 	if err != nil {
 		return err
 	}
 
-	err = ioutil.WriteFile(config.TLS.Public, testTLS.Public, os.ModePerm)
+	err = ioutil.WriteFile(config.TLS.Public, tlsTest.Public, os.ModePerm)
 	if err != nil {
 		return err
 	}
@@ -86,15 +87,15 @@ func createTempTLSfiles(config *config.Config) error {
 	return nil
 }
 
-func createTestServer(config *config.Config) (*Server, func() error, error) {
+func createServerTest(config *config.Config) (*Server, func() error, error) {
 	// create a temporary folder
-	path, cleanTempDir, err := createTempDir()
+	path, cleanTempDir, err := createTempDirTest()
 
 	config.TLS.CA = filepath.Join(path, config.TLS.CA)
 	config.TLS.Public = filepath.Join(path, config.TLS.Public)
 	config.TLS.Private = filepath.Join(path, config.TLS.Private)
 
-	err = createTempTLSfiles(config)
+	err = createTempTLSfilesTest(config)
 	if err != nil {
 		cleanTempDir()
 		return nil, nil, err
@@ -111,20 +112,21 @@ func createTestServer(config *config.Config) (*Server, func() error, error) {
 		}, nil
 }
 
-func startTestServer(server *Server) (func(), error) {
+func startServerTest(server *Server) (func(), error) {
 	ln, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
 		return nil, err
 	}
 
 	server.Conf.Server.Addr = ln.Addr().String()
-	start, err := server.SetupServer()
+	start, cleanup, err := server.SetupServer()
 	if err != nil {
 		ln.Close()
 		return nil, err
 	}
 
 	go func() {
+		defer cleanup()
 		// fmt.Println("server start at", server.Conf.Server.Addr)
 		err = start(ln)
 		if err != nil {
@@ -133,6 +135,7 @@ func startTestServer(server *Server) (func(), error) {
 	}()
 
 	return func() {
+		cleanup()
 		ln.Close()
 	}, nil
 }
@@ -172,12 +175,12 @@ func TestBasicServer(t *testing.T) {
 		},
 	}
 
-	server, cleanup, err := createTestServer(&conf)
+	server, cleanup, err := createServerTest(&conf)
 	assert.Nil(t, err)
 
 	defer cleanup()
 
-	cleanupListener, err := startTestServer(server)
+	cleanupListener, err := startServerTest(server)
 	assert.Nil(t, err)
 
 	defer cleanupListener()
@@ -219,7 +222,7 @@ func TestGenCertificate(t *testing.T) {
 		},
 	}
 
-	server, serverCleanup, err := createTestServer(&conf)
+	server, serverCleanup, err := createServerTest(&conf)
 	assert.Nil(t, err)
 
 	defer serverCleanup()
@@ -239,4 +242,54 @@ func TestGenCertificate(t *testing.T) {
 	}
 
 	assert.Equal(t, expected, certificate)
+}
+
+func TestSetupApp(t *testing.T) {
+	conf := config.Config{
+		Server: struct {
+			Addr       string `toml:"addr"`
+			PublicAddr string `toml:"public_addr"`
+			BundlesDir string `toml:"bundles_dir"`
+		}{
+			PublicAddr: "warpdrive.example.com",
+			BundlesDir: "/bundles",
+		},
+
+		DB: struct {
+			Path string `toml:"path"`
+		}{
+			Path: "/db",
+		},
+
+		TLS: struct {
+			CA      string `toml:"ca"`
+			Private string `toml:"private"`
+			Public  string `toml:"public"`
+		}{
+			CA:      "ca",
+			Private: "private",
+			Public:  "public",
+		},
+
+		Admin: struct {
+			Username string `toml:"username"`
+			Password string `toml:"password"`
+		}{
+			Username: "admin",
+			Password: "$2a$10$NRzYde3E6xGwN1eATKGvBeY1DXhWghAjiBFRvxaJLy9AQ0JmTXG2q",
+		},
+	}
+
+	server, cleanup, err := createServerTest(&conf)
+	assert.Nil(t, err)
+
+	defer cleanup()
+
+	cleanupListener, err := startServerTest(server)
+	assert.Nil(t, err)
+
+	defer cleanupListener()
+
+	_, err = server.SetupApp(context.Background(), &pb.Credential{Username: "admin", Password: "admin", AppName: "My Awesome App"})
+	assert.Nil(t, err)
 }

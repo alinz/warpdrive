@@ -40,7 +40,7 @@ func (s *Server) SetupApp(ctx context.Context, credential *pb.Credential) (*pb.C
 	err := s.transaction(func(tx storm.Node) error {
 		app := pb.App{Name: credential.AppName}
 
-		err := s.db.Save(&app)
+		err := tx.Save(&app)
 		if err != nil {
 			return err
 		}
@@ -127,18 +127,17 @@ func (s *Server) Download(release *pb.Release, stream pb.Warpdrive_DownloadServe
 	return nil
 }
 
-func (s *Server) SetupServer() (func(net.Listener) error, error) {
+func (s *Server) SetupServer() (func(net.Listener) error, func(), error) {
 	cleanup, err := s.setup()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-
-	defer cleanup()
 
 	tlsConfig := s.Conf.TLS
 	creds, err := credentials.NewServerTLSFromFile(tlsConfig.CA, tlsConfig.Private)
 	if err != nil {
-		return nil, err
+		cleanup()
+		return nil, nil, err
 	}
 
 	grpcServer := grpc.NewServer(grpc.Creds(creds))
@@ -148,15 +147,11 @@ func (s *Server) SetupServer() (func(net.Listener) error, error) {
 	// connected grpc server to server implementation
 	pb.RegisterWarpdriveServer(grpcServer, s)
 
-	// start listening to the network
-	// ln, err := net.Listen("tcp", s.Conf.Server.Addr)
-	// if err != nil {
-	// 	return err
-	// }
-
 	return func(ln net.Listener) error {
-		return grpcServer.Serve(ln)
-	}, nil
+			return grpcServer.Serve(ln)
+		}, func() {
+			cleanup()
+		}, nil
 }
 
 func (s *Server) loadKeys() error {
