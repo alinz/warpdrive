@@ -270,3 +270,69 @@ func TestSetupApp(t *testing.T) {
 	_, err = client.SetupApp(context.Background(), &pb.Credential{Username: "admin", Password: "admin", AppName: "My Awesome App"})
 	assert.Nil(t, err)
 }
+
+func TestRelease(t *testing.T) {
+	conf := createConfigTest()
+
+	server, cleanup, err := createServerTest(&conf)
+	assert.Nil(t, err)
+
+	defer cleanup()
+
+	cleanupListener, err := startServerTest(server)
+	assert.Nil(t, err)
+
+	defer cleanupListener()
+
+	var adminCert *pb.Certificate
+	var clientCert *pb.Certificate
+
+	// we need to call the create app first with admin credential
+	// this will create admin certificate and token.
+	// however, release id has not been set yet, so we can use this
+	// certificare to create a release object
+	{
+		cert, err := ioutil.ReadFile(conf.TLS.CA)
+		assert.Nil(t, err)
+
+		conn, err := createClientTest(cert, conf.Server.Addr, "")
+		assert.Nil(t, err)
+
+		defer conn.Close()
+
+		client := pb.NewWarpdriveClient(conn)
+
+		adminCert, err = client.SetupApp(context.Background(), &pb.Credential{Username: "admin", Password: "admin", AppName: "My Awesome App"})
+		assert.Nil(t, err)
+	}
+
+	// we are going to create a release for current app
+	// this will generate a new certificate which we need to store to `warpdrive.admin.json`
+	{
+		conn, err := createClientTest([]byte(adminCert.Cert), conf.Server.Addr, adminCert.Token)
+		assert.Nil(t, err)
+
+		defer conn.Close()
+
+		client := pb.NewWarpdriveClient(conn)
+
+		adminCert, err = client.SetupReleaseAdminCertificate(context.Background(), &pb.Release{Name: "prod"})
+		assert.Nil(t, err)
+	}
+
+	// next we need another certificate for bundling with mobile app
+	// this call will generate mobile app certificate
+	{
+		conn, err := createClientTest([]byte(adminCert.Cert), conf.Server.Addr, adminCert.Token)
+		assert.Nil(t, err)
+
+		defer conn.Close()
+
+		client := pb.NewWarpdriveClient(conn)
+
+		clientCert, err = client.SetupReleaseAdminCertificate(context.Background(), &pb.Release{Name: "prod"})
+		assert.Nil(t, err)
+	}
+
+	assert.NotNil(t, clientCert)
+}
