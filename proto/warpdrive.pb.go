@@ -96,7 +96,7 @@ func (m *Credential) GetAppName() string {
 
 type Certificate struct {
 	// token is signed jwt of Token message
-	Token string `protobuf:"bytes,1,opt,name=token" json:"token,omitempty"`
+	Token string `protobuf:"bytes,1,opt,name=token" json:"token,omitempty" `
 	Cert  string `protobuf:"bytes,2,opt,name=cert" json:"cert,omitempty"`
 	Addr  string `protobuf:"bytes,3,opt,name=addr" json:"addr,omitempty"`
 }
@@ -161,9 +161,9 @@ func (m *Token) GetReleaseId() uint64 {
 
 type App struct {
 	// @inject_tag: storm:"id,increment"
-	Id uint64 `protobuf:"varint,1,opt,name=id" json:"id,omitempty"`
+	Id uint64 `protobuf:"varint,1,opt,name=id" json:"id,omitempty" storm:"id,increment"`
 	// @inject_tag: storm:"unique"
-	Name string `protobuf:"bytes,2,opt,name=name" json:"name,omitempty"`
+	Name string `protobuf:"bytes,2,opt,name=name" json:"name,omitempty" storm:"unique"`
 }
 
 func (m *App) Reset()                    { *m = App{} }
@@ -187,9 +187,9 @@ func (m *App) GetName() string {
 
 type Release struct {
 	// @inject_tag: storm:"id,increment"
-	Id uint64 `protobuf:"varint,1,opt,name=id" json:"id,omitempty"`
+	Id uint64 `protobuf:"varint,1,opt,name=id" json:"id,omitempty" storm:"id,increment"`
 	// @inject_tag: storm:"index"
-	AppId uint64 `protobuf:"varint,2,opt,name=appId" json:"appId,omitempty"`
+	AppId uint64 `protobuf:"varint,2,opt,name=appId" json:"appId,omitempty" storm:"index"`
 	Name  string `protobuf:"bytes,3,opt,name=name" json:"name,omitempty"`
 }
 
@@ -221,11 +221,11 @@ func (m *Release) GetName() string {
 
 type Bundle struct {
 	// @inject_tag: storm:"id,increment"
-	Id uint64 `protobuf:"varint,1,opt,name=id" json:"id,omitempty"`
+	Id uint64 `protobuf:"varint,1,opt,name=id" json:"id,omitempty" storm:"id,increment"`
 	// @inject_tag: storm:"index"
-	ReleaseId uint64 `protobuf:"varint,2,opt,name=releaseId" json:"releaseId,omitempty"`
+	ReleaseId uint64 `protobuf:"varint,2,opt,name=releaseId" json:"releaseId,omitempty" storm:"index"`
 	// @inject_tag: storm:"index"
-	Next     uint64   `protobuf:"varint,3,opt,name=next" json:"next,omitempty"`
+	Next     uint64   `protobuf:"varint,3,opt,name=next" json:"next,omitempty" storm:"index"`
 	Platform Platform `protobuf:"varint,4,opt,name=platform,enum=warpdrive.Platform" json:"platform,omitempty"`
 	Version  string   `protobuf:"bytes,5,opt,name=version" json:"version,omitempty"`
 }
@@ -274,7 +274,7 @@ type Chunck struct {
 	// Types that are valid to be assigned to Value:
 	//	*Chunck_Bundle
 	//	*Chunck_Data
-	Value isChunck_Value `protobuf_oneof:"value"`
+	Value isChunck_Value `protobuf_oneof:"value" `
 }
 
 func (m *Chunck) Reset()                    { *m = Chunck{} }
