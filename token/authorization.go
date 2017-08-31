@@ -14,13 +14,19 @@ type Authorization struct {
 	pb.Token
 	privateKey *rsa.PrivateKey
 	publicKey  *rsa.PublicKey
+	token      string
 }
 
 // GetRequestMetadata is being used by higher level code in grpc
 func (a *Authorization) GetRequestMetadata(ctx context.Context, uri ...string) (map[string]string, error) {
-	token, err := a.GetSignedToken()
-	if err != nil {
-		return nil, err
+	var err error
+
+	token := a.token
+	if token == "" {
+		token, err = a.GetSignedToken()
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return map[string]string{
@@ -46,6 +52,12 @@ func (a *Authorization) GetSignedToken() (string, error) {
 	token := jwt.NewWithClaims(alg, a)
 
 	return token.SignedString(a.privateKey)
+}
+
+func NewAuthorizationWithToken(token string) (*Authorization, error) {
+	return &Authorization{
+		token: token,
+	}, nil
 }
 
 func NewAuthorization(privateKey *rsa.PrivateKey, publicKey *rsa.PublicKey, value ...string) (*Authorization, error) {
