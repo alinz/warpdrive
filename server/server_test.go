@@ -1,6 +1,7 @@
 package server
 
 import (
+	"crypto/x509"
 	"fmt"
 	"io/ioutil"
 	"net"
@@ -180,13 +181,15 @@ func startServerTest(server *Server) (func(), error) {
 	}, nil
 }
 
-func createClientTest(config *config.Config, tokValue string) (*grpc.ClientConn, error) {
+func createClientTest(cert []byte, addr string, tokValue string) (*grpc.ClientConn, error) {
 	var dialOptions []grpc.DialOption
 
-	creds, err := credentials.NewClientTLSFromFile(config.TLS.CA, "warpdrive")
-	if err != nil {
-		return nil, err
+	cp := x509.NewCertPool()
+	if !cp.AppendCertsFromPEM(cert) {
+		return nil, fmt.Errorf("credentials: failed to append certificates")
 	}
+
+	creds := credentials.NewClientTLSFromCert(cp, "warpdrive")
 
 	dialOptions = append(dialOptions, grpc.WithTransportCredentials(creds))
 
@@ -199,7 +202,7 @@ func createClientTest(config *config.Config, tokValue string) (*grpc.ClientConn,
 		dialOptions = append(dialOptions, grpc.WithPerRPCCredentials(authorization))
 	}
 
-	return grpc.Dial(config.Server.Addr, dialOptions...)
+	return grpc.Dial(addr, dialOptions...)
 }
 
 func TestBasicServer(t *testing.T) {
@@ -254,7 +257,10 @@ func TestSetupApp(t *testing.T) {
 
 	defer cleanupListener()
 
-	conn, err := createClientTest(&conf, "")
+	cert, err := ioutil.ReadFile(conf.TLS.CA)
+	assert.Nil(t, err)
+
+	conn, err := createClientTest(cert, conf.Server.Addr, "")
 	assert.Nil(t, err)
 
 	defer conn.Close()
