@@ -7,9 +7,10 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
-	"time"
 
+	pb "github.com/pressly/warpdrive/proto"
 	"github.com/pressly/warpdrive/server/config"
+	"github.com/stretchr/testify/assert"
 )
 
 var testTLS = struct {
@@ -58,7 +59,11 @@ func createTempDir() (string, func() error, error) {
 	}
 
 	return path, func() error {
-		return os.Remove(path)
+		if err := os.RemoveAll(path); err != nil {
+			fmt.Println("ERROR", err)
+		}
+
+		return err
 	}, nil
 }
 
@@ -120,16 +125,14 @@ func startTestServer(server *Server) (func(), error) {
 	}
 
 	go func() {
-		fmt.Println("server start at", server.Conf.Server.Addr)
+		// fmt.Println("server start at", server.Conf.Server.Addr)
 		err = start(ln)
 		if err != nil {
-			fmt.Println("server closed")
 			ln.Close()
 		}
 	}()
 
 	return func() {
-		fmt.Println("server closed")
 		ln.Close()
 	}, nil
 }
@@ -170,18 +173,70 @@ func TestBasicServer(t *testing.T) {
 	}
 
 	server, cleanup, err := createTestServer(&conf)
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.Nil(t, err)
 
 	defer cleanup()
 
 	cleanupListener, err := startTestServer(server)
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.Nil(t, err)
 
 	defer cleanupListener()
+}
 
-	<-time.After(time.Second * 5)
+func TestGenCertificate(t *testing.T) {
+	conf := config.Config{
+		Server: struct {
+			Addr       string `toml:"addr"`
+			PublicAddr string `toml:"public_addr"`
+			BundlesDir string `toml:"bundles_dir"`
+		}{
+			PublicAddr: "warpdrive.example.com",
+			BundlesDir: "/bundles",
+		},
+
+		DB: struct {
+			Path string `toml:"path"`
+		}{
+			Path: "/db",
+		},
+
+		TLS: struct {
+			CA      string `toml:"ca"`
+			Private string `toml:"private"`
+			Public  string `toml:"public"`
+		}{
+			CA:      "ca",
+			Private: "private",
+			Public:  "public",
+		},
+
+		Admin: struct {
+			Username string `toml:"username"`
+			Password string `toml:"password"`
+		}{
+			Username: "",
+			Password: "",
+		},
+	}
+
+	server, serverCleanup, err := createTestServer(&conf)
+	assert.Nil(t, err)
+
+	defer serverCleanup()
+
+	setupCleanup, err := server.setup()
+	assert.Nil(t, err)
+
+	defer setupCleanup()
+
+	certificate, err := server.genCertificate(1, 1, true)
+	assert.Nil(t, err)
+
+	expected := &pb.Certificate{
+		Addr:  "warpdrive.example.com",
+		Token: "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6dHJ1ZSwiYXBwSWQiOjEsInJlbGVhc2VJZCI6MX0.Hk_q2NQB5IZNSrw_xXrYSr80N2awhW42RETOpk4nlEH06PQJSWSlgz-hgdP1eZO9_FTvaIBlWE4R6cK6P5vDX_9RBkVR6CzAja4Q36m53XAVAmtSWFJFlWSjkIXq8dAal-guF2UIJeiNjdkom7VtvzpzqmBDJLdq9-RBWrjZlxI",
+		Cert:  "-----BEGIN CERTIFICATE-----\nMIIBnzCCAQgCCQDWXptzyyuH6DANBgkqhkiG9w0BAQsFADAUMRIwEAYDVQQDEwl3\nYXJwZHJpdmUwHhcNMTcwODMwMTk0ODQ4WhcNMjcwODI4MTk0ODQ4WjAUMRIwEAYD\nVQQDEwl3YXJwZHJpdmUwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBAMME5Ppp\njc1xMLEgb/8K+VCk/lHCYF5WQJPbsmypPI6ZXx8Iqxb212dc//JAmIXbF9fF25Mx\naq+98USPZfgxA/ihH3ZC9jaQuPaSxATZ6XykwaEkj/2dYV80EmVL5BCoJ0KBUQT2\nF8/imAyZpV3JmCSVcNEQp4snvjFNeWBQt0mNAgMBAAEwDQYJKoZIhvcNAQELBQAD\ngYEAKf/1qXn6vzrJlqIX5pCWFwzyH1VCucTn3fMpgtyNu+6XoVwDUoHdV/x13vnS\naPLMfpMKR4RbRyi3n1+WTqndVw7/7gLkqj8A0MA8UbsTXD8AgvxiVS5/8P2TPunD\nwyWYMOfea+1o6nYurX2S4BzCsK45iqISpGrSFvM4B42Ziy0=\n-----END CERTIFICATE-----",
+	}
+
+	assert.Equal(t, expected, certificate)
 }
