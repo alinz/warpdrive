@@ -53,6 +53,43 @@ EKeLJ74xTXlgULdJjQIDAQAB
 -----END PUBLIC KEY-----`),
 }
 
+func createConfigTest() config.Config {
+	return config.Config{
+		Server: struct {
+			Addr       string `toml:"addr"`
+			PublicAddr string `toml:"public_addr"`
+			BundlesDir string `toml:"bundles_dir"`
+		}{
+			PublicAddr: "warpdrive.example.com",
+			BundlesDir: "/bundles",
+		},
+
+		DB: struct {
+			Path string `toml:"path"`
+		}{
+			Path: "/db",
+		},
+
+		TLS: struct {
+			CA      string `toml:"ca"`
+			Private string `toml:"private"`
+			Public  string `toml:"public"`
+		}{
+			CA:      "ca",
+			Private: "private",
+			Public:  "public",
+		},
+
+		Admin: struct {
+			Username string `toml:"username"`
+			Password string `toml:"password"`
+		}{
+			Username: "admin",
+			Password: "$2a$10$NRzYde3E6xGwN1eATKGvBeY1DXhWghAjiBFRvxaJLy9AQ0JmTXG2q",
+		},
+	}
+}
+
 func createTempDirTest() (string, func() error, error) {
 	path, err := ioutil.TempDir("", "test")
 	if err != nil {
@@ -140,40 +177,12 @@ func startServerTest(server *Server) (func(), error) {
 	}, nil
 }
 
+func createClientTest() {
+
+}
+
 func TestBasicServer(t *testing.T) {
-	conf := config.Config{
-		Server: struct {
-			Addr       string `toml:"addr"`
-			PublicAddr string `toml:"public_addr"`
-			BundlesDir string `toml:"bundles_dir"`
-		}{
-			BundlesDir: "/bundles",
-		},
-
-		DB: struct {
-			Path string `toml:"path"`
-		}{
-			Path: "/db",
-		},
-
-		TLS: struct {
-			CA      string `toml:"ca"`
-			Private string `toml:"private"`
-			Public  string `toml:"public"`
-		}{
-			CA:      "ca",
-			Private: "private",
-			Public:  "public",
-		},
-
-		Admin: struct {
-			Username string `toml:"username"`
-			Password string `toml:"password"`
-		}{
-			Username: "",
-			Password: "",
-		},
-	}
+	conf := createConfigTest()
 
 	server, cleanup, err := createServerTest(&conf)
 	assert.Nil(t, err)
@@ -187,40 +196,7 @@ func TestBasicServer(t *testing.T) {
 }
 
 func TestGenCertificate(t *testing.T) {
-	conf := config.Config{
-		Server: struct {
-			Addr       string `toml:"addr"`
-			PublicAddr string `toml:"public_addr"`
-			BundlesDir string `toml:"bundles_dir"`
-		}{
-			PublicAddr: "warpdrive.example.com",
-			BundlesDir: "/bundles",
-		},
-
-		DB: struct {
-			Path string `toml:"path"`
-		}{
-			Path: "/db",
-		},
-
-		TLS: struct {
-			CA      string `toml:"ca"`
-			Private string `toml:"private"`
-			Public  string `toml:"public"`
-		}{
-			CA:      "ca",
-			Private: "private",
-			Public:  "public",
-		},
-
-		Admin: struct {
-			Username string `toml:"username"`
-			Password string `toml:"password"`
-		}{
-			Username: "",
-			Password: "",
-		},
-	}
+	conf := createConfigTest()
 
 	server, serverCleanup, err := createServerTest(&conf)
 	assert.Nil(t, err)
@@ -245,40 +221,7 @@ func TestGenCertificate(t *testing.T) {
 }
 
 func TestSetupApp(t *testing.T) {
-	conf := config.Config{
-		Server: struct {
-			Addr       string `toml:"addr"`
-			PublicAddr string `toml:"public_addr"`
-			BundlesDir string `toml:"bundles_dir"`
-		}{
-			PublicAddr: "warpdrive.example.com",
-			BundlesDir: "/bundles",
-		},
-
-		DB: struct {
-			Path string `toml:"path"`
-		}{
-			Path: "/db",
-		},
-
-		TLS: struct {
-			CA      string `toml:"ca"`
-			Private string `toml:"private"`
-			Public  string `toml:"public"`
-		}{
-			CA:      "ca",
-			Private: "private",
-			Public:  "public",
-		},
-
-		Admin: struct {
-			Username string `toml:"username"`
-			Password string `toml:"password"`
-		}{
-			Username: "admin",
-			Password: "$2a$10$NRzYde3E6xGwN1eATKGvBeY1DXhWghAjiBFRvxaJLy9AQ0JmTXG2q",
-		},
-	}
+	conf := createConfigTest()
 
 	server, cleanup, err := createServerTest(&conf)
 	assert.Nil(t, err)
