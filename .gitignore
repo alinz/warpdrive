@@ -19,3 +19,4 @@ build
 *.crt
 *.key
 *.iml
+debug.test
